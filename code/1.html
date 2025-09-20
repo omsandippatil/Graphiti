@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>String Compression Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            padding: 10px;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            border: 2px solid black;
+            padding: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .problem-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .problem-example {
+            font-size: 14px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        button {
+            background: white;
+            border: 2px solid black;
+            padding: 6px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: black;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .left-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .section {
+            border: 2px solid black;
+            background: white;
+        }
+        
+        .section-header {
+            background: black;
+            color: white;
+            padding: 6px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .section-content {
+            padding: 8px;
+            display: none;
+        }
+        
+        .section-content.expanded {
+            display: block;
+        }
+        
+        .visualization {
+            flex: 1;
+            padding: 12px;
+            position: relative;
+            min-height: 200px;
+        }
+        
+        .string-display {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        
+        .char {
+            width: 30px;
+            height: 30px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            z-index: 10;
+        }
+        
+        .current-pointer {
+            background: #ff4444;
+            color: white;
+        }
+        
+        .compare-pointer {
+            background: #4444ff;
+            color: white;
+        }
+        
+        .variables {
+            padding: 8px;
+        }
+        
+        .var-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            border-bottom: 1px solid black;
+            padding-bottom: 2px;
+        }
+        
+        .var-name {
+            font-weight: bold;
+        }
+        
+        .var-value {
+            font-family: 'Courier New', monospace;
+        }
+        
+        .current-step {
+            padding: 8px;
+            background: white;
+            border-top: 2px solid black;
+            margin-top: 8px;
+        }
+        
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .output-display {
+            margin-top: 16px;
+            padding: 8px;
+            border: 2px solid black;
+            background: #f9f9f9;
+        }
+        
+        .output-label {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .output-value {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="problem-title">String Compression</div>
+            <div class="problem-example">Input: aabbbbeeeeffggg → Output: a2b4e4f2g3</div>
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="section">
+                    <div class="visualization">
+                        <div class="string-display" id="stringDisplay"></div>
+                        <div class="output-display">
+                            <div class="output-label">Output:</div>
+                            <div class="output-value" id="outputValue"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="current-step" id="currentStep">
+                        <div class="step-title">Step Information</div>
+                        <div id="stepContent">Click Next to begin</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="section">
+                    <div class="variables">
+                        <h3>Variables</h3>
+                        <div id="variablesList"></div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection('theory')">▶ Algorithm Theory</div>
+                    <div class="section-content" id="theory">
+                        <p>String compression using run-length encoding counts consecutive identical characters and represents them as character followed by count.</p>
+                        <p>Time Complexity: O(n)<br>Space Complexity: O(1) additional</p>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection('approach')">▶ Approach</div>
+                    <div class="section-content" id="approach">
+                        <p>1. Use two pointers to track current position</p>
+                        <p>2. Count consecutive identical characters</p>
+                        <p>3. Append character and count to result</p>
+                        <p>4. Move to next different character</p>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header" onclick="toggleSection('edge-cases')">▶ Edge Cases</div>
+                    <div class="section-content" id="edge-cases">
+                        <p>• Empty string returns empty</p>
+                        <p>• Single character returns char + "1"</p>
+                        <p>• All same characters</p>
+                        <p>• All different characters</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class StringCompressionVisualizer {
+            constructor() {
+                this.input = "aabbbbeeeeffggg";
+                this.steps = [];
+                this.currentStep = -1;
+                this.generateSteps();
+                this.initializeDisplay();
+                this.setupEventListeners();
+            }
+            
+            generateSteps() {
+                let i = 0;
+                let result = "";
+                let stepIndex = 0;
+                
+                this.steps.push({
+                    i: 0,
+                    j: 0,
+                    count: 0,
+                    currentChar: '',
+                    result: "",
+                    description: "Initialize: Start at beginning of string",
+                    pointers: []
+                });
+                
+                while (i < this.input.length) {
+                    let j = i;
+                    let currentChar = this.input[i];
+                    let count = 0;
+                    
+                    this.steps.push({
+                        i: i,
+                        j: j,
+                        count: count,
+                        currentChar: currentChar,
+                        result: result,
+                        description: `Start counting character '${currentChar}' at position ${i}`,
+                        pointers: [{type: 'current', pos: i}, {type: 'compare', pos: j}]
+                    });
+                    
+                    while (j < this.input.length && this.input[j] === currentChar) {
+                        count++;
+                        this.steps.push({
+                            i: i,
+                            j: j,
+                            count: count,
+                            currentChar: currentChar,
+                            result: result,
+                            description: `Found '${currentChar}' at position ${j}, count = ${count}`,
+                            pointers: [{type: 'current', pos: i}, {type: 'compare', pos: j}]
+                        });
+                        j++;
+                    }
+                    
+                    result += currentChar + count;
+                    
+                    this.steps.push({
+                        i: i,
+                        j: j,
+                        count: count,
+                        currentChar: currentChar,
+                        result: result,
+                        description: `Added '${currentChar}${count}' to result. Moving to position ${j}`,
+                        pointers: [{type: 'current', pos: i}]
+                    });
+                    
+                    i = j;
+                }
+                
+                this.steps.push({
+                    i: i,
+                    j: i,
+                    count: 0,
+                    currentChar: '',
+                    result: result,
+                    description: "Compression complete!",
+                    pointers: []
+                });
+            }
+            
+            initializeDisplay() {
+                this.updateDisplay();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('prevBtn').addEventListener('click', () => this.previousStep());
+                document.getElementById('nextBtn').addEventListener('click', () => this.nextStep());
+                document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+            }
+            
+            updateDisplay() {
+                const step = this.currentStep >= 0 ? this.steps[this.currentStep] : null;
+                
+                const stringDisplay = document.getElementById('stringDisplay');
+                stringDisplay.innerHTML = '';
+                
+                for (let i = 0; i < this.input.length; i++) {
+                    const charDiv = document.createElement('div');
+                    charDiv.className = 'char';
+                    charDiv.textContent = this.input[i];
+                    
+                    if (step && step.pointers) {
+                        step.pointers.forEach((pointer, index) => {
+                            if (pointer.pos === i) {
+                                const pointerDiv = document.createElement('div');
+                                pointerDiv.className = `pointer ${pointer.type}-pointer`;
+                                pointerDiv.textContent = pointer.type === 'current' ? 'i' : 'j';
+                                pointerDiv.style.top = `${-20 - (index * 25)}px`;
+                                charDiv.appendChild(pointerDiv);
+                            }
+                        });
+                    }
+                    
+                    stringDisplay.appendChild(charDiv);
+                }
+                
+                this.updateVariables(step);
+                this.updateStepInfo(step);
+                this.updateOutput(step);
+                this.updateControls();
+            }
+            
+            updateVariables(step) {
+                const variablesList = document.getElementById('variablesList');
+                variablesList.innerHTML = '';
+                
+                if (step) {
+                    const variables = [
+                        {name: 'i', value: step.i, desc: 'Start position'},
+                        {name: 'j', value: step.j, desc: 'Compare position'},
+                        {name: 'count', value: step.count, desc: 'Character count'},
+                        {name: 'currentChar', value: step.currentChar ? `'${step.currentChar}'` : 'null', desc: 'Current character'},
+                        {name: 'result', value: `"${step.result}"`, desc: 'Compressed result'}
+                    ];
+                    
+                    variables.forEach(variable => {
+                        const row = document.createElement('div');
+                        row.className = 'var-row';
+                        row.innerHTML = `
+                            <span class="var-name">${variable.name}:</span>
+                            <span class="var-value">${variable.value}</span>
+                        `;
+                        variablesList.appendChild(row);
+                    });
+                }
+            }
+            
+            updateStepInfo(step) {
+                const stepContent = document.getElementById('stepContent');
+                if (step) {
+                    stepContent.textContent = step.description;
+                } else {
+                    stepContent.textContent = "Click Next to begin";
+                }
+            }
+            
+            updateOutput(step) {
+                const outputValue = document.getElementById('outputValue');
+                if (step) {
+                    outputValue.textContent = step.result || '(empty)';
+                } else {
+                    outputValue.textContent = '(not started)';
+                }
+            }
+            
+            updateControls() {
+                document.getElementById('prevBtn').disabled = this.currentStep <= -1;
+                document.getElementById('nextBtn').disabled = this.currentStep >= this.steps.length - 1;
+            }
+            
+            nextStep() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.currentStep++;
+                    this.updateDisplay();
+                }
+            }
+            
+            previousStep() {
+                if (this.currentStep > -1) {
+                    this.currentStep--;
+                    this.updateDisplay();
+                }
+            }
+            
+            reset() {
+                this.currentStep = -1;
+                this.updateDisplay();
+            }
+        }
+        
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId);
+            const header = content.previousElementSibling;
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                header.textContent = header.textContent.replace('▼', '▶');
+            } else {
+                content.classList.add('expanded');
+                header.textContent = header.textContent.replace('▶', '▼');
+            }
+        }
+        
+        const visualizer = new StringCompressionVisualizer();
+    </script>
+</body>
+</html>
