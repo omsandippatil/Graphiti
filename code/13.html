@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kadane's Algorithm Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            font-size: 12px;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+            padding: 10px;
+            gap: 10px;
+        }
+        
+        .left-panel {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .right-panel {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .question {
+            border: 2px solid black;
+            padding: 8px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+        
+        button:hover {
+            background: black;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .section {
+            border: 2px solid black;
+            padding: 8px;
+        }
+        
+        .step-counter {
+            font-weight: bold;
+        }
+        
+        .variables {
+            background: #f9f9f9;
+            border: 1px solid black;
+            padding: 6px;
+        }
+        
+        .variable {
+            display: inline-block;
+            margin: 2px 4px;
+            padding: 2px 4px;
+            border: 1px solid black;
+        }
+        
+        .variable.active { background: #ffff99; }
+        .variable.increment { background: #90ff90; }
+        .variable.decrement { background: #ff9090; }
+        
+        .conditions {
+            background: #f9f9f9;
+            border: 1px solid black;
+            padding: 6px;
+        }
+        
+        .condition.true { color: green; }
+        .condition.false { color: red; }
+        
+        .operations {
+            background: #f9f9f9;
+            border: 1px solid black;
+            padding: 6px;
+        }
+        
+        .operation.increment { color: green; }
+        .operation.decrement { color: red; }
+        .operation.compare { color: blue; }
+        .operation.assign { color: purple; }
+        
+        .result {
+            background: #f9f9f9;
+            border: 1px solid black;
+            padding: 6px;
+        }
+        
+        .array-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .array {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .cell.current {
+            background: #ffff99;
+            border-color: #ff69b4;
+            border-width: 3px;
+        }
+        
+        .cell.visited {
+            background: #f0f0f0;
+        }
+        
+        .cell.positive {
+            color: green;
+        }
+        
+        .cell.negative {
+            color: red;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -25px;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: white;
+            z-index: 10;
+        }
+        
+        .pointer.current {
+            background: #ff69b4;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .subarray-visual {
+            margin-top: 10px;
+            padding: 8px;
+            border: 2px dashed black;
+            background: #f9f9f9;
+        }
+        
+        .collapsible {
+            margin-top: 10px;
+        }
+        
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 8px;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 8px;
+            border: 2px solid black;
+            border-top: none;
+        }
+        
+        .collapsible-content.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="question">
+                <strong>Problem:</strong> Find the maximum sum of any contiguous subarray<br>
+                <strong>Input:</strong> [-2,1,-3,4,-1,2,1,-5,4]<br>
+                <strong>Output:</strong> 6 (subarray [4,-1,2,1])
+            </div>
+            
+            <div class="controls">
+                <button id="prevBtn" onclick="prevStep()">Previous</button>
+                <button id="nextBtn" onclick="nextStep()">Next</button>
+                <button id="resetBtn" onclick="reset()">Reset</button>
+            </div>
+            
+            <div class="section">
+                <div class="step-counter" id="stepCounter">Step 0 of 9: Initialize</div>
+            </div>
+            
+            <div class="section">
+                <strong>Variables:</strong>
+                <div class="variables" id="variables"></div>
+            </div>
+            
+            <div class="section">
+                <strong>Current Operations:</strong>
+                <div class="operations" id="operations"></div>
+            </div>
+            
+            <div class="section">
+                <strong>Condition Checks:</strong>
+                <div class="conditions" id="conditions"></div>
+            </div>
+            
+            <div class="section">
+                <strong>Result:</strong>
+                <div class="result" id="result"></div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleSection('theory')">
+                    Theory & Algorithm Explanation
+                </div>
+                <div class="collapsible-content" id="theory">
+                    <strong>Kadane's Algorithm</strong><br><br>
+                    Dynamic programming approach to find maximum sum contiguous subarray in O(n) time.<br><br>
+                    <strong>Core Idea:</strong> At each position, decide whether to extend the current subarray or start a new one.<br><br>
+                    <strong>Algorithm:</strong><br>
+                    1. Initialize maxSoFar and maxEndingHere to first element<br>
+                    2. For each remaining element:<br>
+                    &nbsp;&nbsp;- maxEndingHere = max(current element, maxEndingHere + current element)<br>
+                    &nbsp;&nbsp;- maxSoFar = max(maxSoFar, maxEndingHere)<br><br>
+                    <strong>Key Insight:</strong> If maxEndingHere becomes negative, start fresh from current position.
+                </div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleSection('tricks')">
+                    Tricks & Optimizations
+                </div>
+                <div class="collapsible-content" id="tricks">
+                    <strong>Memory Optimization:</strong> Only need two variables, not entire DP array<br><br>
+                    <strong>Early Termination:</strong> Can stop if all remaining elements are negative<br><br>
+                    <strong>Variant - Track Indices:</strong> Keep start/end pointers to return actual subarray<br><br>
+                    <strong>Handle All Negatives:</strong> Return maximum single element if all negative
+                </div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleSection('edge-cases')">
+                    Edge Cases & Boundary Logic
+                </div>
+                <div class="collapsible-content" id="edge-cases">
+                    <strong>Empty Array:</strong> Return 0 or handle as special case<br><br>
+                    <strong>Single Element:</strong> Return that element<br><br>
+                    <strong>All Negative:</strong> Return maximum single element<br><br>
+                    <strong>All Positive:</strong> Return sum of entire array<br><br>
+                    <strong>Mixed Signs:</strong> Core algorithm handles naturally
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="array-display">
+                <div class="array" id="arrayDisplay"></div>
+                <div class="subarray-visual" id="subarrayVisual">
+                    Current subarray being considered
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const array = [-2, 1, -3, 4, -1, 2, 1, -5, 4];
+        let currentStep = 0;
+        
+        const steps = [
+            {
+                index: -1,
+                maxSoFar: -2,
+                maxEndingHere: -2,
+                description: "Initialize",
+                operation: "Set maxSoFar = maxEndingHere = arr[0] = -2",
+                condition: "Starting algorithm",
+                subarrayStart: 0,
+                subarrayEnd: 0
+            },
+            {
+                index: 1,
+                maxSoFar: 1,
+                maxEndingHere: 1,
+                description: "Process arr[1] = 1",
+                operation: "maxEndingHere = max(1, -2 + 1) = 1, maxSoFar = max(-2, 1) = 1",
+                condition: "1 > (-2 + 1), start new subarray",
+                subarrayStart: 1,
+                subarrayEnd: 1
+            },
+            {
+                index: 2,
+                maxSoFar: 1,
+                maxEndingHere: -2,
+                description: "Process arr[2] = -3",
+                operation: "maxEndingHere = max(-3, 1 + (-3)) = -2, maxSoFar = max(1, -2) = 1",
+                condition: "(-3) < (1 + (-3)), extend current",
+                subarrayStart: 1,
+                subarrayEnd: 2
+            },
+            {
+                index: 3,
+                maxSoFar: 4,
+                maxEndingHere: 4,
+                description: "Process arr[3] = 4",
+                operation: "maxEndingHere = max(4, -2 + 4) = 4, maxSoFar = max(1, 4) = 4",
+                condition: "4 > (-2 + 4), start new subarray",
+                subarrayStart: 3,
+                subarrayEnd: 3
+            },
+            {
+                index: 4,
+                maxSoFar: 4,
+                maxEndingHere: 3,
+                description: "Process arr[4] = -1",
+                operation: "maxEndingHere = max(-1, 4 + (-1)) = 3, maxSoFar = max(4, 3) = 4",
+                condition: "(-1) < (4 + (-1)), extend current",
+                subarrayStart: 3,
+                subarrayEnd: 4
+            },
+            {
+                index: 5,
+                maxSoFar: 5,
+                maxEndingHere: 5,
+                description: "Process arr[5] = 2",
+                operation: "maxEndingHere = max(2, 3 + 2) = 5, maxSoFar = max(4, 5) = 5",
+                condition: "2 < (3 + 2), extend current",
+                subarrayStart: 3,
+                subarrayEnd: 5
+            },
+            {
+                index: 6,
+                maxSoFar: 6,
+                maxEndingHere: 6,
+                description: "Process arr[6] = 1",
+                operation: "maxEndingHere = max(1, 5 + 1) = 6, maxSoFar = max(5, 6) = 6",
+                condition: "1 < (5 + 1), extend current",
+                subarrayStart: 3,
+                subarrayEnd: 6
+            },
+            {
+                index: 7,
+                maxSoFar: 6,
+                maxEndingHere: 1,
+                description: "Process arr[7] = -5",
+                operation: "maxEndingHere = max(-5, 6 + (-5)) = 1, maxSoFar = max(6, 1) = 6",
+                condition: "(-5) < (6 + (-5)), extend current",
+                subarrayStart: 3,
+                subarrayEnd: 7
+            },
+            {
+                index: 8,
+                maxSoFar: 6,
+                maxEndingHere: 5,
+                description: "Process arr[8] = 4",
+                operation: "maxEndingHere = max(4, 1 + 4) = 5, maxSoFar = max(6, 5) = 6",
+                condition: "4 < (1 + 4), extend current",
+                subarrayStart: 3,
+                subarrayEnd: 8
+            }
+        ];
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep} of ${steps.length - 1}: ${step.description}`;
+            
+            const variablesDiv = document.getElementById('variables');
+            variablesDiv.innerHTML = `
+                <span class="variable ${currentStep > 0 && step.maxSoFar !== steps[currentStep-1]?.maxSoFar ? 'increment' : ''}" title="Maximum sum found so far">maxSoFar: ${step.maxSoFar}</span>
+                <span class="variable ${currentStep > 0 && step.maxEndingHere !== steps[currentStep-1]?.maxEndingHere ? 'active' : ''}" title="Maximum sum ending at current position">maxEndingHere: ${step.maxEndingHere}</span>
+                <span class="variable ${step.index >= 0 ? 'active' : ''}" title="Current array index">index: ${step.index >= 0 ? step.index : 'N/A'}</span>
+            `;
+            
+            document.getElementById('operations').innerHTML = `<div class="operation">${step.operation}</div>`;
+            document.getElementById('conditions').innerHTML = `<div class="condition">${step.condition}</div>`;
+            document.getElementById('result').innerHTML = `Maximum Sum: ${step.maxSoFar}`;
+            
+            const arrayDisplay = document.getElementById('arrayDisplay');
+            arrayDisplay.innerHTML = '';
+            
+            array.forEach((value, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.textContent = value;
+                
+                if (value > 0) cell.classList.add('positive');
+                if (value < 0) cell.classList.add('negative');
+                if (index === step.index) cell.classList.add('current');
+                if (index < step.index || (step.index === -1 && index === 0)) cell.classList.add('visited');
+                
+                if (index === step.index) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    pointer.textContent = 'curr';
+                    cell.appendChild(pointer);
+                }
+                
+                arrayDisplay.appendChild(cell);
+            });
+            
+            const subarrayDiv = document.getElementById('subarrayVisual');
+            if (step.subarrayStart !== undefined && step.subarrayEnd !== undefined) {
+                const subarrayValues = array.slice(step.subarrayStart, step.subarrayEnd + 1);
+                subarrayDiv.innerHTML = `Current best subarray: [${subarrayValues.join(', ')}] = ${step.maxSoFar}`;
+            }
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+        
+        function reset() {
+            currentStep = 0;
+            updateDisplay();
+        }
+        
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId);
+            content.classList.toggle('show');
+        }
+        
+        updateDisplay();
+    </script>
+</body>
+</html>

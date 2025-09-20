@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Intersection Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+            gap: 20px;
+            padding: 10px;
+        }
+        
+        .left-panel {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .right-panel {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid black;
+            padding: 20px;
+        }
+        
+        .question-section {
+            border: 2px solid black;
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        button {
+            background: white;
+            border: 2px solid black;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .variables-section, .conditions-section, .operations-section, .result-section {
+            border: 2px solid black;
+            padding: 10px;
+            font-size: 13px;
+        }
+        
+        .variables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .variable {
+            padding: 5px;
+            border: 1px solid black;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .variable.active {
+            background: yellow;
+        }
+        
+        .variable.increment {
+            background: lightgreen;
+        }
+        
+        .variable.decrement {
+            background: lightcoral;
+        }
+        
+        .condition {
+            padding: 5px;
+            margin: 5px 0;
+            border: 1px solid black;
+        }
+        
+        .condition.true {
+            background: lightgreen;
+        }
+        
+        .condition.false {
+            background: lightcoral;
+        }
+        
+        .operation {
+            padding: 5px;
+            margin: 5px 0;
+            border: 1px solid black;
+            font-weight: bold;
+        }
+        
+        .operation.increment {
+            background: lightgreen;
+        }
+        
+        .operation.decrement {
+            background: lightcoral;
+        }
+        
+        .operation.add {
+            background: lightblue;
+        }
+        
+        .arrays-display {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .array-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .array {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .array-cell {
+            width: 50px;
+            height: 50px;
+            border: 3px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .array-cell.current {
+            background: #ffeb3b;
+            border-color: #ff5722;
+            border-width: 4px;
+        }
+        
+        .array-cell.visited {
+            background: #e0e0e0;
+        }
+        
+        .pointer {
+            position: absolute;
+            width: 0;
+            height: 0;
+            z-index: 10;
+        }
+        
+        .pointer.current {
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 15px solid #e91e63;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .result-array {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .result-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .theory-section {
+            margin-top: 20px;
+            border: 2px solid black;
+        }
+        
+        .theory-header {
+            padding: 10px;
+            background: #f0f0f0;
+            cursor: pointer;
+            border-bottom: 1px solid black;
+        }
+        
+        .theory-content {
+            padding: 15px;
+            display: none;
+            line-height: 1.5;
+        }
+        
+        .theory-content.visible {
+            display: block;
+        }
+        
+        .step-counter {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="question-section">
+                <h3>Intersection of Two Arrays</h3>
+                <p><strong>Problem:</strong> Find common elements between two arrays</p>
+                <p><strong>Example:</strong> Input: [1,2,2,1], [2,2] → Output: [2]</p>
+            </div>
+            
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="step-counter" id="stepCounter">Step 1 of 10</div>
+            
+            <div class="variables-section">
+                <h4>Variables</h4>
+                <div class="variables-grid">
+                    <div class="variable" data-var="i"><span>i (array1 index):</span><span id="var-i">0</span></div>
+                    <div class="variable" data-var="j"><span>j (array2 index):</span><span id="var-j">0</span></div>
+                    <div class="variable" data-var="currentElement"><span>current element:</span><span id="var-currentElement">-</span></div>
+                    <div class="variable" data-var="comparing"><span>comparing with:</span><span id="var-comparing">-</span></div>
+                </div>
+            </div>
+            
+            <div class="conditions-section">
+                <h4>Current Condition</h4>
+                <div id="currentCondition">Starting algorithm...</div>
+            </div>
+            
+            <div class="operations-section">
+                <h4>Current Operation</h4>
+                <div id="currentOperation">Initialize pointers</div>
+            </div>
+            
+            <div class="result-section">
+                <h4>Result Array</h4>
+                <div class="result-array" id="resultArray"></div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="arrays-display">
+                <div class="array-container">
+                    <h4>Array 1: [1,2,2,1]</h4>
+                    <div class="array" id="array1"></div>
+                </div>
+                
+                <div class="array-container">
+                    <h4>Array 2: [2,2]</h4>
+                    <div class="array" id="array2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="theory-section">
+        <div class="theory-header" onclick="toggleTheory()">
+            ▼ Algorithm Theory & Explanation (Click to expand)
+        </div>
+        <div class="theory-content" id="theoryContent">
+            <h4>Two-Pointer Approach for Array Intersection</h4>
+            <p>This algorithm uses a nested loop approach to find common elements between two arrays:</p>
+            <ul>
+                <li><strong>Time Complexity:</strong> O(n*m) where n and m are the lengths of the arrays</li>
+                <li><strong>Space Complexity:</strong> O(min(n,m)) for the result array</li>
+                <li><strong>Approach:</strong> For each element in the first array, check if it exists in the second array</li>
+                <li><strong>Optimization:</strong> Mark used elements to avoid duplicates in the result</li>
+            </ul>
+            
+            <h4>Edge Cases & Boundary Conditions</h4>
+            <ul>
+                <li>Empty arrays - return empty result</li>
+                <li>No common elements - return empty result</li>
+                <li>Duplicate elements - handle appropriately based on requirements</li>
+                <li>Different array sizes - algorithm handles naturally</li>
+            </ul>
+            
+            <h4>Algorithm Steps</h4>
+            <ol>
+                <li>Initialize result array and pointers</li>
+                <li>For each element in first array, search in second array</li>
+                <li>If found, add to result and mark as used</li>
+                <li>Continue until all elements processed</li>
+                <li>Return result array</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        const array1 = [1, 2, 2, 1];
+        const array2 = [2, 2];
+        const used = [false, false];
+        let result = [];
+        let currentStep = 0;
+        
+        const steps = [
+            {
+                i: 0, j: -1, currentElement: 1, comparing: '-',
+                condition: 'Starting with first element of array1',
+                operation: 'Initialize: i=0, examining array1[0]=1',
+                conditionType: 'info'
+            },
+            {
+                i: 0, j: 0, currentElement: 1, comparing: 2,
+                condition: 'array1[0] == array2[0] ? (1 == 2) ✗',
+                operation: 'Compare 1 with 2: no match',
+                conditionType: 'false'
+            },
+            {
+                i: 0, j: 1, currentElement: 1, comparing: 2,
+                condition: 'array1[0] == array2[1] ? (1 == 2) ✗',
+                operation: 'Compare 1 with 2: no match',
+                conditionType: 'false'
+            },
+            {
+                i: 1, j: -1, currentElement: 2, comparing: '-',
+                condition: 'Move to next element in array1',
+                operation: 'i++ (0 → 1): examining array1[1]=2',
+                conditionType: 'info'
+            },
+            {
+                i: 1, j: 0, currentElement: 2, comparing: 2,
+                condition: 'array1[1] == array2[0] ? (2 == 2) ✓',
+                operation: 'Compare 2 with 2: match found!',
+                conditionType: 'true'
+            },
+            {
+                i: 1, j: 0, currentElement: 2, comparing: 2,
+                condition: 'Element not used yet? used[0] == false ✓',
+                operation: 'Add 2 to result, mark used[0] = true',
+                conditionType: 'true'
+            },
+            {
+                i: 2, j: -1, currentElement: 2, comparing: '-',
+                condition: 'Move to next element in array1',
+                operation: 'i++ (1 → 2): examining array1[2]=2',
+                conditionType: 'info'
+            },
+            {
+                i: 2, j: 0, currentElement: 2, comparing: 2,
+                condition: 'array1[2] == array2[0] ? (2 == 2) but used[0] == true ✗',
+                operation: 'Compare 2 with 2: match but already used',
+                conditionType: 'false'
+            },
+            {
+                i: 2, j: 1, currentElement: 2, comparing: 2,
+                condition: 'array1[2] == array2[1] ? (2 == 2) ✓',
+                operation: 'Compare 2 with 2: match found!',
+                conditionType: 'true'
+            },
+            {
+                i: 3, j: -1, currentElement: 1, comparing: '-',
+                condition: 'Move to next element in array1',
+                operation: 'i++ (2 → 3): examining array1[3]=1',
+                conditionType: 'info'
+            }
+        ];
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('var-i').textContent = step.i;
+            document.getElementById('var-j').textContent = step.j >= 0 ? step.j : '-';
+            document.getElementById('var-currentElement').textContent = step.currentElement;
+            document.getElementById('var-comparing').textContent = step.comparing;
+            
+            const conditionDiv = document.getElementById('currentCondition');
+            conditionDiv.textContent = step.condition;
+            conditionDiv.className = 'condition ' + step.conditionType;
+            
+            const operationDiv = document.getElementById('currentOperation');
+            operationDiv.textContent = step.operation;
+            operationDiv.className = 'operation';
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} of ${steps.length}`;
+            
+            document.querySelectorAll('.variable').forEach(v => v.classList.remove('active', 'increment', 'decrement'));
+            if (step.operation.includes('i++')) {
+                document.querySelector('[data-var="i"]').classList.add('increment');
+            }
+            if (step.j >= 0) {
+                document.querySelector('[data-var="j"]').classList.add('active');
+            }
+            if (step.currentElement !== '-') {
+                document.querySelector('[data-var="currentElement"]').classList.add('active');
+            }
+            
+            updateArrays();
+            updateResult();
+            updateButtons();
+        }
+        
+        function updateArrays() {
+            const step = steps[currentStep];
+            
+            const array1Div = document.getElementById('array1');
+            array1Div.innerHTML = '';
+            array1.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = val;
+                if (idx === step.i) {
+                    cell.classList.add('current');
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    cell.appendChild(pointer);
+                }
+                if (idx < step.i) {
+                    cell.classList.add('visited');
+                }
+                array1Div.appendChild(cell);
+            });
+            
+            const array2Div = document.getElementById('array2');
+            array2Div.innerHTML = '';
+            array2.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = val;
+                if (idx === step.j && step.j >= 0) {
+                    cell.classList.add('current');
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    cell.appendChild(pointer);
+                }
+                if (used[idx]) {
+                    cell.classList.add('visited');
+                }
+                array2Div.appendChild(cell);
+            });
+        }
+        
+        function updateResult() {
+            const step = steps[currentStep];
+            let currentResult = [];
+            
+            if (currentStep >= 5) {
+                currentResult.push(2);
+            }
+            
+            const resultDiv = document.getElementById('resultArray');
+            resultDiv.innerHTML = '';
+            
+            if (currentResult.length === 0) {
+                resultDiv.innerHTML = '<div style="padding: 10px; font-style: italic;">Empty</div>';
+            } else {
+                currentResult.forEach(val => {
+                    const cell = document.createElement('div');
+                    cell.className = 'result-cell';
+                    cell.textContent = val;
+                    resultDiv.appendChild(cell);
+                });
+            }
+        }
+        
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                if (currentStep === 5) {
+                    used[0] = true;
+                }
+                updateDisplay();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                if (currentStep < 5) {
+                    used[0] = false;
+                }
+                updateDisplay();
+            }
+        }
+        
+        function resetVisualization() {
+            currentStep = 0;
+            used[0] = false;
+            used[1] = false;
+            result = [];
+            updateDisplay();
+        }
+        
+        function toggleTheory() {
+            const content = document.getElementById('theoryContent');
+            const header = document.querySelector('.theory-header');
+            content.classList.toggle('visible');
+            header.textContent = content.classList.contains('visible') 
+                ? '▲ Algorithm Theory & Explanation (Click to collapse)'
+                : '▼ Algorithm Theory & Explanation (Click to expand)';
+        }
+        
+        document.getElementById('nextBtn').onclick = nextStep;
+        document.getElementById('prevBtn').onclick = prevStep;
+        document.getElementById('resetBtn').onclick = resetVisualization;
+        
+        updateDisplay();
+    </script>
+</body>
+</html>

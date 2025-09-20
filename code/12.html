@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Majority Element Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+            padding: 10px;
+            gap: 15px;
+        }
+        
+        .left-panel {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .section {
+            border: 2px solid black;
+            padding: 10px;
+            background: white;
+        }
+        
+        .section-header {
+            font-weight: bold;
+            border-bottom: 1px solid black;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            font-family: inherit;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .array-display {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 8px 0;
+        }
+        
+        .array-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            background: white;
+        }
+        
+        .array-cell.visited {
+            background: #f5f5f5;
+        }
+        
+        .array-cell.current {
+            background: #ffeb3b;
+            border-color: #ff1744;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -25px;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: white;
+        }
+        
+        .pointer.current {
+            background: #e91e63;
+        }
+        
+        .variables-display {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .var-name {
+            font-weight: bold;
+        }
+        
+        .var-value {
+            padding: 4px 8px;
+            border: 1px solid black;
+            background: white;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .var-value.active {
+            background: #ffeb3b;
+        }
+        
+        .var-value.increment {
+            background: #c8e6c9;
+        }
+        
+        .var-value.decrement {
+            background: #ffcdd2;
+        }
+        
+        .condition-display {
+            font-family: inherit;
+            padding: 5px;
+            margin: 3px 0;
+            border-left: 3px solid transparent;
+        }
+        
+        .condition-display.true {
+            border-left-color: #4caf50;
+            background: #e8f5e8;
+        }
+        
+        .condition-display.false {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        
+        .operation-display {
+            padding: 5px;
+            margin: 3px 0;
+            border-left: 3px solid transparent;
+        }
+        
+        .operation-display.increment {
+            border-left-color: #4caf50;
+            background: #e8f5e8;
+        }
+        
+        .operation-display.decrement {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        
+        .operation-display.assign {
+            border-left-color: #2196f3;
+            background: #e3f2fd;
+        }
+        
+        .collapsible {
+            margin-top: auto;
+        }
+        
+        .collapsible-header {
+            background: #f0f0f0;
+            border: 2px solid black;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .collapsible-content {
+            display: none;
+            border: 2px solid black;
+            border-top: none;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .collapsible.open .collapsible-content {
+            display: block;
+        }
+        
+        .step-counter {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="section">
+                <div class="section-header">Problem</div>
+                <div>Find the majority element (appears >n/2 times)</div>
+                <div>Input: [2,2,1,1,1,2,2] → Output: 2</div>
+            </div>
+            
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">Step Counter</div>
+                <div class="step-counter" id="stepCounter">Step 0 of 8</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">Variables</div>
+                <div class="variables-display">
+                    <span class="var-name">candidate:</span>
+                    <span class="var-value" id="candidateVar">null</span>
+                    <span class="var-name">count:</span>
+                    <span class="var-value" id="countVar">0</span>
+                    <span class="var-name">i:</span>
+                    <span class="var-value" id="indexVar">0</span>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">Current Condition</div>
+                <div id="conditionDisplay">Ready to start</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">Current Operation</div>
+                <div id="operationDisplay">Initialize variables</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">Result</div>
+                <div>Majority Element: <span id="resultDisplay">null</span></div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible()">
+                    Theory & Explanation ▼
+                </div>
+                <div class="collapsible-content">
+                    <strong>Boyer-Moore Majority Vote Algorithm</strong><br><br>
+                    Uses O(1) space and O(n) time. Maintains a candidate and count.<br><br>
+                    <strong>Key Insight:</strong> If we cancel out different elements, the majority element will remain.<br><br>
+                    <strong>Algorithm:</strong><br>
+                    1. If count is 0, set current element as candidate<br>
+                    2. If current element equals candidate, increment count<br>
+                    3. Otherwise, decrement count<br><br>
+                    <strong>Why it works:</strong> The majority element appears more than n/2 times, so even after canceling with all other elements, it will have a positive count.
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="section-header" style="margin-bottom: 15px;">Array Visualization</div>
+            <div class="array-display" id="arrayDisplay"></div>
+        </div>
+    </div>
+
+    <script>
+        const arr = [2, 2, 1, 1, 1, 2, 2];
+        let currentStep = 0;
+        
+        const steps = [
+            {
+                i: -1, candidate: null, count: 0,
+                condition: "Initialize algorithm",
+                operation: "Set candidate = null, count = 0",
+                visited: [],
+                current: -1
+            },
+            {
+                i: 0, candidate: 2, count: 1,
+                condition: "count == 0 (0 == 0) ✓",
+                operation: "candidate = arr[0] = 2, count = 1",
+                visited: [0],
+                current: 0
+            },
+            {
+                i: 1, candidate: 2, count: 2,
+                condition: "arr[1] == candidate (2 == 2) ✓",
+                operation: "count++ (1 → 2)",
+                visited: [0, 1],
+                current: 1
+            },
+            {
+                i: 2, candidate: 2, count: 1,
+                condition: "arr[2] == candidate (1 == 2) ✗",
+                operation: "count-- (2 → 1)",
+                visited: [0, 1, 2],
+                current: 2
+            },
+            {
+                i: 3, candidate: 2, count: 0,
+                condition: "arr[3] == candidate (1 == 2) ✗",
+                operation: "count-- (1 → 0)",
+                visited: [0, 1, 2, 3],
+                current: 3
+            },
+            {
+                i: 4, candidate: 1, count: 1,
+                condition: "count == 0 (0 == 0) ✓",
+                operation: "candidate = arr[4] = 1, count = 1",
+                visited: [0, 1, 2, 3, 4],
+                current: 4
+            },
+            {
+                i: 5, candidate: 1, count: 0,
+                condition: "arr[5] == candidate (2 == 1) ✗",
+                operation: "count-- (1 → 0)",
+                visited: [0, 1, 2, 3, 4, 5],
+                current: 5
+            },
+            {
+                i: 6, candidate: 2, count: 1,
+                condition: "count == 0 (0 == 0) ✓",
+                operation: "candidate = arr[6] = 2, count = 1",
+                visited: [0, 1, 2, 3, 4, 5, 6],
+                current: 6
+            },
+            {
+                i: 7, candidate: 2, count: 1,
+                condition: "Algorithm complete",
+                operation: "Return candidate = 2",
+                visited: [0, 1, 2, 3, 4, 5, 6],
+                current: -1
+            }
+        ];
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep} of ${steps.length - 1}`;
+            document.getElementById('candidateVar').textContent = step.candidate || 'null';
+            document.getElementById('countVar').textContent = step.count;
+            document.getElementById('indexVar').textContent = step.i >= 0 ? step.i : '-';
+            document.getElementById('conditionDisplay').textContent = step.condition;
+            document.getElementById('operationDisplay').textContent = step.operation;
+            document.getElementById('resultDisplay').textContent = currentStep === steps.length - 1 ? step.candidate : 'calculating...';
+            
+            document.querySelectorAll('.var-value').forEach(el => {
+                el.className = 'var-value';
+            });
+            
+            if (currentStep > 0) {
+                const prevStep = steps[currentStep - 1];
+                if (step.candidate !== prevStep.candidate) {
+                    document.getElementById('candidateVar').classList.add('active');
+                }
+                if (step.count !== prevStep.count) {
+                    document.getElementById('countVar').classList.add('active');
+                    if (step.count > prevStep.count) {
+                        document.getElementById('countVar').classList.add('increment');
+                    } else if (step.count < prevStep.count) {
+                        document.getElementById('countVar').classList.add('decrement');
+                    }
+                }
+                if (step.i !== prevStep.i) {
+                    document.getElementById('indexVar').classList.add('active');
+                }
+            }
+            
+            updateArrayDisplay();
+            updateButtons();
+        }
+        
+        function updateArrayDisplay() {
+            const step = steps[currentStep];
+            const arrayDisplay = document.getElementById('arrayDisplay');
+            arrayDisplay.innerHTML = '';
+            
+            arr.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = val;
+                
+                if (step.visited.includes(idx)) {
+                    cell.classList.add('visited');
+                }
+                if (step.current === idx) {
+                    cell.classList.add('current');
+                    
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    pointer.textContent = 'i';
+                    cell.appendChild(pointer);
+                }
+                
+                arrayDisplay.appendChild(cell);
+            });
+        }
+        
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+        
+        function reset() {
+            currentStep = 0;
+            updateDisplay();
+        }
+        
+        function toggleCollapsible() {
+            const collapsible = document.querySelector('.collapsible');
+            collapsible.classList.toggle('open');
+            const header = document.querySelector('.collapsible-header');
+            header.textContent = collapsible.classList.contains('open') 
+                ? 'Theory & Explanation ▲' 
+                : 'Theory & Explanation ▼';
+        }
+        
+        document.getElementById('nextBtn').onclick = nextStep;
+        document.getElementById('prevBtn').onclick = prevStep;
+        document.getElementById('resetBtn').onclick = reset;
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextStep();
+            if (e.key === 'ArrowLeft') prevStep();
+            if (e.key === 'r' || e.key === 'R') reset();
+        });
+        
+        updateDisplay();
+    </script>
+</body>
+</html>
