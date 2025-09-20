@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Keywords Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            display: flex;
+            flex: 1;
+            max-height: 100vh;
+        }
+        .left-panel {
+            flex: 1;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow: hidden;
+        }
+        .right-panel {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+        .header {
+            margin-bottom: 15px;
+        }
+        .topic-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .syntax {
+            background: #f5f5f5;
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+            white-space: pre;
+        }
+        .example {
+            background: #f9f9f9;
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .explanation {
+            font-size: 16px;
+            margin: 10px 0;
+            line-height: 1.4;
+        }
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        button {
+            background: white;
+            border: 2px solid black;
+            padding: 8px 16px;
+            margin: 0 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: black;
+            color: white;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .visual {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
+        }
+        .visual-box {
+            border: 2px solid black;
+            padding: 20px;
+            margin: 10px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .stack-frame {
+            border: 1px solid black;
+            padding: 10px;
+            margin: 5px;
+            background: white;
+        }
+        .class-box {
+            border: 2px solid black;
+            padding: 15px;
+            margin: 10px;
+            background: white;
+        }
+        .arrow {
+            font-size: 20px;
+            margin: 10px;
+        }
+        .collapsible {
+            margin-top: 20px;
+        }
+        .toggle-btn {
+            background: none;
+            border: 1px solid black;
+            padding: 5px 10px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+        }
+        .content {
+            display: none;
+            border: 1px solid black;
+            padding: 15px;
+            margin-top: 5px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .content.show {
+            display: block;
+        }
+        .iteration-box {
+            border: 1px solid black;
+            padding: 8px;
+            margin: 3px 0;
+            background: white;
+            font-size: 12px;
+            transition: all 0.5s ease;
+            width: 200px;
+        }
+        .iteration-box.active {
+            background: black;
+            color: white;
+            transform: scale(1.05);
+        }
+        .iteration-box.break-point {
+            border: 2px solid red;
+            font-weight: bold;
+        }
+        .iteration-box.continue-point {
+            border: 2px dashed blue;
+            font-weight: bold;
+        }
+        .iteration-box.skipped {
+            opacity: 0.3;
+            text-decoration: line-through;
+        }
+        .anim-btn {
+            background: white;
+            border: 1px solid black;
+            padding: 6px 12px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .anim-btn:hover {
+            background: black;
+            color: white;
+        }
+        #continue-output {
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        /* For loop animation */
+        .for-loop-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .loop-parts {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .loop-part {
+            border: 1px solid black;
+            padding: 5px 10px;
+            background: white;
+            font-size: 11px;
+        }
+        .loop-part.active {
+            background: black;
+            color: white;
+        }
+        
+        /* While loop animation */
+        .while-loop-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .condition-box {
+            border: 2px solid black;
+            padding: 10px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        .condition-box.true {
+            background: lightgreen;
+        }
+        .condition-box.false {
+            background: lightcoral;
+        }
+        
+        /* Static animation */
+        .static-demo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .instance-box {
+            border: 1px solid black;
+            padding: 10px;
+            background: white;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        .static-var {
+            border: 2px solid blue;
+            padding: 15px;
+            background: lightblue;
+            font-weight: bold;
+        }
+        
+        /* Inheritance animation */
+        .inheritance-demo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .parent-class, .child-class {
+            border: 2px solid black;
+            padding: 15px;
+            background: white;
+            transition: all 0.5s ease;
+        }
+        .parent-class {
+            background: lightgray;
+        }
+        .child-class.inheriting {
+            background: lightgreen;
+            transform: scale(1.1);
+        }
+        .inheritance-arrow {
+            font-size: 30px;
+            transition: all 0.3s ease;
+        }
+        .inheritance-arrow.active {
+            color: green;
+            transform: scale(1.2);
+        }
+        
+        /* Method call animation */
+        .method-call-demo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .call-stack {
+            border: 1px solid black;
+            padding: 8px;
+            background: white;
+            margin: 2px;
+            transition: all 0.3s ease;
+            width: 150px;
+        }
+        .call-stack.active {
+            background: yellow;
+            transform: translateX(10px);
+        }
+        .call-stack.returning {
+            background: lightgreen;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="header">
+                <div class="topic-title" id="topicTitle">for</div>
+                <div class="syntax" id="syntax">for (int i = 0; i < 5; i++) { }</div>
+                <div class="example" id="example">Input: for(int i=0; i<3; i++) { System.out.println(i); }
+Output: Prints 0, 1, 2</div>
+                <div class="explanation" id="explanation">Executes a block of code repeatedly while a condition is true, with initialization and increment.</div>
+            </div>
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            <div class="collapsible">
+                <button class="toggle-btn" id="toggleBtn">Show Details ▼</button>
+                <div class="content" id="detailsContent">
+                    <strong>Extended Notes:</strong><br>
+                    • Initialization runs once at the start<br>
+                    • Condition is checked before each iteration<br>
+                    • Update expression runs after each iteration<br>
+                    • Any part can be omitted (infinite loop possible)<br><br>
+                    <strong>Edge Cases:</strong><br>
+                    • Enhanced for-each loop for collections<br>
+                    • Multiple variables can be declared<br>
+                    • Break and continue alter flow control
+                </div>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="visual" id="visual">
+                <div class="visual-box">
+                    <div class="for-loop-container">
+                        <div class="loop-parts">
+                            <div class="loop-part" id="init-part">i = 0</div>
+                            <div class="loop-part" id="condition-part">i < 3</div>
+                            <div class="loop-part" id="increment-part">i++</div>
+                        </div>
+                        <div id="for-iterations">
+                            <div class="iteration-box" id="for-iter-0">Iteration 0: i=0</div>
+                            <div class="iteration-box" id="for-iter-1">Iteration 1: i=1</div>
+                            <div class="iteration-box" id="for-iter-2">Iteration 2: i=2</div>
+                        </div>
+                        <button class="anim-btn" onclick="animateForLoop()">▶ Run For Loop</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const keywords = [
+            {
+                title: 'for',
+                syntax: 'for (int i = 0; i < 5; i++) { }',
+                example: 'Input: for(int i=0; i<3; i++) { System.out.println(i); }\nOutput: Prints 0, 1, 2',
+                explanation: 'Executes a block of code repeatedly while a condition is true, with initialization and increment.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="for-loop-container">
+                            <div class="loop-parts">
+                                <div class="loop-part" id="init-part">i = 0</div>
+                                <div class="loop-part" id="condition-part">i < 3</div>
+                                <div class="loop-part" id="increment-part">i++</div>
+                            </div>
+                            <div id="for-iterations">
+                                <div class="iteration-box" id="for-iter-0">Iteration 0: i=0</div>
+                                <div class="iteration-box" id="for-iter-1">Iteration 1: i=1</div>
+                                <div class="iteration-box" id="for-iter-2">Iteration 2: i=2</div>
+                            </div>
+                            <button class="anim-btn" onclick="animateForLoop()">▶ Run For Loop</button>
+                        </div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Initialization runs once at the start<br>• Condition is checked before each iteration<br>• Update expression runs after each iteration<br>• Any part can be omitted (infinite loop possible)<br><br><strong>Edge Cases:</strong><br>• Enhanced for-each loop for collections<br>• Multiple variables can be declared<br>• Break and continue alter flow control`
+            },
+            {
+                title: 'while',
+                syntax: 'while (condition) { }',
+                example: 'Input: int x=0; while(x<3) { System.out.println(x); x++; }\nOutput: Prints 0, 1, 2',
+                explanation: 'Repeats a block of code as long as a condition remains true.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="while-loop-container">
+                            <div class="condition-box" id="while-condition">x < 3</div>
+                            <div id="while-iterations">
+                                <div class="iteration-box" id="while-iter-0">x=0, print(0), x++</div>
+                                <div class="iteration-box" id="while-iter-1">x=1, print(1), x++</div>
+                                <div class="iteration-box" id="while-iter-2">x=2, print(2), x++</div>
+                                <div class="iteration-box" id="while-iter-3">x=3, condition false</div>
+                            </div>
+                            <button class="anim-btn" onclick="animateWhileLoop()">▶ Run While Loop</button>
+                        </div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Condition checked before each iteration<br>• May not execute at all if condition initially false<br>• Common cause of infinite loops if condition never changes<br>• More flexible than for loop<br><br><strong>Edge Cases:</strong><br>• do-while variant executes at least once<br>• Boolean expressions can be complex<br>• Break and continue work inside while loops`
+            },
+            {
+                title: 'static',
+                syntax: 'static int count = 0;',
+                example: 'Input: class Counter { static int count = 0; }\nOutput: count is shared across all Counter instances',
+                explanation: 'Creates a class-level variable or method that belongs to the class rather than instances.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="static-demo">
+                            <div class="static-var" id="static-var">static count = 0</div>
+                            <div style="display: flex; gap: 10px;">
+                                <div class="instance-box" id="instance1">Instance 1</div>
+                                <div class="instance-box" id="instance2">Instance 2</div>
+                                <div class="instance-box" id="instance3">Instance 3</div>
+                            </div>
+                            <div style="margin-top: 10px;">All instances share the same static variable</div>
+                            <button class="anim-btn" onclick="animateStatic()">▶ Show Static Sharing</button>
+                        </div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Static members are initialized when the class is first loaded<br>• Cannot access non-static members directly<br>• Memory efficient for shared data<br>• Common for utility methods and constants<br><br><strong>Edge Cases:</strong><br>• Static blocks execute before constructors<br>• Static methods cannot be overridden (but can be hidden)<br>• Static nested classes don't need outer instance reference`
+            },
+            {
+                title: 'final',
+                syntax: 'final int MAX = 100;',
+                example: 'Input: final int MAX = 100; MAX = 200;\nOutput: Compilation error - cannot reassign',
+                explanation: 'Prevents reassignment of variables, method overriding, or class inheritance.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="class-box">
+                            <div>final MAX = 100</div>
+                            <div style="margin-top:10px;">🔒 Immutable</div>
+                        </div>
+                        <div class="arrow">✗</div>
+                        <div>Cannot be changed</div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Final variables must be initialized<br>• Final methods cannot be overridden<br>• Final classes cannot be extended<br>• Final parameters cannot be reassigned<br><br><strong>Edge Cases:</strong><br>• Final collections can still be modified (contents)<br>• Blank final variables must be initialized in constructor<br>• Final static variables are compile-time constants`
+            },
+            {
+                title: 'this',
+                syntax: 'this.name = name;',
+                example: 'Input: this.age = age; (in constructor)\nOutput: Sets instance variable age to parameter value',
+                explanation: 'References the current object instance to distinguish from parameters or local variables.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="class-box">
+                            <div>Current Object</div>
+                            <div style="margin-top:10px;">this → instance</div>
+                        </div>
+                        <div class="arrow">↓</div>
+                        <div>Resolves name conflicts</div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Used to call other constructors with this()<br>• Disambiguates instance variables from parameters<br>• Cannot be used in static context<br>• Implicit in most cases<br><br><strong>Edge Cases:</strong><br>• this() must be first statement in constructor<br>• Cannot assign to this reference<br>• Inner classes have access to outer this`
+            },
+            {
+                title: 'return',
+                syntax: 'return result;',
+                example: 'Input: return x + y;\nOutput: Method exits and returns the sum value',
+                explanation: 'Exits a method and optionally returns a value to the caller.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="method-call-demo">
+                            <div class="call-stack" id="caller">main() calls add(5,3)</div>
+                            <div class="arrow">↓</div>
+                            <div class="call-stack" id="method">add() { return 5+3; }</div>
+                            <div class="arrow">↑</div>
+                            <div class="call-stack" id="result">returns 8 to main()</div>
+                            <button class="anim-btn" onclick="animateReturn()">▶ Show Method Return</button>
+                        </div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Void methods can use return; without value<br>• Must return value matching method signature<br>• Unreachable code after return causes compilation error<br>• Can have multiple return statements<br><br><strong>Edge Cases:</strong><br>• Finally blocks execute even after return<br>• Return type must match or be assignable<br>• Constructors cannot have return type`
+            },
+            {
+                title: 'break',
+                syntax: 'break;',
+                example: 'Input: for(int i=0; i<10; i++) { if(i==5) break; }\nOutput: Loop exits when i equals 5',
+                explanation: 'Exits the nearest enclosing loop or switch statement immediately.',
+                visual: `
+                    <div class="visual-box">
+                        <div style="margin-bottom:15px;">for(int i=0; i&lt;10; i++)</div>
+                        <div id="break-animation">
+                            <div class="iteration-box" id="break-iter-0">i=0 ✓</div>
+                            <div class="iteration-box" id="break-iter-1">i=1 ✓</div>
+                            <div class="iteration-box" id="break-iter-2">i=2 ✓</div>
+                            <div class="iteration-box" id="break-iter-3">i=3 ✓</div>
+                            <div class="iteration-box" id="break-iter-4">i=4 ✓</div>
+                            <div class="iteration-box break-point" id="break-iter-5">i=5 BREAK</div>
+                            <div class="iteration-box skipped" id="break-iter-6">i=6 ✗</div>
+                            <div class="iteration-box skipped" id="break-iter-7">i=7 ✗</div>
+                        </div>
+                        <button class="anim-btn" onclick="animateBreak()">▶ Run Loop</button>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Works with for, while, do-while, and switch<br>• Labeled break can exit outer loops<br>• Cannot be used outside loop or switch<br>• Only exits innermost enclosing structure<br><br><strong>Edge Cases:</strong><br>• break label; exits to specific labeled statement<br>• Finally blocks still execute<br>• Cannot break from if statements directly`
+            },
+            {
+                title: 'continue',
+                syntax: 'continue;',
+                example: 'Input: for(int i=0; i<5; i++) { if(i==2) continue; print(i); }\nOutput: Prints 0,1,3,4 (skips 2)',
+                explanation: 'Skips the rest of the current loop iteration and moves to the next iteration.',
+                visual: `
+                    <div class="visual-box">
+                        <div style="margin-bottom:15px;">for(int i=0; i&lt;5; i++)</div>
+                        <div id="continue-animation">
+                            <div class="iteration-box" id="cont-0">i=0 print(0)</div>
+                            <div class="iteration-box" id="cont-1">i=1 print(1)</div>
+                            <div class="iteration-box continue-point" id="cont-2">i=2 continue</div>
+                            <div class="iteration-box" id="cont-3">i=3 print(3)</div>
+                            <div class="iteration-box" id="cont-4">i=4 print(4)</div>
+                        </div>
+                        <div style="margin-top:15px;">Output: <span id="continue-output">0 1 3 4</span></div>
+                        <button class="anim-btn" onclick="animateContinue()">▶ Run Loop</button>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Only works inside loops (for, while, do-while)<br>• Labeled continue can skip to outer loop<br>• Skips remaining code in current iteration<br>• Loop condition is still evaluated<br><br><strong>Edge Cases:</strong><br>• continue label; continues specific labeled loop<br>• Cannot be used outside loops<br>• For loops still execute increment expression`
+            },
+            {
+                title: 'public',
+                syntax: 'public class MyClass {}',
+                example: 'Input: public void getName() { return name; }\nOutput: Method accessible from any class',
+                explanation: 'Makes classes, methods, or fields accessible from anywhere in the program.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="class-box">
+                            <div>Any Class</div>
+                            <div style="margin-top:10px;">✓ Can Access</div>
+                        </div>
+                        <div class="arrow">→</div>
+                        <div class="class-box">public member</div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Widest access level in Java<br>• Public classes must be in files with same name<br>• No restrictions on access location<br>• Default choice for API methods<br><br><strong>Edge Cases:</strong><br>• Only one public class per file<br>• Public constructors allow object creation anywhere<br>• Public fields break encapsulation principles`
+            },
+            {
+                title: 'private',
+                syntax: 'private int age;',
+                example: 'Input: private String secret = "hidden";\nOutput: Variable only accessible within same class',
+                explanation: 'Restricts access to members only within the same class where they are declared.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="class-box">
+                            <div>Same Class Only</div>
+                            <div style="margin-top:10px;">🔒 private member</div>
+                        </div>
+                        <div class="arrow">✗</div>
+                        <div>Other classes blocked</div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Strongest access restriction<br>• Essential for encapsulation<br>• Cannot be overridden (not inherited)<br>• Common for internal implementation details<br><br><strong>Edge Cases:</strong><br>• Private constructors prevent instantiation<br>• Inner classes can access private members of outer class<br>• Private methods cannot be abstract`
+            },
+            {
+                title: 'protected',
+                syntax: 'protected void method() {}',
+                example: 'Input: protected int value = 10;\nOutput: Accessible in subclasses and same package',
+                explanation: 'Allows access within the same package or by subclasses in any package.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="class-box">Same Package</div>
+                        <div class="arrow">↓</div>
+                        <div class="class-box">protected member</div>
+                        <div class="arrow">↓</div>
+                        <div class="class-box">Subclasses</div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Inheritance-friendly access level<br>• Package-level access plus subclass access<br>• Common for methods meant to be overridden<br>• More restrictive than public, less than private<br><br><strong>Edge Cases:</strong><br>• Subclass access only through inheritance<br>• Protected constructors allow subclass creation<br>• Cannot access protected members of other instances unless same class`
+            },
+            {
+                title: 'class',
+                syntax: 'class Person {}',
+                example: 'Input: class Car { String brand; }\nOutput: Defines a new Car type with brand field',
+                explanation: 'Defines a blueprint for creating objects with fields and methods.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="class-box">
+                            <div>class Car</div>
+                            <div style="margin-top:10px;">├─ String brand</div>
+                            <div>├─ void start()</div>
+                        </div>
+                        <div style="margin-top:15px;">Template for objects</div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Classes are reference types<br>• Can extend one class and implement multiple interfaces<br>• Support constructors, methods, and fields<br>• Default package-private access<br><br><strong>Edge Cases:</strong><br>• Abstract classes cannot be instantiated<br>• Final classes cannot be extended<br>• Inner classes have access to outer class members`
+            },
+            {
+                title: 'interface',
+                syntax: 'interface Drawable {}',
+                example: 'Input: interface Shape { void draw(); }\nOutput: Contract requiring implementing classes to have draw method',
+                explanation: 'Defines a contract that implementing classes must follow with abstract methods.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="class-box">
+                            <div>interface Shape</div>
+                            <div style="margin-top:10px;">void draw();</div>
+                        </div>
+                        <div class="arrow">↓</div>
+                        <div>Classes must implement</div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Methods are implicitly public abstract<br>• Fields are implicitly public static final<br>• Supports multiple inheritance through implementation<br>• Can contain default and static methods (Java 8+)<br><br><strong>Edge Cases:</strong><br>• Functional interfaces can be used with lambdas<br>• Diamond problem resolved by explicit override<br>• Private methods allowed in interfaces (Java 9+)`
+            },
+            {
+                title: 'extends',
+                syntax: 'class Dog extends Animal',
+                example: 'Input: class Dog extends Animal { }\nOutput: Dog inherits all Animal fields and methods',
+                explanation: 'Creates inheritance relationship where subclass inherits from superclass.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="inheritance-demo">
+                            <div class="parent-class" id="parent">Animal (Parent)<br>- name<br>- eat()</div>
+                            <div class="inheritance-arrow" id="inherit-arrow">↓ extends</div>
+                            <div class="child-class" id="child">Dog (Child)<br>+ bark()</div>
+                            <div style="margin-top: 15px;">Dog inherits name and eat() from Animal</div>
+                            <button class="anim-btn" onclick="animateInheritance()">▶ Show Inheritance</button>
+                        </div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Single inheritance only (one parent class)<br>• Child class inherits non-private members<br>• Constructor chaining with super()<br>• Method overriding with @Override<br><br><strong>Edge Cases:</strong><br>• All classes implicitly extend Object<br>• Abstract classes can be extended<br>• Final classes cannot be extended`
+            },
+            {
+                title: 'implements',
+                syntax: 'class Circle implements Shape',
+                example: 'Input: class Circle implements Drawable { void draw() {...} }\nOutput: Circle must provide draw() method implementation',
+                explanation: 'Requires class to provide implementations for all abstract methods in the interface.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="class-box">
+                            <div>Drawable Interface</div>
+                            <div style="margin-top:10px;">void draw();</div>
+                        </div>
+                        <div class="arrow">implements</div>
+                        <div class="class-box">Circle Class</div>
+                        <div style="margin-top:10px;">Must implement all methods</div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Can implement multiple interfaces<br>• Must implement all abstract methods<br>• Can inherit default method implementations<br>• Enables polymorphism through interface types<br><br><strong>Edge Cases:</strong><br>• Diamond problem with default methods<br>• Anonymous classes can implement interfaces<br>• Lambda expressions work with functional interfaces`
+            },
+            {
+                title: 'import',
+                syntax: 'import java.util.List;',
+                example: 'Input: import java.util.ArrayList;\nOutput: Can use ArrayList without full package name',
+                explanation: 'Brings classes or packages into scope so they can be used without full qualification.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="class-box">java.util.ArrayList</div>
+                        <div class="arrow">import</div>
+                        <div class="class-box">ArrayList (shortened)</div>
+                        <div style="margin-top:10px;">Namespace convenience</div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Static imports bring static members into scope<br>• Wildcard imports (* ) import all classes in package<br>• No runtime overhead, compile-time convenience<br>• java.lang.* automatically imported<br><br><strong>Edge Cases:</strong><br>• Name conflicts require full qualification<br>• Unused imports are typically warnings<br>• Cannot import individual methods (except static)`
+            },
+            {
+                title: 'package',
+                syntax: 'package com.example.app;',
+                example: 'Input: package com.mycompany.utils;\nOutput: Class belongs to com.mycompany.utils namespace',
+                explanation: 'Declares which package the current class belongs to for organization and access control.',
+                visual: `
+                    <div class="visual-box">
+                        <div class="class-box">
+                            <div>com.example.app</div>
+                            <div style="margin-top:10px;">├─ MyClass.java</div>
+                            <div>├─ Helper.java</div>
+                        </div>
+                        <div style="margin-top:15px;">Namespace organization</div>
+                    </div>
+                `,
+                details: `<strong>Extended Notes:</strong><br>• Must be first non-comment line in file<br>• Corresponds to directory structure<br>• Enables access control and organization<br>• Prevents naming conflicts<br><br><strong>Edge Cases:</strong><br>• Default package has limitations<br>• Package-private access within same package<br>• Cannot import from default package`
+            }
+        ];
+
+        let currentIndex = 0;
+        let isAnimating = false;
+
+        function updateDisplay() {
+            const current = keywords[currentIndex];
+            document.getElementById('topicTitle').textContent = current.title;
+            document.getElementById('syntax').textContent = current.syntax;
+            document.getElementById('example').textContent = current.example;
+            document.getElementById('explanation').textContent = current.explanation;
+            document.getElementById('visual').innerHTML = current.visual;
+            document.getElementById('detailsContent').innerHTML = current.details;
+            
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            document.getElementById('nextBtn').disabled = currentIndex === keywords.length - 1;
+            
+            // Reset animation states
+            isAnimating = false;
+        }
+
+        // Animation functions
+        function animateForLoop() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const parts = ['init-part', 'condition-part', 'increment-part'];
+            const iterations = ['for-iter-0', 'for-iter-1', 'for-iter-2'];
+            
+            // Reset
+            parts.forEach(id => document.getElementById(id)?.classList.remove('active'));
+            iterations.forEach(id => document.getElementById(id)?.classList.remove('active'));
+            
+            // Initialize
+            document.getElementById('init-part')?.classList.add('active');
+            
+            setTimeout(() => {
+                document.getElementById('init-part')?.classList.remove('active');
+                runForIteration(0, iterations, parts);
+            }, 800);
+            
+            function runForIteration(index, iterations, parts) {
+                if (index >= iterations.length) {
+                    isAnimating = false;
+                    return;
+                }
+                
+                // Check condition
+                document.getElementById('condition-part')?.classList.add('active');
+                
+                setTimeout(() => {
+                    document.getElementById('condition-part')?.classList.remove('active');
+                    
+                    // Execute iteration
+                    document.getElementById(iterations[index])?.classList.add('active');
+                    
+                    setTimeout(() => {
+                        document.getElementById(iterations[index])?.classList.remove('active');
+                        
+                        // Increment
+                        document.getElementById('increment-part')?.classList.add('active');
+                        
+                        setTimeout(() => {
+                            document.getElementById('increment-part')?.classList.remove('active');
+                            runForIteration(index + 1, iterations, parts);
+                        }, 600);
+                    }, 800);
+                }, 600);
+            }
+        }
+
+        function animateWhileLoop() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const condition = document.getElementById('while-condition');
+            const iterations = ['while-iter-0', 'while-iter-1', 'while-iter-2', 'while-iter-3'];
+            let currentIter = 0;
+            
+            // Reset
+            iterations.forEach(id => document.getElementById(id)?.classList.remove('active'));
+            condition?.classList.remove('true', 'false');
+            
+            function checkCondition() {
+                if (currentIter >= 3) {
+                    condition?.classList.add('false');
+                    setTimeout(() => {
+                        document.getElementById('while-iter-3')?.classList.add('active');
+                        setTimeout(() => {
+                            document.getElementById('while-iter-3')?.classList.remove('active');
+                            condition?.classList.remove('false');
+                            isAnimating = false;
+                        }, 800);
+                    }, 600);
+                    return;
+                }
+                
+                condition?.classList.add('true');
+                
+                setTimeout(() => {
+                    condition?.classList.remove('true');
+                    
+                    // Execute iteration
+                    document.getElementById(iterations[currentIter])?.classList.add('active');
+                    
+                    setTimeout(() => {
+                        document.getElementById(iterations[currentIter])?.classList.remove('active');
+                        currentIter++;
+                        checkCondition();
+                    }, 800);
+                }, 600);
+            }
+            
+            checkCondition();
+        }
+
+        function animateBreak() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const iterations = ['break-iter-0', 'break-iter-1', 'break-iter-2', 'break-iter-3', 'break-iter-4', 'break-iter-5'];
+            let index = 0;
+            
+            document.querySelectorAll('.iteration-box').forEach(box => {
+                box.classList.remove('active');
+            });
+            
+            function step() {
+                if (index < iterations.length) {
+                    const currentBox = document.getElementById(iterations[index]);
+                    if (currentBox) {
+                        currentBox.classList.add('active');
+                        
+                        if (index === 5) {
+                            setTimeout(() => {
+                                currentBox.classList.remove('active');
+                                isAnimating = false;
+                            }, 1000);
+                            return;
+                        }
+                        
+                        setTimeout(() => {
+                            currentBox.classList.remove('active');
+                            index++;
+                            step();
+                        }, 600);
+                    }
+                }
+            }
+            step();
+        }
+        
+        function animateContinue() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const iterations = ['cont-0', 'cont-1', 'cont-2', 'cont-3', 'cont-4'];
+            const output = [];
+            let index = 0;
+            
+            document.querySelectorAll('.iteration-box').forEach(box => {
+                box.classList.remove('active');
+            });
+            document.getElementById('continue-output').textContent = '';
+            
+            function step() {
+                if (index < iterations.length) {
+                    const currentBox = document.getElementById(iterations[index]);
+                    if (currentBox) {
+                        currentBox.classList.add('active');
+                        
+                        setTimeout(() => {
+                            currentBox.classList.remove('active');
+                            
+                            if (index !== 2) {
+                                output.push(index);
+                                document.getElementById('continue-output').textContent = output.join(' ');
+                            }
+                            
+                            index++;
+                            step();
+                        }, index === 2 ? 400 : 700);
+                    }
+                } else {
+                    isAnimating = false;
+                }
+            }
+            step();
+        }
+
+        function animateStatic() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const staticVar = document.getElementById('static-var');
+            const instances = ['instance1', 'instance2', 'instance3'];
+            
+            instances.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.background = 'white';
+            });
+            
+            let count = 0;
+            function highlightInstance(index) {
+                if (index >= instances.length) {
+                    isAnimating = false;
+                    return;
+                }
+                
+                const el = document.getElementById(instances[index]);
+                if (el) {
+                    el.style.background = 'lightblue';
+                    count++;
+                    staticVar.textContent = `static count = ${count}`;
+                    staticVar.style.background = 'yellow';
+                    
+                    setTimeout(() => {
+                        el.style.background = 'white';
+                        staticVar.style.background = 'lightblue';
+                        highlightInstance(index + 1);
+                    }, 800);
+                }
+            }
+            
+            highlightInstance(0);
+        }
+
+        function animateReturn() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const caller = document.getElementById('caller');
+            const method = document.getElementById('method');
+            const result = document.getElementById('result');
+            
+            // Reset
+            [caller, method, result].forEach(el => {
+                if (el) el.classList.remove('active', 'returning');
+            });
+            
+            // Call method
+            caller?.classList.add('active');
+            
+            setTimeout(() => {
+                caller?.classList.remove('active');
+                method?.classList.add('active');
+                
+                setTimeout(() => {
+                    method?.classList.remove('active');
+                    method?.classList.add('returning');
+                    
+                    setTimeout(() => {
+                        method?.classList.remove('returning');
+                        result?.classList.add('returning');
+                        
+                        setTimeout(() => {
+                            result?.classList.remove('returning');
+                            isAnimating = false;
+                        }, 800);
+                    }, 600);
+                }, 1000);
+            }, 600);
+        }
+
+        function animateInheritance() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const parent = document.getElementById('parent');
+            const arrow = document.getElementById('inherit-arrow');
+            const child = document.getElementById('child');
+            
+            // Reset
+            parent?.classList.remove('active');
+            arrow?.classList.remove('active');
+            child?.classList.remove('inheriting');
+            
+            // Highlight parent
+            parent?.style.setProperty('background', 'lightgreen');
+            
+            setTimeout(() => {
+                arrow?.classList.add('active');
+                
+                setTimeout(() => {
+                    child?.classList.add('inheriting');
+                    
+                    setTimeout(() => {
+                        parent?.style.setProperty('background', 'lightgray');
+                        arrow?.classList.remove('active');
+                        child?.classList.remove('inheriting');
+                        isAnimating = false;
+                    }, 1200);
+                }, 800);
+            }, 800);
+        }
+
+        // Navigation
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentIndex < keywords.length - 1) {
+                currentIndex++;
+                updateDisplay();
+            } else {
+                // Navigate to index.html after last keyword
+                window.location.href = './index.html';
+            }
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            currentIndex = 0;
+            updateDisplay();
+        });
+
+        document.getElementById('toggleBtn').addEventListener('click', () => {
+            const content = document.getElementById('detailsContent');
+            const btn = document.getElementById('toggleBtn');
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                btn.textContent = 'Show Details ▼';
+            } else {
+                content.classList.add('show');
+                btn.textContent = 'Hide Details ▲';
+            }
+        });
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>

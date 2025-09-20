@@ -254,7 +254,7 @@
     <div class="header">
         <div class="header-left">
             <h1>Graphiti</h1>
-            <a href="/basic/index.html" class="basic-button">Basic</a>
+            <a href="basic/index.html" class="basic-button">Basic</a>
         </div>
         <div class="progress-info">
             <div class="total-questions" id="totalQuestions">
@@ -278,7 +278,7 @@
         // Load completed questions from storage
         function loadCompletedQuestions() {
             try {
-                const saved = JSON.parse(localStorage.getItem('completedQuestions') || '[]');
+                const saved = JSON.parse(sessionStorage.getItem('completedQuestions') || '[]');
                 completedQuestions = new Set(saved);
             } catch (e) {
                 completedQuestions = new Set();
@@ -289,7 +289,7 @@
         // Save completed questions to storage
         function saveCompletedQuestions() {
             try {
-                localStorage.setItem('completedQuestions', JSON.stringify([...completedQuestions]));
+                sessionStorage.setItem('completedQuestions', JSON.stringify([...completedQuestions]));
             } catch (e) {
                 console.error('Failed to save progress to storage');
             }

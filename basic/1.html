@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Data Types & Structures Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            border-bottom: 2px solid black;
+            padding: 15px;
+            background: white;
+        }
+        
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .content {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .left-panel {
+            flex: 1;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .syntax {
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .example {
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        
+        .example-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .code-block {
+            background: #f8f8f8;
+            border: 1px solid black;
+            padding: 8px;
+            margin: 5px 0;
+            white-space: pre-line;
+        }
+        
+        .explanation {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .right-panel {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+        }
+        
+        .visual {
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            max-width: 100%;
+        }
+        
+        .controls {
+            padding: 15px;
+            border-top: 2px solid black;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid black;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        button:hover {
+            background: black;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .counter {
+            margin-left: auto;
+            font-size: 12px;
+        }
+        
+        .collapsible {
+            border-top: 1px solid black;
+            background: #fafafa;
+        }
+        
+        .collapsible-header {
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .collapsible-content {
+            padding: 15px;
+            font-size: 11px;
+            line-height: 1.5;
+            display: none;
+        }
+        
+        .collapsible.open .collapsible-content {
+            display: block;
+        }
+        
+        /* Memory visualization styles */
+        .memory-box {
+            border: 3px solid black;
+            padding: 20px;
+            margin: 10px;
+            display: inline-block;
+            min-width: 200px;
+            text-align: center;
+            background: white;
+        }
+        
+        .bit-representation {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            margin: 10px 0;
+            padding: 5px;
+            border: 1px solid #666;
+            background: #f0f0f0;
+            letter-spacing: 1px;
+        }
+        
+        .range-display {
+            font-size: 10px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* Array visualization */
+        .array-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .array-visual {
+            border: 2px solid black;
+            display: flex;
+            margin: 10px 0;
+        }
+        
+        .array-cell {
+            border-right: 1px solid black;
+            padding: 12px 8px;
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .array-cell:last-child {
+            border-right: none;
+        }
+        
+        .array-index {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .array-value {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        /* String visualization */
+        .string-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .string-chars {
+            display: flex;
+            border: 2px solid black;
+            margin: 10px 0;
+        }
+        
+        .char-cell {
+            border-right: 1px solid black;
+            padding: 10px 6px;
+            text-align: center;
+            min-width: 30px;
+            font-size: 12px;
+        }
+        
+        .char-cell:last-child {
+            border-right: none;
+        }
+        
+        /* Collection visualization */
+        .collection-visual {
+            border: 2px solid black;
+            padding: 20px;
+            margin: 10px;
+            min-width: 300px;
+            background: white;
+        }
+        
+        .list-item {
+            border: 1px solid black;
+            padding: 8px;
+            margin: 2px 0;
+            background: #f8f8f8;
+            text-align: center;
+        }
+        
+        .node-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 5px 0;
+        }
+        
+        .node {
+            border: 2px solid black;
+            padding: 10px;
+            margin: 0 5px;
+            background: white;
+        }
+        
+        .arrow {
+            font-size: 20px;
+            margin: 0 10px;
+        }
+        
+        .stack-visual {
+            display: flex;
+            flex-direction: column-reverse;
+            width: 150px;
+            margin: 0 auto;
+        }
+        
+        .stack-item {
+            border: 2px solid black;
+            padding: 10px;
+            margin: 1px 0;
+            background: #f8f8f8;
+            text-align: center;
+        }
+        
+        .queue-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .queue-item {
+            border: 2px solid black;
+            padding: 10px;
+            margin: 0 2px;
+            background: #f8f8f8;
+            text-align: center;
+        }
+        
+        .set-visual {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            border: 2px solid black;
+            background: #f8f8f8;
+        }
+        
+        .set-item {
+            border: 1px solid black;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 20px;
+        }
+        
+        .map-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 20px;
+            border: 2px solid black;
+            background: #f8f8f8;
+        }
+        
+        .map-entry {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .map-key, .map-value {
+            border: 1px solid black;
+            padding: 8px 12px;
+            background: white;
+        }
+        
+        .map-key {
+            background: #e8f4fd;
+        }
+        
+        .map-value {
+            background: #fff2e8;
+        }
+        
+        /* Hierarchy visualization */
+        .hierarchy {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            background: white;
+            padding: 20px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .tree-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .tree-root {
+            background: white;
+            border: 3px solid black;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .tree-branches {
+            display: flex;
+            justify-content: space-evenly;
+            width: 100%;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .tree-branches::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            width: 2px;
+            height: 15px;
+            background: black;
+            transform: translateX(-50%);
+        }
+        
+        .tree-branches::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: black;
+        }
+        
+        .branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+        
+        .branch::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            width: 2px;
+            height: 15px;
+            background: black;
+            transform: translateX(-50%);
+        }
+        
+        .branch-header {
+            background: #f0f0f0;
+            border: 2px solid black;
+            padding: 10px 15px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            min-width: 140px;
+        }
+        
+        .branch-items {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .tree-item {
+            background: white;
+            border: 1px solid black;
+            padding: 6px 10px;
+            text-align: center;
+            min-width: 100px;
+            font-size: 10px;
+            position: relative;
+        }
+        
+        .tree-item.completed {
+            background: #e8f5e8;
+            border-color: #4a8a4a;
+        }
+        
+        .vertical-line {
+            width: 2px;
+            height: 20px;
+            background: black;
+            margin: 0 auto;
+        }
+        
+        .next-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .next-box {
+            background: #f0f8ff;
+            border: 3px solid black;
+            padding: 15px 25px;
+            font-weight: bold;
+            font-size: 13px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title" id="currentTitle"></div>
+        <div class="syntax" id="currentSyntax"></div>
+    </div>
+    
+    <div class="content">
+        <div class="left-panel">
+            <div class="example">
+                <div class="example-title">Example:</div>
+                <div id="currentExample"></div>
+            </div>
+            <div class="explanation" id="currentExplanation"></div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="visual" id="currentVisual"></div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button id="prevBtn">Previous</button>
+        <button id="nextBtn">Next</button>
+        <button id="resetBtn">Reset</button>
+        <div class="counter">
+            <span id="currentStep">1</span> / <span id="totalSteps">18</span>
+        </div>
+    </div>
+    
+    <div class="collapsible" id="detailsSection">
+        <div class="collapsible-header" onclick="toggleDetails()">▼ Extended Notes & Details</div>
+        <div class="collapsible-content" id="detailsContent"></div>
+    </div>
+
+    <script>
+        const topics = [
+            {
+                title: "Java Data Types & Structures Hierarchy",
+                syntax: "// Complete classification of Java data organization",
+                example: `<div class="code-block">// This overview shows all data types and structures
+// Navigate through each section to learn details</div>`,
+                explanation: "Java organizes data into primitive types, reference types, and collection structures.",
+                visual: `<div class="hierarchy">
+<div class="tree-container">
+    <div class="tree-root">JAVA DATA ORGANIZATION</div>
+    
+    <div class="tree-branches">
+        <div class="branch">
+            <div class="branch-header">PRIMITIVE TYPES<br>(8 types)</div>
+            <div class="branch-items">
+                <div class="tree-item">byte<br>8-bit<br>(-128 to 127)</div>
+                <div class="tree-item">short<br>16-bit<br>(-32K to 32K)</div>
+                <div class="tree-item">int<br>32-bit<br>(-2³¹ to 2³¹-1)</div>
+                <div class="tree-item">long<br>64-bit<br>(-2⁶³ to 2⁶³-1)</div>
+                <div class="tree-item">float<br>32-bit IEEE<br>(~7 digits)</div>
+                <div class="tree-item">double<br>64-bit IEEE<br>(~15 digits)</div>
+                <div class="tree-item">char<br>16-bit<br>(Unicode)</div>
+                <div class="tree-item">boolean<br>true/false</div>
+            </div>
+        </div>
+        
+        <div class="branch">
+            <div class="branch-header">REFERENCE TYPES</div>
+            <div class="branch-items">
+                <div class="tree-item">String<br>Immutable<br>Text sequences</div>
+                <div class="tree-item">Arrays<br>Fixed size<br>Same type elements</div>
+                <div class="tree-item">Objects<br>Custom classes<br>Instance variables</div>
+            </div>
+        </div>
+        
+        <div class="branch">
+            <div class="branch-header">DATA STRUCTURES</div>
+            <div class="branch-items">
+                <div class="tree-item">ArrayList<br>Dynamic array<br>Resizable</div>
+                <div class="tree-item">LinkedList<br>Node-based<br>Doubly linked</div>
+                <div class="tree-item">Stack<br>LIFO<br>Last in, first out</div>
+                <div class="tree-item">Queue<br>FIFO<br>First in, first out</div>
+                <div class="tree-item">HashSet<br>Unique elements<br>No duplicates</div>
+                <div class="tree-item">HashMap<br>Key-value pairs<br>Fast lookup</div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>`,
+                details: "Java's type system is statically typed, meaning variable types are checked at compile time. Primitive types store values directly, while reference types store memory addresses pointing to objects."
+            },
+            {
+                title: "byte Type",
+                syntax: "byte variable = 100;",
+                example: `<div class="code-block">byte age = 25;
+byte temperature = -10;
+byte[] data = {1, 2, 3};
+System.out.println(age); // Output: 25</div>`,
+                explanation: "Stores whole numbers from -128 to 127 in 8 bits.",
+                visual: `<div class="memory-box">
+    <h3>byte (8 bits)</h3>
+    <div class="bit-representation">0 0 0 1 1 0 0 1</div>
+    <div>Value: 25</div>
+    <div class="range-display">Range: -128 to 127</div>
+    <div class="range-display">Memory: 1 byte</div>
+</div>`,
+                details: "Smallest integer type. Useful for saving memory in large arrays, binary data, or when range is guaranteed to fit. Automatically promotes to int in arithmetic operations."
+            },
+            {
+                title: "short Type",
+                syntax: "short variable = 1000;",
+                example: `<div class="code-block">short distance = 1500;
+short year = 2024;
+short[] measurements = {100, 200, 300};
+System.out.println(distance); // Output: 1500</div>`,
+                explanation: "Stores whole numbers from -32,768 to 32,767 in 16 bits.",
+                visual: `<div class="memory-box">
+    <h3>short (16 bits)</h3>
+    <div class="bit-representation">0000 0101 1101 1100</div>
+    <div>Value: 1500</div>
+    <div class="range-display">Range: -32,768 to 32,767</div>
+    <div class="range-display">Memory: 2 bytes</div>
+</div>`,
+                details: "Rarely used in modern Java. Like byte, it promotes to int in arithmetic operations. Mainly useful for saving memory in large arrays where int range isn't needed."
+            },
+            {
+                title: "int Type",
+                syntax: "int variable = 42;",
+                example: `<div class="code-block">int count = 100;
+int result = 5 + 3;
+int[] numbers = {10, 20, 30};
+System.out.println(count); // Output: 100</div>`,
+                explanation: "Stores whole numbers from -2,147,483,648 to 2,147,483,647 in 32 bits.",
+                visual: `<div class="memory-box">
+    <h3>int (32 bits)</h3>
+    <div class="bit-representation">0000 0000 0000 0000 0000 0000 0110 0100</div>
+    <div>Value: 100</div>
+    <div class="range-display">Range: -2³¹ to 2³¹-1</div>
+    <div class="range-display">Memory: 4 bytes</div>
+    <div style="margin-top: 10px; color: #666;">🔧 Default integer type</div>
+</div>`,
+                details: "The default integer type in Java. Most commonly used for counting, indexing, and general integer arithmetic. Overflows wrap around to negative values."
+            },
+            {
+                title: "long Type",
+                syntax: "long variable = 123456789L;",
+                example: `<div class="code-block">long fileSize = 1024000000L;
+long timestamp = System.currentTimeMillis();
+long[] bigNumbers = {1L, 2L, 3L};
+System.out.println(fileSize); // Output: 1024000000</div>`,
+                explanation: "Stores whole numbers from -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807 in 64 bits.",
+                visual: `<div class="memory-box">
+    <h3>long (64 bits)</h3>
+    <div class="bit-representation">...0011 1101 0000 1001 1100 0100 0000 0000</div>
+    <div>Value: 1024000000L</div>
+    <div class="range-display">Range: -2⁶³ to 2⁶³-1</div>
+    <div class="range-display">Memory: 8 bytes</div>
+    <div style="margin-top: 10px; color: #666;">⚠️ Requires 'L' suffix</div>
+</div>`,
+                details: "Used for very large integers. Requires 'L' suffix for literals to distinguish from int. Essential for timestamps, file sizes, and calculations requiring large numbers."
+            },
+            {
+                title: "float Type",
+                syntax: "float variable = 3.14f;",
+                example: `<div class="code-block">float price = 19.99f;
+float pi = 3.14159f;
+float[] coordinates = {1.5f, 2.7f, 3.9f};
+System.out.println(price); // Output: 19.99</div>`,
+                explanation: "Stores decimal numbers with single precision in 32 bits.",
+                visual: `<div class="memory-box">
+    <h3>float (32 bits)</h3>
+    <div class="bit-representation">0|10000100|00111111010111000010100</div>
+    <div>Value: 19.99f</div>
+    <div class="range-display">Precision: ~7 decimal digits</div>
+    <div class="range-display">Memory: 4 bytes</div>
+    <div style="margin-top: 10px; color: #666;">⚠️ Requires 'f' suffix</div>
+    <div style="font-size: 10px; margin-top: 5px;">Sign|Exponent|Mantissa</div>
+</div>`,
+                details: "Single-precision floating point. Requires 'f' suffix for literals. Less precise than double. Used when memory is a concern and high precision isn't critical."
+            },
+            {
+                title: "double Type",
+                syntax: "double variable = 3.141592653589793;",
+                example: `<div class="code-block">double pi = 3.14159;
+double result = 10.5 / 3.0;
+double[] values = {1.1, 2.2, 3.3};
+System.out.println(pi); // Output: 3.14159</div>`,
+                explanation: "Stores decimal numbers with double precision in 64 bits.",
+                visual: `<div class="memory-box">
+    <h3>double (64 bits)</h3>
+    <div class="bit-representation">0|10000000000|1001001000011111101101010100010001000010110</div>
+    <div>Value: 3.14159</div>
+    <div class="range-display">Precision: ~15 decimal digits</div>
+    <div class="range-display">Memory: 8 bytes</div>
+    <div style="margin-top: 10px; color: #666;">🔧 Default for decimals</div>
+    <div style="font-size: 10px; margin-top: 5px;">Sign|Exponent (11 bits)|Mantissa (52 bits)</div>
+</div>`,
+                details: "Double-precision floating point. Default type for decimal literals. Preferred for most floating-point calculations due to higher precision than float."
+            },
+            {
+                title: "char Type",
+                syntax: "char variable = 'A';",
+                example: `<div class="code-block">char grade = 'A';
+char symbol = '$';
+char[] word = {'H', 'i'};
+System.out.println(grade); // Output: A</div>`,
+                explanation: "Stores single Unicode characters in 16 bits.",
+                visual: `<div class="memory-box">
+    <h3>char (16 bits)</h3>
+    <div class="bit-representation">0000 0000 0100 0001</div>
+    <div>Character: 'A'</div>
+    <div>Unicode Value: 65</div>
+    <div class="range-display">Range: 0 to 65,535</div>
+    <div class="range-display">Memory: 2 bytes</div>
+    <div style="margin-top: 10px; color: #666;">📝 Unicode support</div>
+</div>`,
+                details: "Represents Unicode characters. Can store values from 0 to 65,535. Uses single quotes for literals. Can participate in arithmetic operations as integer values."
+            },
+            {
+                title: "boolean Type",
+                syntax: "boolean variable = true;",
+                example: `<div class="code-block">boolean isReady = false;
+boolean result = (5 > 3);
+boolean[] flags = {true, false, true};
+System.out.println(isReady); // Output: false</div>`,
+                explanation: "Stores true or false values for logical operations.",
+                visual: `<div class="memory-box">
+    <h3>boolean</h3>
+    <div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+        <div style="border: 2px solid green; padding: 10px; background: #e8f5e8;">
+            <strong>true</strong><br>
+            <div style="font-size: 10px;">Logical 1</div>
+        </div>
+        <div style="border: 2px solid red; padding: 10px; background: #ffe8e8;">
+            <strong>false</strong><br>
+            <div style="font-size: 10px;">Logical 0</div>
+        </div>
+    </div>
+    <div class="range-display">Only two values</div>
+    <div class="range-display">Used in conditions</div>
+</div>`,
+                details: "Only two possible values: true and false. Used for logical operations and control flow. JVM implementation may use more than 1 bit for storage optimization."
+            },
+            {
+                title: "String Type",
+                syntax: "String variable = \"Hello\";",
+                example: `<div class="code-block">String name = "Alice";
+String greeting = "Hello " + name;
+String[] words = {"Java", "Programming"};
+System.out.println(greeting); // Output: Hello Alice</div>`,
+                explanation: "Stores sequences of characters as immutable objects.",
+                visual: `<div class="string-visual">
+    <h3>String: "Hello"</h3>
+    <div class="string-chars">
+        <div class="char-cell">H<br><span style="font-size: 8px;">72</span></div>
+        <div class="char-cell">e<br><span style="font-size: 8px;">101</span></div>
+        <div class="char-cell">l<br><span style="font-size: 8px;">108</span></div>
+        <div class="char-cell">l<br><span style="font-size: 8px;">108</span></div>
+        <div class="char-cell">o<br><span style="font-size: 8px;">111</span></div>
+    </div>
+    <div style="margin-top: 10px;">
+        <div>📍 Reference Type</div>
+        <div>🔒 Immutable</div>
+        <div>💾 String Pool</div>
+    </div>
+</div>`,
+                details: "Reference type representing text. Immutable - operations create new String objects. String literals are stored in string pool for memory efficiency."
+            },
+            {
+                title: "Arrays",
+                syntax: "int[] array = new int[5];",
+                example: `<div class="code-block">int[] numbers = {10, 20, 30};
+String[] names = new String[3];
+names[0] = "Alice";
+System.out.println(numbers[1]); // Output: 20</div>`,
+                explanation: "Stores multiple elements of the same type in contiguous memory.",
+                visual: `<div class="array-container">
+    <h3>int[] numbers = {10, 20, 30, 40, 50}</h3>
+    <div style="display: flex; align-items: center; margin: 20px 0;">
+        <div style="margin-right: 10px;">numbers:</div>
+        <div class="array-visual">
+            <div class="array-cell">
+                <div class="array-index">[0]</div>
+                <div class="array-value">10</div>
+            </div>
+            <div class="array-cell">
+                <div class="array-index">[1]</div>
+                <div class="array-value">20</div>
+            </div>
+            <div class="array-cell">
+                <div class="array-index">[2]</div>
+                <div class="array-value">30</div>
+            </div>
+            <div class="array-cell">
+                <div class="array-index">[3]</div>
+                <div class="array-value">40</div>
+            </div>
+            <div class="array-cell">
+                <div class="array-index">[4]</div>
+                <div class="array-value">50</div>
+            </div>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 15px;">
+        <div>✅ Fixed size: numbers.length = 5</div>
+        <div>🎯 Zero-indexed: first element at [0]</div>
+        <div>📦 Contiguous memory allocation</div>
+    </div>
+</div>`,
+                details: "Fixed-size collections of elements. All elements must be of the same type. Arrays are objects with a length property. Indices start at 0."
+            },
+            {
+                title: "ArrayList",
+                syntax: "ArrayList<Integer> list = new ArrayList<>();",
+                example: `<div class="code-block">ArrayList<String> names = new ArrayList<>();
+names.add("Alice");
+names.add("Bob");
+System.out.println(names.get(0)); // Output: Alice</div>`,
+                explanation: "Dynamic array that automatically resizes and provides methods for manipulation.",
+                visual: `<div class="collection-visual">
+    <h3>ArrayList&lt;String&gt;</h3>
+    <div style="display: flex; justify-content: space-between; margin: 15px 0;">
+        <div style="font-size: 12px;">Capacity: 10</div>
+        <div style="font-size: 12px;">Size: 3</div>
+    </div>
+    <div class="array-visual" style="margin: 15px 0;">
+        <div class="array-cell" style="background: #e8f5e8;">
+            <div class="array-index">[0]</div>
+            <div class="array-value">Alice</div>
+        </div>
+        <div class="array-cell" style="background: #e8f5e8;">
+            <div class="array-index">[1]</div>
+            <div class="array-value">Bob</div>
+        </div>
+        <div class="array-cell" style="background: #e8f5e8;">
+            <div class="array-index">[2]</div>
+            <div class="array-value">Carol</div>
+        </div>
+        <div class="array-cell" style="background: #f0f0f0; color: #999;">
+            <div class="array-index">[3]</div>
+            <div class="array-value">null</div>
+        </div>
+        <div class="array-cell" style="background: #f0f0f0; color: #999;">
+            <div class="array-index">[4]</div>
+            <div class="array-value">null</div>
+        </div>
+        <div style="padding: 12px 8px; text-align: center;">...</div>
+    </div>
+    <div style="text-align: center; margin-top: 15px;">
+        <div>🔄 Dynamic resizing when needed</div>
+        <div>⚡ Fast random access: O(1)</div>
+        <div>📋 Methods: .add(), .get(), .remove(), .size()</div>
+    </div>
+</div>`,
+                details: "Resizable array implementation of List interface. Provides random access, automatic resizing, and many utility methods. Generic type ensures type safety."
+            },
+            {
+                title: "LinkedList",
+                syntax: "LinkedList<String> list = new LinkedList<>();",
+                example: `<div class="code-block">LinkedList<Integer> numbers = new LinkedList<>();
+numbers.addFirst(10);
+numbers.addLast(20);
+System.out.println(numbers.getFirst()); // Output: 10</div>`,
+                explanation: "Doubly-linked list allowing efficient insertion and deletion at both ends.",
+                visual: `<div class="collection-visual">
+    <h3>LinkedList&lt;Integer&gt;</h3>
+    <div style="margin: 20px 0;">
+        <div class="node-visual">
+            <div style="border: 1px dashed #999; padding: 5px; font-size: 10px;">null</div>
+            <div class="arrow">←</div>
+            <div class="node">
+                <div style="font-size: 10px;">prev</div>
+                <div style="font-weight: bold; font-size: 14px;">10</div>
+                <div style="font-size: 10px;">next</div>
+            </div>
+            <div class="arrow">⇄</div>
+            <div class="node">
+                <div style="font-size: 10px;">prev</div>
+                <div style="font-weight: bold; font-size: 14px;">20</div>
+                <div style="font-size: 10px;">next</div>
+            </div>
+            <div class="arrow">⇄</div>
+            <div class="node">
+                <div style="font-size: 10px;">prev</div>
+                <div style="font-weight: bold; font-size: 14px;">30</div>
+                <div style="font-size: 10px;">next</div>
+            </div>
+            <div class="arrow">→</div>
+            <div style="border: 1px dashed #999; padding: 5px; font-size: 10px;">null</div>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 15px;">
+        <div>🔗 Doubly-linked nodes</div>
+        <div>⚡ Fast insertion/deletion: O(1) at ends</div>
+        <div>📋 Methods: .addFirst(), .addLast(), .removeFirst()</div>
+    </div>
+</div>`,
+                details: "Doubly-linked list implementation. Efficient insertion/deletion at any position but slower random access compared to ArrayList. Good for frequent modifications."
+            },
+            {
+                title: "Stack",
+                syntax: "Stack<Integer> stack = new Stack<>();",
+                example: `<div class="code-block">Stack<String> books = new Stack<>();
+books.push("Book1");
+books.push("Book2");
+System.out.println(books.pop()); // Output: Book2</div>`,
+                explanation: "Last-In-First-Out (LIFO) data structure for ordered element management.",
+                visual: `<div class="collection-visual">
+    <h3>Stack&lt;String&gt; (LIFO)</h3>
+    <div style="display: flex; justify-content: center; align-items: center; margin: 20px 0;">
+        <div style="margin-right: 30px;">
+            <div style="font-size: 12px; margin-bottom: 10px;">Operations:</div>
+            <div style="background: #e8f5e8; padding: 5px; margin: 2px; font-size: 11px;">push("Book3") ←</div>
+            <div style="background: #ffe8e8; padding: 5px; margin: 2px; font-size: 11px;">pop() →</div>
+            <div style="background: #f0f8ff; padding: 5px; margin: 2px; font-size: 11px;">peek()</div>
+        </div>
+        <div class="stack-visual">
+            <div class="stack-item" style="background: #ffeb3b; border-color: #f57f17;">
+                <strong>Book3</strong><br>
+                <span style="font-size: 10px;">← Top (Last In, First Out)</span>
+            </div>
+            <div class="stack-item">Book2</div>
+            <div class="stack-item">Book1</div>
+            <div style="border-top: 3px solid black; padding: 5px; text-align: center; font-size: 10px;">
+                Bottom
+            </div>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 15px;">
+        <div>📚 LIFO: Last In, First Out</div>
+        <div>⚡ Operations: push(), pop(), peek()</div>
+        <div>🎯 Use cases: Undo operations, function calls</div>
+    </div>
+</div>`,
+                details: "Extends Vector class. LIFO principle - last element added is first removed. Common operations: push(), pop(), peek(). Used for function calls, undo operations."
+            },
+            {
+                title: "Queue",
+                syntax: "Queue<String> queue = new LinkedList<>();",
+                example: `<div class="code-block">Queue<String> line = new LinkedList<>();
+line.offer("Person1");
+line.offer("Person2");
+System.out.println(line.poll()); // Output: Person1</div>`,
+                explanation: "First-In-First-Out (FIFO) data structure for sequential processing.",
+                visual: `<div class="collection-visual">
+    <h3>Queue&lt;String&gt; (FIFO)</h3>
+    <div style="margin: 20px 0;">
+        <div style="text-align: center; margin-bottom: 15px; font-size: 12px;">
+            <span style="background: #e8f5e8; padding: 5px; margin: 0 5px;">offer("Person4")</span>
+            <span>→ REAR</span>
+            <span style="margin: 0 20px;">|</span>
+            <span>FRONT →</span>
+            <span style="background: #ffe8e8; padding: 5px; margin: 0 5px;">poll()</span>
+        </div>
+        <div class="queue-visual">
+            <div class="queue-item" style="background: #ffeb3b; border-color: #f57f17;">
+                <strong>Person1</strong><br>
+                <span style="font-size: 10px;">← Front (First Out)</span>
+            </div>
+            <div class="queue-item">Person2</div>
+            <div class="queue-item">Person3</div>
+            <div class="queue-item" style="border: 2px dashed #999; color: #999;">
+                <span style="font-size: 10px;">Next: Person4</span><br>
+                <span style="font-size: 10px;">← Rear (Last In)</span>
+            </div>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 15px;">
+        <div>🎫 FIFO: First In, First Out</div>
+        <div>⚡ Operations: offer(), poll(), peek()</div>
+        <div>🎯 Use cases: Task scheduling, breadth-first search</div>
+    </div>
+</div>`,
+                details: "Interface typically implemented by LinkedList. FIFO principle - first element added is first removed. Common operations: offer(), poll(), peek()."
+            },
+            {
+                title: "HashSet",
+                syntax: "HashSet<String> set = new HashSet<>();",
+                example: `<div class="code-block">HashSet<Integer> numbers = new HashSet<>();
+numbers.add(10);
+numbers.add(20);
+numbers.add(10); // Duplicate ignored
+System.out.println(numbers.size()); // Output: 2</div>`,
+                explanation: "Stores unique elements with no duplicates and fast lookup operations.",
+                visual: `<div class="collection-visual">
+    <h3>HashSet&lt;Integer&gt;</h3>
+    <div style="margin: 20px 0;">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <div style="background: #ffe8e8; padding: 8px; display: inline-block; border: 1px solid #ff9999;">
+                Attempt: numbers.add(20) → <strong>false</strong> (duplicate)
+            </div>
+        </div>
+        <div class="set-visual">
+            <div class="set-item">10</div>
+            <div class="set-item">42</div>
+            <div class="set-item">20</div>
+            <div class="set-item">7</div>
+            <div class="set-item">35</div>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 15px;">
+        <div>🚫 No duplicates allowed</div>
+        <div>⚡ O(1) average for add, remove, contains</div>
+        <div>🔀 No guaranteed ordering</div>
+        <div>📋 Methods: .add(), .remove(), .contains(), .size()</div>
+    </div>
+</div>`,
+                details: "Hash table implementation of Set interface. No duplicate elements allowed. No guaranteed ordering. Excellent performance for basic operations (add, remove, contains)."
+            },
+            {
+                title: "HashMap",
+                syntax: "HashMap<String, Integer> map = new HashMap<>();",
+                example: `<div class="code-block">HashMap<String, Integer> ages = new HashMap<>();
+ages.put("Alice", 25);
+ages.put("Bob", 30);
+System.out.println(ages.get("Alice")); // Output: 25</div>`,
+                explanation: "Stores key-value pairs with fast lookup using unique keys.",
+                visual: `<div class="collection-visual">
+    <h3>HashMap&lt;String, Integer&gt;</h3>
+    <div class="map-visual" style="margin: 20px 0;">
+        <div class="map-entry">
+            <div class="map-key">"Alice"</div>
+            <div style="font-size: 16px;">→</div>
+            <div class="map-value">25</div>
+        </div>
+        <div class="map-entry">
+            <div class="map-key">"Bob"</div>
+            <div style="font-size: 16px;">→</div>
+            <div class="map-value">30</div>
+        </div>
+        <div class="map-entry">
+            <div class="map-key">"Carol"</div>
+            <div style="font-size: 16px;">→</div>
+            <div class="map-value">28</div>
+        </div>
+        <div class="map-entry">
+            <div class="map-key">"David"</div>
+            <div style="font-size: 16px;">→</div>
+            <div class="map-value">35</div>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 15px;">
+        <div>🗝️ Unique keys → Values</div>
+        <div>⚡ O(1) average for get, put, remove</div>
+        <div>🔀 No guaranteed ordering</div>
+        <div>📋 Methods: .put(), .get(), .remove(), .containsKey()</div>
+    </div>
+</div>`,
+                details: "Hash table implementation of Map interface. Stores key-value pairs. Keys must be unique, values can be duplicated. O(1) average time for basic operations."
+            },
+            {
+                title: "Complete Overview - Ready for Basics",
+                syntax: "// All Java data types and structures covered",
+                example: `<div class="code-block">// You've learned:
+// - 8 primitive types (byte, short, int, long, float, double, char, boolean)
+// - Reference types (String, arrays, objects)
+// - Data structures (ArrayList, LinkedList, Stack, Queue, HashSet, HashMap)
+// Ready to explore Java basics!</div>`,
+                explanation: "You've mastered Java's complete data organization system and are ready for the next level.",
+                visual: `<div class="hierarchy">
+<div class="tree-container">
+    <div class="tree-root">✓ JAVA DATA MASTERY COMPLETE ✓</div>
+    
+    <div class="tree-branches">
+        <div class="branch">
+            <div class="branch-header" style="background: #e8f5e8;">PRIMITIVE TYPES<br>✓ All 8 Mastered</div>
+            <div class="branch-items">
+                <div class="tree-item completed">✓ byte<br>8-bit integers</div>
+                <div class="tree-item completed">✓ short<br>16-bit integers</div>
+                <div class="tree-item completed">✓ int<br>32-bit integers</div>
+                <div class="tree-item completed">✓ long<br>64-bit integers</div>
+                <div class="tree-item completed">✓ float<br>32-bit decimals</div>
+                <div class="tree-item completed">✓ double<br>64-bit decimals</div>
+                <div class="tree-item completed">✓ char<br>Unicode characters</div>
+                <div class="tree-item completed">✓ boolean<br>true/false logic</div>
+            </div>
+        </div>
+        
+        <div class="branch">
+            <div class="branch-header" style="background: #e8f5e8;">REFERENCE TYPES<br>✓ All Covered</div>
+            <div class="branch-items">
+                <div class="tree-item completed">✓ String<br>Text handling</div>
+                <div class="tree-item completed">✓ Arrays<br>Fixed collections</div>
+                <div class="tree-item completed">✓ Objects<br>Custom classes</div>
+            </div>
+        </div>
+        
+        <div class="branch">
+            <div class="branch-header" style="background: #e8f5e8;">DATA STRUCTURES<br>✓ All Learned</div>
+            <div class="branch-items">
+                <div class="tree-item completed">✓ ArrayList<br>Dynamic arrays</div>
+                <div class="tree-item completed">✓ LinkedList<br>Node structures</div>
+                <div class="tree-item completed">✓ Stack<br>LIFO operations</div>
+                <div class="tree-item completed">✓ Queue<br>FIFO operations</div>
+                <div class="tree-item completed">✓ HashSet<br>Unique collections</div>
+                <div class="tree-item completed">✓ HashMap<br>Key-value mapping</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="vertical-line"></div>
+    
+    <div class="next-section">
+        <div class="next-box">
+            🎯 READY FOR JAVA BASICS<br>
+            <span style="font-size: 11px;">Variables, Operators, Control Flow, Methods</span><br>
+            <span style="font-size: 12px; color: #666;">Click Next to Continue →</span>
+        </div>
+    </div>
+</div>
+</div>`,
+                details: "Congratulations! You've completed the comprehensive tour of Java's data types and structures. You understand how to declare, initialize, and use each type effectively. This foundation prepares you for learning Java basics including operators, control structures, methods, and object-oriented programming concepts."
+            }
+        ];
+
+        let currentIndex = 0;
+
+        function updateDisplay() {
+            const topic = topics[currentIndex];
+            document.getElementById('currentTitle').textContent = topic.title;
+            document.getElementById('currentSyntax').textContent = topic.syntax;
+            document.getElementById('currentExample').innerHTML = topic.example;
+            document.getElementById('currentExplanation').textContent = topic.explanation;
+            document.getElementById('currentVisual').innerHTML = topic.visual;
+            document.getElementById('detailsContent').textContent = topic.details;
+            
+            document.getElementById('currentStep').textContent = currentIndex + 1;
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            
+            if (currentIndex === topics.length - 1) {
+                document.getElementById('nextBtn').textContent = "Go to Basics →";
+            } else {
+                document.getElementById('nextBtn').textContent = "Next";
+            }
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextTopic() {
+            if (currentIndex < topics.length - 1) {
+                currentIndex++;
+                updateDisplay();
+            } else {
+                window.location.href = './index.html';
+            }
+        }
+
+        function prevTopic() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+            }
+        }
+
+        function resetToFirst() {
+            currentIndex = 0;
+            updateDisplay();
+        }
+
+        function toggleDetails() {
+            const section = document.getElementById('detailsSection');
+            const header = section.querySelector('.collapsible-header');
+            section.classList.toggle('open');
+            header.textContent = section.classList.contains('open') ? '▲ Extended Notes & Details' : '▼ Extended Notes & Details';
+        }
+
+        document.getElementById('nextBtn').onclick = nextTopic;
+        document.getElementById('prevBtn').onclick = prevTopic;
+        document.getElementById('resetBtn').onclick = resetToFirst;
+        document.getElementById('totalSteps').textContent = topics.length;
+
+        updateDisplay();
+    </script>
+</body>
+</html>

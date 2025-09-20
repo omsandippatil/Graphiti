@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java I/O Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            border-bottom: 2px solid black;
+            padding: 10px;
+            background: white;
+        }
+        
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .left-panel {
+            flex: 1;
+            padding: 15px;
+            border-right: 2px solid black;
+        }
+        
+        .right-panel {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .syntax {
+            font-size: 14px;
+            margin-bottom: 10px;
+            background: #f8f8f8;
+            padding: 8px;
+            border: 1px solid black;
+        }
+        
+        .example {
+            margin-bottom: 10px;
+        }
+        
+        .example-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .code-block {
+            background: #f0f0f0;
+            border: 1px solid black;
+            padding: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .explanation {
+            font-size: 14px;
+            line-height: 1.3;
+            margin-bottom: 15px;
+        }
+        
+        .visual {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            border-top: 2px solid black;
+            padding: 10px;
+            background: white;
+        }
+        
+        button {
+            background: white;
+            border: 2px solid black;
+            padding: 8px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .collapsible {
+            border-top: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-decoration: underline;
+        }
+        
+        .notes {
+            display: none;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .notes.show {
+            display: block;
+        }
+        
+        .io-box {
+            border: 2px solid black;
+            padding: 10px;
+            margin: 5px;
+            min-width: 120px;
+        }
+        
+        .arrow {
+            font-size: 20px;
+            margin: 10px;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title" id="title">Scanner Input Methods</div>
+    </div>
+    
+    <div class="main-content">
+        <div class="left-panel">
+            <div class="syntax" id="syntax">Scanner scanner = new Scanner(System.in);<br>scanner.next()</div>
+            
+            <div class="example">
+                <div class="example-title">Example:</div>
+                <div class="code-block" id="input-code">Input: "Hello World"<br>String word = scanner.next();</div>
+                <div class="code-block" id="output-code">Output: word = "Hello"</div>
+            </div>
+            
+            <div class="explanation" id="explanation">Reads the next token (word) from input, stopping at whitespace.</div>
+            
+            <div class="collapsible">
+                <button class="toggle-btn" onclick="toggleNotes()">▼ Show Notes</button>
+                <div class="notes" id="notes">
+                    <strong>Notes:</strong><br>
+                    • next() reads until whitespace (space, tab, newline)<br>
+                    • nextLine() reads entire line including spaces<br>
+                    • nextInt() parses integer, throws exception if not valid<br>
+                    • nextDouble() parses decimal number<br>
+                    • Always close scanner when done: scanner.close()<br>
+                    • Can read from files: new Scanner(new File("file.txt"))
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="visual" id="visual">
+                <div class="flow-diagram">
+                    <div class="io-box">INPUT<br>"Hello World"</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">scanner.next()</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">READS<br>"Hello"</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button id="prevBtn" onclick="previousStep()">Previous</button>
+        <button id="nextBtn" onclick="nextStep()">Next</button>
+        <button id="resetBtn" onclick="resetSteps()">Reset</button>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        
+        const steps = [
+            {
+                title: "Scanner Input Methods",
+                syntax: "Scanner scanner = new Scanner(System.in);<br>scanner.next()",
+                inputCode: 'Input: "Hello World"<br>String word = scanner.next();',
+                outputCode: 'Output: word = "Hello"',
+                explanation: "Reads the next token (word) from input, stopping at whitespace.",
+                visual: `<div class="flow-diagram">
+                    <div class="io-box">INPUT<br>"Hello World"</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">scanner.next()</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">READS<br>"Hello"</div>
+                </div>`
+            },
+            {
+                title: "Scanner nextLine() Method",
+                syntax: "Scanner scanner = new Scanner(System.in);<br>scanner.nextLine()",
+                inputCode: 'Input: "Hello World"<br>String line = scanner.nextLine();',
+                outputCode: 'Output: line = "Hello World"',
+                explanation: "Reads the entire line including spaces until newline character.",
+                visual: `<div class="flow-diagram">
+                    <div class="io-box">INPUT<br>"Hello World\\n"</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">scanner.nextLine()</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">READS<br>"Hello World"</div>
+                </div>`
+            },
+            {
+                title: "Scanner nextInt() Method",
+                syntax: "Scanner scanner = new Scanner(System.in);<br>scanner.nextInt()",
+                inputCode: 'Input: "42"<br>int number = scanner.nextInt();',
+                outputCode: 'Output: number = 42',
+                explanation: "Reads and parses the next token as an integer value.",
+                visual: `<div class="flow-diagram">
+                    <div class="io-box">INPUT<br>"42"</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">scanner.nextInt()</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">PARSED<br>42 (int)</div>
+                </div>`
+            },
+            {
+                title: "Scanner nextDouble() Method",
+                syntax: "Scanner scanner = new Scanner(System.in);<br>scanner.nextDouble()",
+                inputCode: 'Input: "3.14"<br>double value = scanner.nextDouble();',
+                outputCode: 'Output: value = 3.14',
+                explanation: "Reads and parses the next token as a double-precision number.",
+                visual: `<div class="flow-diagram">
+                    <div class="io-box">INPUT<br>"3.14"</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">scanner.nextDouble()</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">PARSED<br>3.14 (double)</div>
+                </div>`
+            },
+            {
+                title: "System.out.print() Method",
+                syntax: "System.out.print(value)",
+                inputCode: 'Code: System.out.print("Hello");',
+                outputCode: 'Console: Hello (no newline)',
+                explanation: "Prints the value to console without adding a newline character.",
+                visual: `<div class="flow-diagram">
+                    <div class="io-box">CODE<br>print("Hello")</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">CONSOLE<br>Hello|</div>
+                </div>`
+            },
+            {
+                title: "System.out.println() Method",
+                syntax: "System.out.println(value)",
+                inputCode: 'Code: System.out.println("Hello");',
+                outputCode: 'Console: Hello\\n',
+                explanation: "Prints the value to console and adds a newline character.",
+                visual: `<div class="flow-diagram">
+                    <div class="io-box">CODE<br>println("Hello")</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">CONSOLE<br>Hello<br>|</div>
+                </div>`
+            },
+            {
+                title: "System.out.printf() Method",
+                syntax: "System.out.printf(format, args)",
+                inputCode: 'Code: System.out.printf("%.2f", 3.14159);',
+                outputCode: 'Console: 3.14',
+                explanation: "Prints formatted output using format specifiers like C-style printf.",
+                visual: `<div class="flow-diagram">
+                    <div class="io-box">CODE<br>printf("%.2f", 3.14159)</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">FORMAT<br>%.2f → 2 decimals</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">CONSOLE<br>3.14</div>
+                </div>`
+            },
+            {
+                title: "Navigation Complete",
+                syntax: "window.location.href = './index.html'",
+                inputCode: 'Action: Navigate to index.html',
+                outputCode: 'Result: Page redirect',
+                explanation: "Redirects the browser to the index.html page.",
+                visual: `<div class="flow-diagram">
+                    <div class="io-box">CURRENT PAGE<br>visualization.html</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">REDIRECT</div>
+                    <div class="arrow">↓</div>
+                    <div class="io-box">TARGET<br>index.html</div>
+                </div>`
+            }
+        ];
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            document.getElementById('title').innerHTML = step.title;
+            document.getElementById('syntax').innerHTML = step.syntax;
+            document.getElementById('input-code').innerHTML = step.inputCode;
+            document.getElementById('output-code').innerHTML = step.outputCode;
+            document.getElementById('explanation').textContent = step.explanation;
+            document.getElementById('visual').innerHTML = step.visual;
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+                
+                if (currentStep === steps.length - 1) {
+                    setTimeout(() => {
+                        window.location.href = './index.html';
+                    }, 2000);
+                }
+            }
+        }
+        
+        function previousStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+        
+        function resetSteps() {
+            currentStep = 0;
+            updateDisplay();
+        }
+        
+        function toggleNotes() {
+            const notes = document.getElementById('notes');
+            const btn = document.querySelector('.toggle-btn');
+            
+            if (notes.classList.contains('show')) {
+                notes.classList.remove('show');
+                btn.textContent = '▼ Show Notes';
+            } else {
+                notes.classList.add('show');
+                btn.textContent = '▲ Hide Notes';
+            }
+        }
+        
+        updateDisplay();
+    </script>
+</body>
+</html>

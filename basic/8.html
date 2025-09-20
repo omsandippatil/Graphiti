@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Collections Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 10px 20px;
+            border-bottom: 2px solid black;
+            background: white;
+        }
+        
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .syntax {
+            font-size: 14px;
+            margin-bottom: 8px;
+            background: #f5f5f5;
+            padding: 4px 8px;
+            border: 1px solid black;
+        }
+        
+        .example {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .explanation {
+            font-size: 12px;
+            font-style: italic;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+        }
+        
+        .controls {
+            width: 200px;
+            padding: 15px;
+            border-right: 2px solid black;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 12px;
+            border: 2px solid black;
+            background: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+        
+        .btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .visualization {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .visual-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .array-box, .list-node, .map-entry, .set-item {
+            border: 2px solid black;
+            background: white;
+            padding: 8px 12px;
+            margin: 2px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            display: inline-block;
+            min-width: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .array-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+            max-width: 600px;
+        }
+        
+        .list-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .arrow {
+            width: 20px;
+            height: 2px;
+            background: black;
+            position: relative;
+        }
+        
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: -3px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid black;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+        
+        .map-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 500px;
+        }
+        
+        .map-pair {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .key {
+            background: #f0f0f0;
+        }
+        
+        .value {
+            background: white;
+        }
+        
+        .set-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            max-width: 400px;
+        }
+        
+        .highlight {
+            background: #e0e0e0 !important;
+            transform: scale(1.1);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.8); }
+        }
+        
+        .slide-left {
+            animation: slideLeft 0.4s ease-in-out;
+        }
+        
+        @keyframes slideLeft {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .notes-section {
+            border-top: 2px solid black;
+            background: #f9f9f9;
+        }
+        
+        .notes-toggle {
+            padding: 8px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
+            font-size: 12px;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .notes-content {
+            padding: 15px 20px;
+            font-size: 11px;
+            line-height: 1.4;
+            display: none;
+        }
+        
+        .notes-content.expanded {
+            display: block;
+        }
+        
+        .counter {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title" id="title">ArrayList - add()</div>
+            <div class="syntax" id="syntax">list.add(element)</div>
+            <div class="example" id="example">list.add("apple") → adds "apple" to end</div>
+            <div class="explanation" id="explanation">Appends element to the end of the list</div>
+        </div>
+        
+        <div class="main-content">
+            <div class="controls">
+                <button class="btn" id="prevBtn">Previous</button>
+                <button class="btn" id="nextBtn">Next</button>
+                <button class="btn" id="resetBtn">Reset</button>
+                <div class="counter" id="counter">1 / 25</div>
+            </div>
+            
+            <div class="visualization">
+                <div class="visual-container" id="visualContainer">
+                    <div class="array-container" id="arrayContainer">
+                        <div class="array-box">apple</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="notes-section">
+            <button class="notes-toggle" id="notesToggle">▶ Extended Notes & Implementation Details</button>
+            <div class="notes-content" id="notesContent">
+                <p><strong>ArrayList Implementation:</strong> Backed by resizable array. Default capacity 10, grows by 50% when full. O(1) amortized add, O(n) worst case.</p>
+                <p><strong>LinkedList Implementation:</strong> Doubly-linked list. O(1) add/remove at ends, O(n) for middle operations.</p>
+                <p><strong>HashMap Implementation:</strong> Hash table with separate chaining. O(1) average case, O(n) worst case. Load factor 0.75.</p>
+                <p><strong>HashSet vs TreeSet:</strong> HashSet uses HashMap internally. TreeSet uses Red-Black tree, maintains sorted order.</p>
+                <p><strong>Collections Utility:</strong> Static methods for common operations. Uses optimized algorithms like TimSort for sorting.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const steps = [
+            {
+                title: "ArrayList - add()",
+                syntax: "list.add(element)",
+                example: 'list.add("apple") → adds "apple" to end',
+                explanation: "Appends element to the end of the list",
+                type: "arraylist",
+                data: ["apple"]
+            },
+            {
+                title: "ArrayList - add(index, element)",
+                syntax: "list.add(index, element)",
+                example: 'list.add(1, "banana") → inserts at index 1',
+                explanation: "Inserts element at specified index",
+                type: "arraylist",
+                data: ["apple", "banana"]
+            },
+            {
+                title: "ArrayList - addAll()",
+                syntax: "list.addAll(collection)",
+                example: 'list.addAll(Arrays.asList("cherry", "date"))',
+                explanation: "Adds all elements from collection to the end",
+                type: "arraylist",
+                data: ["apple", "banana", "cherry", "date"]
+            },
+            {
+                title: "ArrayList - get()",
+                syntax: "list.get(index)",
+                example: "list.get(1) → returns \"banana\"",
+                explanation: "Returns element at specified index",
+                type: "arraylist",
+                data: ["apple", "banana", "cherry", "date"],
+                highlight: 1
+            },
+            {
+                title: "ArrayList - set()",
+                syntax: "list.set(index, element)",
+                example: 'list.set(0, "orange") → replaces "apple"',
+                explanation: "Replaces element at specified index",
+                type: "arraylist",
+                data: ["orange", "banana", "cherry", "date"]
+            },
+            {
+                title: "ArrayList - remove(index)",
+                syntax: "list.remove(index)",
+                example: "list.remove(1) → removes \"banana\"",
+                explanation: "Removes element at specified index",
+                type: "arraylist",
+                data: ["orange", "cherry", "date"]
+            },
+            {
+                title: "ArrayList - remove(object)",
+                syntax: "list.remove(object)",
+                example: 'list.remove("cherry") → removes first occurrence',
+                explanation: "Removes first occurrence of specified element",
+                type: "arraylist",
+                data: ["orange", "date"]
+            },
+            {
+                title: "ArrayList - size()",
+                syntax: "list.size()",
+                example: "list.size() → returns 2",
+                explanation: "Returns number of elements in the list",
+                type: "arraylist",
+                data: ["orange", "date"],
+                showSize: true
+            },
+            {
+                title: "ArrayList - clear()",
+                syntax: "list.clear()",
+                example: "list.clear() → removes all elements",
+                explanation: "Removes all elements from the list",
+                type: "arraylist",
+                data: []
+            },
+            {
+                title: "ArrayList - contains()",
+                syntax: "list.contains(object)",
+                example: 'list.contains("apple") → returns false',
+                explanation: "Checks if list contains specified element",
+                type: "arraylist",
+                data: ["grape", "kiwi"],
+                checkElement: "apple"
+            },
+            {
+                title: "ArrayList - indexOf()",
+                syntax: "list.indexOf(object)",
+                example: 'list.indexOf("kiwi") → returns 1',
+                explanation: "Returns index of first occurrence of element",
+                type: "arraylist",
+                data: ["grape", "kiwi"],
+                highlight: 1
+            },
+            {
+                title: "ArrayList - isEmpty()",
+                syntax: "list.isEmpty()",
+                example: "list.isEmpty() → returns false",
+                explanation: "Checks if the list contains no elements",
+                type: "arraylist",
+                data: ["grape", "kiwi"]
+            },
+            {
+                title: "LinkedList - addFirst()",
+                syntax: "list.addFirst(element)",
+                example: 'list.addFirst("first") → adds to beginning',
+                explanation: "Adds element to the beginning of the list",
+                type: "linkedlist",
+                data: ["first", "grape", "kiwi"]
+            },
+            {
+                title: "LinkedList - addLast()",
+                syntax: "list.addLast(element)",
+                example: 'list.addLast("last") → adds to end',
+                explanation: "Adds element to the end of the list",
+                type: "linkedlist",
+                data: ["first", "grape", "kiwi", "last"]
+            },
+            {
+                title: "LinkedList - removeFirst()",
+                syntax: "list.removeFirst()",
+                example: 'list.removeFirst() → removes "first"',
+                explanation: "Removes first element from the list",
+                type: "linkedlist",
+                data: ["grape", "kiwi", "last"]
+            },
+            {
+                title: "LinkedList - removeLast()",
+                syntax: "list.removeLast()",
+                example: 'list.removeLast() → removes "last"',
+                explanation: "Removes last element from the list",
+                type: "linkedlist",
+                data: ["grape", "kiwi"]
+            },
+            {
+                title: "LinkedList - getFirst()",
+                syntax: "list.getFirst()",
+                example: 'list.getFirst() → returns "grape"',
+                explanation: "Returns first element in the list",
+                type: "linkedlist",
+                data: ["grape", "kiwi"],
+                highlight: 0
+            },
+            {
+                title: "LinkedList - getLast()",
+                syntax: "list.getLast()",
+                example: 'list.getLast() → returns "kiwi"',
+                explanation: "Returns last element in the list",
+                type: "linkedlist",
+                data: ["grape", "kiwi"],
+                highlight: 1
+            },
+            {
+                title: "HashMap - put()",
+                syntax: "map.put(key, value)",
+                example: 'map.put("name", "John") → stores key-value pair',
+                explanation: "Associates value with key in the map",
+                type: "hashmap",
+                data: [["name", "John"]]
+            },
+            {
+                title: "HashMap - get()",
+                syntax: "map.get(key)",
+                example: 'map.get("name") → returns "John"',
+                explanation: "Returns value associated with key",
+                type: "hashmap",
+                data: [["name", "John"], ["age", "25"]],
+                highlight: 0
+            },
+            {
+                title: "HashMap - containsKey()",
+                syntax: "map.containsKey(key)",
+                example: 'map.containsKey("name") → returns true',
+                explanation: "Checks if map contains the specified key",
+                type: "hashmap",
+                data: [["name", "John"], ["age", "25"]],
+                highlight: 0
+            },
+            {
+                title: "HashMap - containsValue()",
+                syntax: "map.containsValue(value)",
+                example: 'map.containsValue("John") → returns true',
+                explanation: "Checks if map contains the specified value",
+                type: "hashmap",
+                data: [["name", "John"], ["age", "25"]],
+                highlightValue: "John"
+            },
+            {
+                title: "HashMap - remove()",
+                syntax: "map.remove(key)",
+                example: 'map.remove("age") → removes key-value pair',
+                explanation: "Removes key-value pair from the map",
+                type: "hashmap",
+                data: [["name", "John"]]
+            },
+            {
+                title: "HashMap - size()",
+                syntax: "map.size()",
+                example: "map.size() → returns 1",
+                explanation: "Returns number of key-value pairs in map",
+                type: "hashmap",
+                data: [["name", "John"]],
+                showSize: true
+            },
+            {
+                title: "HashMap - keySet()",
+                syntax: "map.keySet()",
+                example: 'map.keySet() → returns ["name", "city"]',
+                explanation: "Returns set view of all keys in the map",
+                type: "hashmap",
+                data: [["name", "John"], ["city", "NYC"]],
+                showKeys: true
+            },
+            {
+                title: "HashMap - values()",
+                syntax: "map.values()",
+                example: 'map.values() → returns ["John", "NYC"]',
+                explanation: "Returns collection view of all values in map",
+                type: "hashmap",
+                data: [["name", "John"], ["city", "NYC"]],
+                showValues: true
+            },
+            {
+                title: "HashMap - entrySet()",
+                syntax: "map.entrySet()",
+                example: "map.entrySet() → returns set of key-value pairs",
+                explanation: "Returns set view of key-value mappings",
+                type: "hashmap",
+                data: [["name", "John"], ["city", "NYC"]],
+                showEntries: true
+            },
+            {
+                title: "HashMap - clear()",
+                syntax: "map.clear()",
+                example: "map.clear() → removes all mappings",
+                explanation: "Removes all key-value pairs from the map",
+                type: "hashmap",
+                data: []
+            },
+            {
+                title: "HashMap - isEmpty()",
+                syntax: "map.isEmpty()",
+                example: "map.isEmpty() → returns true",
+                explanation: "Checks if the map contains no mappings",
+                type: "hashmap",
+                data: []
+            },
+            {
+                title: "HashSet - add()",
+                syntax: "set.add(element)",
+                example: 'set.add("apple") → adds unique element',
+                explanation: "Adds element to set if not already present",
+                type: "hashset",
+                data: ["apple"]
+            },
+            {
+                title: "HashSet - remove()",
+                syntax: "set.remove(element)",
+                example: 'set.remove("banana") → removes element',
+                explanation: "Removes specified element from the set",
+                type: "hashset",
+                data: ["apple", "cherry"]
+            },
+            {
+                title: "HashSet - contains()",
+                syntax: "set.contains(element)",
+                example: 'set.contains("apple") → returns true',
+                explanation: "Checks if set contains the specified element",
+                type: "hashset",
+                data: ["apple", "cherry"],
+                highlight: 0
+            },
+            {
+                title: "HashSet - isEmpty()",
+                syntax: "set.isEmpty()",
+                example: "set.isEmpty() → returns false",
+                explanation: "Checks if the set contains no elements",
+                type: "hashset",
+                data: ["apple", "cherry"]
+            },
+            {
+                title: "HashSet - size()",
+                syntax: "set.size()",
+                example: "set.size() → returns 2",
+                explanation: "Returns number of elements in the set",
+                type: "hashset",
+                data: ["apple", "cherry"],
+                showSize: true
+            },
+            {
+                title: "HashSet - clear()",
+                syntax: "set.clear()",
+                example: "set.clear() → removes all elements",
+                explanation: "Removes all elements from the set",
+                type: "hashset",
+                data: []
+            },
+            {
+                title: "HashSet - iterator()",
+                syntax: "set.iterator()",
+                example: "set.iterator() → returns iterator over elements",
+                explanation: "Returns iterator for traversing set elements",
+                type: "hashset",
+                data: ["apple", "banana", "cherry"],
+                showIterator: true
+            },
+            {
+                title: "TreeSet - add()",
+                syntax: "set.add(element)",
+                example: 'set.add("banana") → adds in sorted order',
+                explanation: "Adds element maintaining sorted order",
+                type: "treeset",
+                data: ["apple", "banana", "cherry"]
+            },
+            {
+                title: "TreeSet - first()",
+                syntax: "set.first()",
+                example: 'set.first() → returns "apple"',
+                explanation: "Returns first (lowest) element in the set",
+                type: "treeset",
+                data: ["apple", "banana", "cherry"],
+                highlight: 0
+            },
+            {
+                title: "TreeSet - last()",
+                syntax: "set.last()",
+                example: 'set.last() → returns "cherry"',
+                explanation: "Returns last (highest) element in the set",
+                type: "treeset",
+                data: ["apple", "banana", "cherry"],
+                highlight: 2
+            },
+            {
+                title: "TreeSet - headSet()",
+                syntax: "set.headSet(element)",
+                example: 'set.headSet("cherry") → returns elements < "cherry"',
+                explanation: "Returns elements less than specified element",
+                type: "treeset",
+                data: ["apple", "banana", "cherry"],
+                headSet: "cherry"
+            },
+            {
+                title: "TreeSet - tailSet()",
+                syntax: "set.tailSet(element)",
+                example: 'set.tailSet("banana") → returns elements >= "banana"',
+                explanation: "Returns elements greater than or equal to element",
+                type: "treeset",
+                data: ["apple", "banana", "cherry"],
+                tailSet: "banana"
+            },
+            {
+                title: "Collections.sort()",
+                syntax: "Collections.sort(list)",
+                example: "Collections.sort(list) → sorts in ascending order",
+                explanation: "Sorts list elements in natural ordering",
+                type: "arraylist",
+                data: ["apple", "banana", "cherry"]
+            },
+            {
+                title: "Collections.reverse()",
+                syntax: "Collections.reverse(list)",
+                example: "Collections.reverse(list) → reverses order",
+                explanation: "Reverses the order of elements in the list",
+                type: "arraylist",
+                data: ["cherry", "banana", "apple"]
+            },
+            {
+                title: "Collections.max()",
+                syntax: "Collections.max(collection)",
+                example: 'Collections.max(list) → returns "cherry"',
+                explanation: "Returns maximum element in the collection",
+                type: "arraylist",
+                data: ["cherry", "banana", "apple"],
+                highlight: 0
+            },
+            {
+                title: "Collections.min()",
+                syntax: "Collections.min(collection)",
+                example: 'Collections.min(list) → returns "apple"',
+                explanation: "Returns minimum element in the collection",
+                type: "arraylist",
+                data: ["cherry", "banana", "apple"],
+                highlight: 2
+            },
+            {
+                title: "Collections.frequency()",
+                syntax: "Collections.frequency(collection, element)",
+                example: 'Collections.frequency(list, "apple") → returns 2',
+                explanation: "Returns frequency of element in collection",
+                type: "arraylist",
+                data: ["apple", "banana", "apple", "cherry"],
+                frequencyElement: "apple"
+            },
+            {
+                title: "Collections.shuffle()",
+                syntax: "Collections.shuffle(list)",
+                example: "Collections.shuffle(list) → randomizes order",
+                explanation: "Randomly permutes the list elements",
+                type: "arraylist",
+                data: ["banana", "apple", "cherry", "date"]
+            },
+            {
+                title: "Collections.binarySearch()",
+                syntax: "Collections.binarySearch(list, key)",
+                example: 'Collections.binarySearch(list, "cherry") → returns 2',
+                explanation: "Searches for element using binary search",
+                type: "arraylist",
+                data: ["apple", "banana", "cherry", "date"],
+                highlight: 2
+            },
+            {
+                title: "Collections.fill()",
+                syntax: "Collections.fill(list, object)",
+                example: 'Collections.fill(list, "X") → replaces all with "X"',
+                explanation: "Replaces all elements with specified object",
+                type: "arraylist",
+                data: ["X", "X", "X", "X"]
+            },
+            {
+                title: "Navigate to index.html",
+                syntax: "window.location = './index.html'",
+                example: "Redirects to main index page",
+                explanation: "Navigates to the index.html file",
+                type: "redirect",
+                data: []
+            }
+        ];
+
+        let currentStep = 0;
+        
+        const titleEl = document.getElementById('title');
+        const syntaxEl = document.getElementById('syntax');
+        const exampleEl = document.getElementById('example');
+        const explanationEl = document.getElementById('explanation');
+        const visualContainer = document.getElementById('visualContainer');
+        const counterEl = document.getElementById('counter');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const notesToggle = document.getElementById('notesToggle');
+        const notesContent = document.getElementById('notesContent');
+
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            titleEl.textContent = step.title;
+            syntaxEl.textContent = step.syntax;
+            exampleEl.textContent = step.example;
+            explanationEl.textContent = step.explanation;
+            counterEl.textContent = `${currentStep + 1} / ${steps.length}`;
+            
+            prevBtn.disabled = currentStep === 0;
+            nextBtn.disabled = currentStep === steps.length - 1;
+            
+            renderVisualization(step);
+        }
+
+        function renderVisualization(step) {
+            visualContainer.innerHTML = '';
+            
+            if (step.type === 'redirect') {
+                const redirectMsg = document.createElement('div');
+                redirectMsg.style.cssText = 'font-size: 18px; text-align: center; padding: 40px;';
+                redirectMsg.textContent = 'Click Next to navigate to index.html';
+                visualContainer.appendChild(redirectMsg);
+                return;
+            }
+            
+            if (step.type === 'arraylist') {
+                const container = document.createElement('div');
+                container.className = 'array-container';
+                
+                step.data.forEach((item, index) => {
+                    const box = document.createElement('div');
+                    box.className = 'array-box fade-in';
+                    box.textContent = item;
+                    if (step.highlight === index) {
+                        box.classList.add('highlight');
+                    }
+                    if (step.frequencyElement === item) {
+                        box.classList.add('highlight');
+                    }
+                    container.appendChild(box);
+                });
+                
+                if (step.showSize) {
+                    const sizeLabel = document.createElement('div');
+                    sizeLabel.style.cssText = 'margin-top: 20px; font-size: 16px; font-weight: bold;';
+                    sizeLabel.textContent = `Size: ${step.data.length}`;
+                    visualContainer.appendChild(container);
+                    visualContainer.appendChild(sizeLabel);
+                } else if (step.checkElement) {
+                    const checkLabel = document.createElement('div');
+                    checkLabel.style.cssText = 'margin-top: 20px; font-size: 14px;';
+                    const contains = step.data.includes(step.checkElement);
+                    checkLabel.textContent = `Contains "${step.checkElement}": ${contains}`;
+                    visualContainer.appendChild(container);
+                    visualContainer.appendChild(checkLabel);
+                } else if (step.frequencyElement) {
+                    const freqCount = step.data.filter(item => item === step.frequencyElement).length;
+                    const freqLabel = document.createElement('div');
+                    freqLabel.style.cssText = 'margin-top: 20px; font-size: 14px;';
+                    freqLabel.textContent = `Frequency of "${step.frequencyElement}": ${freqCount}`;
+                
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+                
+                if (currentStep === steps.length - 1) {
+                    setTimeout(() => {
+                        window.location.href = './index.html';
+                    }, 1000);
+                }
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            currentStep = 0;
+            updateDisplay();
+        });
+
+        notesToggle.addEventListener('click', () => {
+            const isExpanded = notesContent.classList.contains('expanded');
+            notesContent.classList.toggle('expanded');
+            notesToggle.textContent = isExpanded ? '▶ Extended Notes & Implementation Details' : '▼ Extended Notes & Implementation Details';
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            } else if (e.key === 'ArrowRight' && currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+                
+                if (currentStep === steps.length - 1) {
+                    setTimeout(() => {
+                        window.location.href = './index.html';
+                    }, 1000);
+                }
+            } else if (e.key === 'Home') {
+                currentStep = 0;
+                updateDisplay();
+            }
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>

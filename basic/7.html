@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Arrays Methods</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            border-bottom: 2px solid black;
+            padding: 20px;
+            background: white;
+            flex-shrink: 0;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .syntax {
+            font-size: 16px;
+            background: #f8f8f8;
+            padding: 10px;
+            border: 1px solid black;
+            margin-bottom: 10px;
+        }
+        
+        .example {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .explanation {
+            font-size: 14px;
+            font-style: italic;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 30px;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        .left-panel {
+            flex: 1;
+        }
+        
+        .visual-panel {
+            flex: 1;
+            border: 2px solid black;
+            padding: 20px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: auto;
+            min-height: 300px;
+        }
+        
+        .array-container {
+            display: flex;
+            gap: 2px;
+            margin: 10px 0;
+            transition: all 0.8s ease-in-out;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .array-element {
+            border: 2px solid black;
+            padding: 8px 12px;
+            background: white;
+            min-width: 40px;
+            text-align: center;
+            transition: all 0.8s ease-in-out;
+            font-size: 14px;
+        }
+        
+        .array-element.highlight {
+            background: #e0e0e0;
+        }
+        
+        .array-element.new {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .arrow {
+            margin: 10px 0;
+            font-size: 24px;
+            transition: opacity 0.8s ease-in-out;
+        }
+        
+        .result-text {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid black;
+            background: #f8f8f8;
+            transition: all 0.8s ease-in-out;
+            text-align: center;
+        }
+        
+        .nested-array-container {
+            border: 1px dashed black;
+            padding: 15px;
+            margin: 5px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        .comparison-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            max-width: 100%;
+        }
+        
+        .vs-text {
+            margin: 10px 0;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .controls {
+            border-top: 2px solid black;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background: white;
+            flex-shrink: 0;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .btn:disabled {
+            background: #e0e0e0;
+            cursor: not-allowed;
+        }
+        
+        .collapsible {
+            border-top: 1px solid black;
+            background: #f9f9f9;
+            flex-shrink: 0;
+        }
+        
+        .collapsible-header {
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-bottom: 1px solid #ccc;
+        }
+        
+        .collapsible-header:hover {
+            background: #f0f0f0;
+        }
+        
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .collapsible-content.active {
+            max-height: 200px;
+        }
+        
+        .collapsible-content div {
+            padding: 15px 20px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .step-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .hash-display {
+            border: 2px solid black;
+            padding: 15px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .hash-display .hash-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .hash-display .hash-value {
+            font-size: 20px;
+        }
+        
+        .list-display {
+            border: 2px solid black;
+            padding: 15px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .list-display .list-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stream-display {
+            border: 2px solid black;
+            padding: 15px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .stream-display .stream-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stream-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .stream-arrow {
+            margin: 0 5px;
+            font-size: 16px;
+        }
+        
+        .generator-function {
+            margin: 10px 0;
+            font-size: 12px;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .redirect-display {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .redirect-arrow {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .redirect-target {
+            border: 2px solid black;
+            padding: 20px;
+            display: inline-block;
+        }
+        
+        .redirect-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title" id="methodTitle">Arrays.sort(array)</div>
+        <div class="syntax" id="methodSyntax">Arrays.sort(numbers);</div>
+        <div class="example" id="methodExample">Input: [3, 1, 4, 2] → Output: [1, 2, 3, 4]</div>
+        <div class="explanation" id="methodExplanation">Sorts array elements in ascending order in-place.</div>
+    </div>
+    
+    <div class="main-content">
+        <div class="left-panel"></div>
+        <div class="visual-panel">
+            <div class="step-counter" id="stepCounter">1 / 15</div>
+            <div id="visualContent">
+                <div class="array-container">
+                    <div class="array-element">3</div>
+                    <div class="array-element">1</div>
+                    <div class="array-element">4</div>
+                    <div class="array-element">2</div>
+                </div>
+                <div class="arrow">↓</div>
+                <div class="array-container">
+                    <div class="array-element">1</div>
+                    <div class="array-element">2</div>
+                    <div class="array-element">3</div>
+                    <div class="array-element">4</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="btn" id="prevBtn">Previous</button>
+        <button class="btn" id="resetBtn">Reset</button>
+        <button class="btn" id="nextBtn">Next</button>
+    </div>
+    
+    <div class="collapsible">
+        <div class="collapsible-header" id="toggleNotes">▼ Extended Notes & Edge Cases</div>
+        <div class="collapsible-content" id="notesContent">
+            <div id="notesText">
+                <strong>Edge Cases:</strong> Empty arrays, null arrays, single element arrays.<br>
+                <strong>Performance:</strong> O(n log n) time complexity for most implementations.<br>
+                <strong>Notes:</strong> Modifies the original array. Use Arrays.copyOf() first if you need to preserve the original.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const methods = [
+            {
+                title: "Arrays.sort(array)",
+                syntax: "Arrays.sort(numbers);",
+                example: "Input: [3, 1, 4, 2] → Output: [1, 2, 3, 4]",
+                explanation: "Sorts array elements in ascending order in-place.",
+                visual: () => `
+                    <div class="array-container">
+                        <div class="array-element">3</div>
+                        <div class="array-element">1</div>
+                        <div class="array-element">4</div>
+                        <div class="array-element">2</div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="array-container">
+                        <div class="array-element">1</div>
+                        <div class="array-element">2</div>
+                        <div class="array-element">3</div>
+                        <div class="array-element">4</div>
+                    </div>
+                `,
+                notes: "<strong>Edge Cases:</strong> Empty arrays, null arrays, single element arrays.<br><strong>Performance:</strong> O(n log n) time complexity.<br><strong>Notes:</strong> Modifies the original array in-place."
+            },
+            {
+                title: "Arrays.binarySearch(array, key)",
+                syntax: "Arrays.binarySearch(sorted, 3);",
+                example: "Input: [1, 2, 3, 4], key=3 → Output: 2 (index)",
+                explanation: "Searches for a key in a sorted array and returns its index.",
+                visual: () => `
+                    <div class="array-container">
+                        <div class="array-element">1</div>
+                        <div class="array-element">2</div>
+                        <div class="array-element highlight">3</div>
+                        <div class="array-element">4</div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="result-text">Index: 2</div>
+                `,
+                notes: "<strong>Requirements:</strong> Array must be sorted before search.<br><strong>Return:</strong> Returns negative value if key not found.<br><strong>Performance:</strong> O(log n) time complexity."
+            },
+            {
+                title: "Arrays.copyOf(array, newLength)",
+                syntax: "Arrays.copyOf(original, 6);",
+                example: "Input: [1, 2, 3], length=6 → Output: [1, 2, 3, 0, 0, 0]",
+                explanation: "Creates a new array copy with specified length, padding with zeros if needed.",
+                visual: () => `
+                    <div class="array-container">
+                        <div class="array-element">1</div>
+                        <div class="array-element">2</div>
+                        <div class="array-element">3</div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="array-container">
+                        <div class="array-element">1</div>
+                        <div class="array-element">2</div>
+                        <div class="array-element">3</div>
+                        <div class="array-element new">0</div>
+                        <div class="array-element new">0</div>
+                        <div class="array-element new">0</div>
+                    </div>
+                `,
+                notes: "<strong>Memory:</strong> Creates completely new array, doesn't modify original.<br><strong>Padding:</strong> Uses default values (0 for numbers, null for objects).<br><strong>Truncation:</strong> If newLength < original length, elements are truncated."
+            },
+            {
+                title: "Arrays.copyOfRange(array, from, to)",
+                syntax: "Arrays.copyOfRange(arr, 1, 4);",
+                example: "Input: [1,2,3,4,5], from=1, to=4 → Output: [2,3,4]",
+                explanation: "Creates a copy of a specific range from the original array.",
+                visual: () => `
+                    <div class="array-container">
+                        <div class="array-element">1</div>
+                        <div class="array-element highlight">2</div>
+                        <div class="array-element highlight">3</div>
+                        <div class="array-element highlight">4</div>
+                        <div class="array-element">5</div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="array-container">
+                        <div class="array-element new">2</div>
+                        <div class="array-element new">3</div>
+                        <div class="array-element new">4</div>
+                    </div>
+                `,
+                notes: "<strong>Range:</strong> Copies elements from index 'from' (inclusive) to 'to' (exclusive).<br><strong>New Array:</strong> Creates completely new array, doesn't modify original.<br><strong>Bounds:</strong> IndexOutOfBounds if from < 0 or from > original.length."
+            },
+            {
+                title: "Arrays.fill(array, value)",
+                syntax: "Arrays.fill(numbers, 7);",
+                example: "Input: [1, 2, 3, 4] → Output: [7, 7, 7, 7]",
+                explanation: "Fills all array positions with the specified value.",
+                visual: () => `
+                    <div class="array-container">
+                        <div class="array-element">1</div>
+                        <div class="array-element">2</div>
+                        <div class="array-element">3</div>
+                        <div class="array-element">4</div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="array-container">
+                        <div class="array-element new">7</div>
+                        <div class="array-element new">7</div>
+                        <div class="array-element new">7</div>
+                        <div class="array-element new">7</div>
+                    </div>
+                `,
+                notes: "<strong>Range Fill:</strong> Can fill specific ranges with fill(array, start, end, value).<br><strong>In-place:</strong> Modifies the original array directly.<br><strong>Objects:</strong> For object arrays, fills with same reference."
+            },
+            {
+                title: "Arrays.equals(arr1, arr2)",
+                syntax: "Arrays.equals(first, second);",
+                example: "Input: [1, 2, 3] vs [1, 2, 3] → Output: true",
+                explanation: "Compares two arrays for equality element by element.",
+                visual: () => `
+                    <div class="comparison-section">
+                        <div class="array-container">
+                            <div class="array-element highlight">1</div>
+                            <div class="array-element highlight">2</div>
+                            <div class="array-element highlight">3</div>
+                        </div>
+                        <div class="vs-text">vs</div>
+                        <div class="array-container">
+                            <div class="array-element highlight">1</div>
+                            <div class="array-element highlight">2</div>
+                            <div class="array-element highlight">3</div>
+                        </div>
+                        <div class="arrow">↓</div>
+                        <div class="result-text">true</div>
+                    </div>
+                `,
+                notes: "<strong>Shallow Check:</strong> Compares each element using equals() method.<br><strong>Length:</strong> Returns false if arrays have different lengths.<br><strong>Null Safe:</strong> Handles null arrays correctly."
+            },
+            {
+                title: "Arrays.deepEquals(arr1, arr2)",
+                syntax: "Arrays.deepEquals(nested1, nested2);",
+                example: "Input: [[1,2],[3]] vs [[1,2],[3]] → Output: true",
+                explanation: "Compares nested arrays for deep equality at all levels.",
+                visual: () => `
+                    <div class="comparison-section">
+                        <div class="nested-array-container">
+                            <div class="array-container">
+                                <div class="array-element highlight">1</div>
+                                <div class="array-element highlight">2</div>
+                            </div>
+                            <div class="array-container">
+                                <div class="array-element highlight">3</div>
+                            </div>
+                        </div>
+                        <div class="vs-text">vs</div>
+                        <div class="nested-array-container">
+                            <div class="array-container">
+                                <div class="array-element highlight">1</div>
+                                <div class="array-element highlight">2</div>
+                            </div>
+                            <div class="array-container">
+                                <div class="array-element highlight">3</div>
+                            </div>
+                        </div>
+                        <div class="arrow">↓</div>
+                        <div class="result-text">true</div>
+                    </div>
+                `,
+                notes: "<strong>Deep Check:</strong> Recursively compares nested arrays at all levels.<br><strong>Multidimensional:</strong> Perfect for comparing 2D, 3D arrays.<br><strong>Circular:</strong> Handles circular references by showing \"[...]\"."
+            },
+            {
+                title: "Arrays.toString(array)",
+                syntax: "Arrays.toString(numbers);",
+                example: "Input: [1, 2, 3] → Output: \"[1, 2, 3]\"",
+                explanation: "Converts array to readable string representation.",
+                visual: () => `
+                    <div class="array-container">
+                        <div class="array-element">1</div>
+                        <div class="array-element">2</div>
+                        <div class="array-element">3</div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="result-text">"[1, 2, 3]"</div>
+                `,
+                notes: "<strong>Format:</strong> Returns string in format \"[element1, element2, ...]\".<br><strong>Null Elements:</strong> Shows null elements as \"null\".<br><strong>Objects:</strong> Calls toString() on each object element."
+            },
+            {
+                title: "Arrays.deepToString(array)",
+                syntax: "Arrays.deepToString(nested);",
+                example: "Input: [[1,2],[3,4]] → Output: \"[[1, 2], [3, 4]]\"",
+                explanation: "Converts nested arrays to readable string with deep formatting.",
+                visual: () => `
+                    <div class="nested-array-container">
+                        <div class="array-container">
+                            <div class="array-element">1</div>
+                            <div class="array-element">2</div>
+                        </div>
+                        <div class="array-container">
+                            <div class="array-element">3</div>
+                            <div class="array-element">4</div>
+                        </div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="result-text">"[[1, 2], [3, 4]]"</div>
+                `,
+                notes: "<strong>Nested Format:</strong> Recursively formats nested arrays with proper brackets.<br><strong>Deep Print:</strong> Shows structure of multidimensional arrays clearly.<br><strong>Circular:</strong> Handles circular references with \"[...]\"."
+            },
+            {
+                title: "Arrays.hashCode(array)",
+                syntax: "Arrays.hashCode(numbers);",
+                example: "Input: [1, 2, 3] → Output: 30817 (hash)",
+                explanation: "Computes hash code based on array contents for HashSet/HashMap use.",
+                visual: () => `
+                    <div class="array-container">
+                        <div class="array-element">1</div>
+                        <div class="array-element">2</div>
+                        <div class="array-element">3</div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="hash-display">
+                        <div class="hash-title">Hash Code</div>
+                        <div class="hash-value">30817</div>
+                    </div>
+                `,
+                notes: "<strong>Content-based:</strong> Same contents always produce same hash code.<br><strong>Collections:</strong> Required for using arrays as keys in HashMap.<br><strong>Performance:</strong> O(n) time complexity to compute."
+            },
+            {
+                title: "Arrays.deepHashCode(array)",
+                syntax: "Arrays.deepHashCode(nested);",
+                example: "Input: [[1,2],[3]] → Output: 987654 (deep hash)",
+                explanation: "Computes hash code for nested arrays based on deep contents.",
+                visual: () => `
+                    <div class="nested-array-container">
+                        <div class="array-container">
+                            <div class="array-element">1</div>
+                            <div class="array-element">2</div>
+                        </div>
+                        <div class="array-container">
+                            <div class="array-element">3</div>
+                        </div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="hash-display">
+                        <div class="hash-title">Deep Hash</div>
+                        <div class="hash-value">987654</div>
+                    </div>
+                `,
+                notes: "<strong>Deep Hash:</strong> Recursively computes hash for nested structures.<br><strong>Multidimensional:</strong> Proper hashing for 2D, 3D arrays.<br><strong>Consistent:</strong> Arrays with same deep contents get same hash."
+            },
+            {
+                title: "Arrays.asList(array)",
+                syntax: "Arrays.asList(numbers);",
+                example: "Input: [1, 2, 3] → Output: List<Integer>",
+                explanation: "Converts array to a fixed-size list backed by the original array.",
+                visual: () => `
+                    <div class="array-container">
+                        <div class="array-element">1</div>
+                        <div class="array-element">2</div>
+                        <div class="array-element">3</div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="list-display">
+                        <div class="list-title">List&lt;Integer&gt;</div>
+                        <div class="array-container" style="margin: 0;">
+                            <div class="array-element">1</div>
+                            <div class="array-element">2</div>
+                            <div class="array-element">3</div>
+                        </div>
+                    </div>
+                `,
+                notes: "<strong>Fixed Size:</strong> Returned list cannot be resized (no add/remove).<br><strong>Backed:</strong> Changes to list reflect in original array and vice versa.<br><strong>Collections:</strong> Allows using Collection methods on arrays."
+            },
+            {
+                title: "Arrays.stream(array)",
+                syntax: "Arrays.stream(numbers);",
+                example: "Input: [1, 2, 3] → Output: Stream<Integer>",
+                explanation: "Converts array to a Stream for functional programming operations.",
+                visual: () => `
+                    <div class="array-container">
+                        <div class="array-element">1</div>
+                        <div class="array-element">2</div>
+                        <div class="array-element">3</div>
+                    </div>
+                    <div class="arrow">↓</div>
+                    <div class="stream-display">
+                        <div class="stream-title">Stream&lt;Integer&gt;</div>
+                        <div class="stream-flow">
+                            <div class="array-element">1</div>
+                            <div class="stream-arrow">→</div>
+                            <div class="array-element">2</div>
+                            <div class="stream-arrow">→</div>
+                            <div class="array-element">3</div>
+                        </div>
+                    </div>
+                `,
+                notes: "<strong>Functional:</strong> Enables map, filter, reduce operations on arrays.<br><strong>Lazy:</strong> Stream operations are lazy until terminal operation called.<br><strong>Java 8+:</strong> Part of modern functional programming in Java."
+            },
+            {
+                title: "Arrays.setAll(array, generator)",
+                syntax: "Arrays.setAll(arr, i -> i * 2);",
+                example: "Input: [0,0,0], generator=i*2 → Output: [0,2,4]",
+                explanation: "Sets array elements using a generator function based on index.",
+                visual: () => `
+                    <div class="array-container">
+                        <div class="array-element">0</div>
+                        <div class="array-element">0</div>
+                        <div class="array-element">0</div>
+                    </div>
+                    <div class="generator-function">λ i → i * 2</div>
+                    <div class="arrow">↓</div>
+                    <div class="array-container">
+                        <div class="array-element new">0</div>
+                        <div class="array-element new">2</div>
+                        <div class="array-element new">4</div>
+                    </div>
+                `,
+                notes: "<strong>Functional:</strong> Uses lambda expression to compute each element.<br><strong>Index-based:</strong> Generator function receives element index as parameter.<br><strong>In-place:</strong> Modifies original array with computed values."
+            },
+            {
+                title: "Navigation Complete",
+                syntax: "window.location.href = './index.html';",
+                example: "Redirecting to index page...",
+                explanation: "Returns to main index page.",
+                visual: () => `
+                    <div class="redirect-display">
+                        <div class="redirect-arrow">→</div>
+                        <div class="redirect-target">
+                            <div class="redirect-title">index.html</div>
+                            <div>Main Menu</div>
+                        </div>
+                    </div>
+                `,
+                notes: "<strong>Navigation:</strong> Automatically redirects to index.html.<br><strong>Complete Coverage:</strong> All major java.util.Arrays methods covered.<br><strong>Next Topic:</strong> Choose from main menu."
+            }
+        ];
+
+        let currentStep = 0;
+
+        function updateDisplay() {
+            const method = methods[currentStep];
+            
+            document.getElementById('methodTitle').textContent = method.title;
+            document.getElementById('methodSyntax').textContent = method.syntax;
+            document.getElementById('methodExample').textContent = method.example;
+            document.getElementById('methodExplanation').textContent = method.explanation;
+            document.getElementById('stepCounter').textContent = `${currentStep + 1} / ${methods.length}`;
+            document.getElementById('notesText').innerHTML = method.notes;
+            
+            const visualContent = document.getElementById('visualContent');
+            visualContent.style.opacity = '0';
+            
+            setTimeout(() => {
+                visualContent.innerHTML = method.visual();
+                visualContent.style.opacity = '1';
+                
+                if (currentStep === methods.length - 1) {
+                    setTimeout(() => {
+                        window.location.href = './index.html';
+                    }, 3000);
+                }
+            }, 300);
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep >= methods.length - 1;
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentStep < methods.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            currentStep = 0;
+            updateDisplay();
+        });
+
+        document.getElementById('toggleNotes').addEventListener('click', () => {
+            const content = document.getElementById('notesContent');
+            const header = document.getElementById('toggleNotes');
+            
+            content.classList.toggle('active');
+            header.textContent = content.classList.contains('active') ? '▲ Extended Notes & Edge Cases' : '▼ Extended Notes & Edge Cases';
+        });
+
+        document.getElementById('visualContent').style.transition = 'opacity 0.3s ease-in-out';
+        
+        updateDisplay();
+    </script>
+</body>
+</html>

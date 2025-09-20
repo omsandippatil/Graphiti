@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java String Methods</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            border-bottom: 2px solid black;
+            padding: 10px 20px;
+            background: white;
+        }
+        
+        .topic-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .syntax {
+            font-size: 14px;
+            margin-bottom: 5px;
+            background: #f8f8f8;
+            padding: 5px;
+            border: 1px solid black;
+        }
+        
+        .example {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .explanation {
+            font-size: 12px;
+            font-style: italic;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .right-panel {
+            flex: 1;
+            border: 2px solid black;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            background: white;
+            border: 2px solid black;
+            padding: 8px 16px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .string-visual {
+            font-size: 16px;
+            margin: 10px 0;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .char-box {
+            border: 1px solid black;
+            padding: 8px 4px;
+            margin: 1px;
+            min-width: 20px;
+            text-align: center;
+            background: white;
+            display: inline-block;
+            transition: all 0.5s ease;
+        }
+        
+        .char-box.highlight {
+            background: #ddd;
+        }
+        
+        .char-box.new {
+            background: #bbb;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .operation-label {
+            font-size: 12px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .result-arrow {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        
+        .footer {
+            border-top: 2px solid black;
+            padding: 10px 20px;
+        }
+        
+        .collapsible {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .collapsible:hover {
+            background: #f0f0f0;
+        }
+        
+        .content {
+            display: none;
+            padding-top: 10px;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .step-counter {
+            font-size: 12px;
+            color: #666;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="topic-title" id="topicTitle">String.length()</div>
+            <div class="step-counter" id="stepCounter">1 / 15</div>
+        </div>
+        <div class="syntax" id="syntax">String str = "hello"; int len = str.length();</div>
+        <div class="example" id="example">Input: "hello" → Output: 5</div>
+        <div class="explanation" id="explanation">Returns the number of characters in the string.</div>
+    </div>
+    
+    <div class="main-content">
+        <div class="left-panel">
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+        </div>
+        
+        <div class="right-panel" id="visualization">
+            <div class="operation-label" id="operationLabel">Counting characters</div>
+            <div class="string-visual" id="stringVisual"></div>
+            <div class="result-arrow" id="resultArrow">↓</div>
+            <div class="string-visual" id="resultVisual"></div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="collapsible" id="collapsibleHeader">▶ Extended Notes & Details</div>
+        <div class="content" id="collapsibleContent">
+            <p><strong>Theory:</strong> String methods in Java operate on immutable String objects. Each operation that appears to modify a string actually returns a new string instance.</p>
+            <p><strong>Edge Cases:</strong> Empty strings ("") have length 0. Null strings throw NullPointerException. Unicode characters may have unexpected behavior with some methods.</p>
+            <p><strong>Performance:</strong> String concatenation with + creates new objects. StringBuilder is more efficient for multiple operations.</p>
+            <p><strong>Caveats:</strong> String comparison should use equals(), not ==. Regular expressions in replaceAll() and split() can be complex.</p>
+        </div>
+    </div>
+
+    <script>
+        const topics = [
+            {
+                title: "String.length()",
+                syntax: "String str = \"hello\"; int len = str.length();",
+                example: "Input: \"hello\" → Output: 5",
+                explanation: "Returns the number of characters in the string.",
+                visual: () => animateLength("hello")
+            },
+            {
+                title: "String.charAt()",
+                syntax: "String str = \"hello\"; char c = str.charAt(1);",
+                example: "Input: \"hello\", index 1 → Output: 'e'",
+                explanation: "Returns the character at the specified index position.",
+                visual: () => animateCharAt("hello", 1)
+            },
+            {
+                title: "String.toCharArray()",
+                syntax: "String str = \"hello\"; char[] chars = str.toCharArray();",
+                example: "Input: \"hello\" → Output: ['h','e','l','l','o']",
+                explanation: "Converts the string into an array of individual characters.",
+                visual: () => animateToCharArray("hello")
+            },
+            {
+                title: "String.substring()",
+                syntax: "String str = \"hello\"; String sub = str.substring(1, 4);",
+                example: "Input: \"hello\", (1,4) → Output: \"ell\"",
+                explanation: "Extracts a portion of the string between start and end indices.",
+                visual: () => animateSubstring("hello", 1, 4)
+            },
+            {
+                title: "String.indexOf()",
+                syntax: "String str = \"hello\"; int pos = str.indexOf('l');",
+                example: "Input: \"hello\", 'l' → Output: 2",
+                explanation: "Returns the first occurrence index of the specified character.",
+                visual: () => animateIndexOf("hello", 'l')
+            },
+            {
+                title: "String.lastIndexOf()",
+                syntax: "String str = \"hello\"; int pos = str.lastIndexOf('l');",
+                example: "Input: \"hello\", 'l' → Output: 3",
+                explanation: "Returns the last occurrence index of the specified character.",
+                visual: () => animateLastIndexOf("hello", 'l')
+            },
+            {
+                title: "String.contains()",
+                syntax: "String str = \"hello\"; boolean has = str.contains(\"ell\");",
+                example: "Input: \"hello\", \"ell\" → Output: true",
+                explanation: "Checks if the string contains the specified substring.",
+                visual: () => animateContains("hello", "ell")
+            },
+            {
+                title: "String.startsWith()",
+                syntax: "String str = \"hello\"; boolean starts = str.startsWith(\"he\");",
+                example: "Input: \"hello\", \"he\" → Output: true",
+                explanation: "Checks if the string begins with the specified prefix.",
+                visual: () => animateStartsWith("hello", "he")
+            },
+            {
+                title: "String.endsWith()",
+                syntax: "String str = \"hello\"; boolean ends = str.endsWith(\"lo\");",
+                example: "Input: \"hello\", \"lo\" → Output: true",
+                explanation: "Checks if the string ends with the specified suffix.",
+                visual: () => animateEndsWith("hello", "lo")
+            },
+            {
+                title: "String.equals()",
+                syntax: "String s1 = \"hello\"; boolean same = s1.equals(\"hello\");",
+                example: "Input: \"hello\" == \"hello\" → Output: true",
+                explanation: "Compares two strings for exact equality including case.",
+                visual: () => animateEquals("hello", "hello")
+            },
+            {
+                title: "String.equalsIgnoreCase()",
+                syntax: "String s1 = \"Hello\"; boolean same = s1.equalsIgnoreCase(\"HELLO\");",
+                example: "Input: \"Hello\" == \"HELLO\" → Output: true",
+                explanation: "Compares two strings for equality ignoring case differences.",
+                visual: () => animateEqualsIgnoreCase("Hello", "HELLO")
+            },
+            {
+                title: "String.compareTo()",
+                syntax: "String s1 = \"apple\"; int cmp = s1.compareTo(\"banana\");",
+                example: "Input: \"apple\" vs \"banana\" → Output: -1",
+                explanation: "Compares strings lexicographically returning negative, zero, or positive.",
+                visual: () => animateCompareTo("apple", "banana")
+            },
+            {
+                title: "String.compareToIgnoreCase()",
+                syntax: "String s1 = \"Apple\"; int cmp = s1.compareToIgnoreCase(\"BANANA\");",
+                example: "Input: \"Apple\" vs \"BANANA\" → Output: -1",
+                explanation: "Compares strings lexicographically ignoring case differences.",
+                visual: () => animateCompareToIgnoreCase("Apple", "BANANA")
+            },
+            {
+                title: "String.toUpperCase()",
+                syntax: "String str = \"hello\"; String upper = str.toUpperCase();",
+                example: "Input: \"hello\" → Output: \"HELLO\"",
+                explanation: "Converts all characters to uppercase letters.",
+                visual: () => animateToUpperCase("hello")
+            },
+            {
+                title: "String.toLowerCase()",
+                syntax: "String str = \"HELLO\"; String lower = str.toLowerCase();",
+                example: "Input: \"HELLO\" → Output: \"hello\"",
+                explanation: "Converts all characters to lowercase letters.",
+                visual: () => animateToLowerCase("HELLO")
+            },
+            {
+                title: "String.trim()",
+                syntax: "String str = \" hello \"; String trimmed = str.trim();",
+                example: "Input: \" hello \" → Output: \"hello\"",
+                explanation: "Removes leading and trailing whitespace characters.",
+                visual: () => animateTrim(" hello ")
+            },
+            {
+                title: "String.replace()",
+                syntax: "String str = \"hello\"; String replaced = str.replace('l', 'x');",
+                example: "Input: \"hello\", 'l'→'x' → Output: \"hexxo\"",
+                explanation: "Replaces all occurrences of one character with another.",
+                visual: () => animateReplace("hello", 'l', 'x')
+            },
+            {
+                title: "String.replaceAll()",
+                syntax: "String str = \"hello123\"; String replaced = str.replaceAll(\"[0-9]\", \"X\");",
+                example: "Input: \"hello123\", \"[0-9]\"→\"X\" → Output: \"helloXXX\"",
+                explanation: "Replaces all substrings matching the regular expression pattern.",
+                visual: () => animateReplaceAll("hello123", "[0-9]", "X")
+            },
+            {
+                title: "String.split()",
+                syntax: "String str = \"a,b,c\"; String[] parts = str.split(\",\");",
+                example: "Input: \"a,b,c\", \",\" → Output: [\"a\", \"b\", \"c\"]",
+                explanation: "Splits the string into an array using the specified delimiter.",
+                visual: () => animateSplit("a,b,c", ",")
+            },
+            {
+                title: "String.concat()",
+                syntax: "String s1 = \"hello\"; String s2 = s1.concat(\" world\");",
+                example: "Input: \"hello\" + \" world\" → Output: \"hello world\"",
+                explanation: "Combines two strings together into a single string.",
+                visual: () => animateConcat("hello", " world")
+            },
+            {
+                title: "StringBuilder.append()",
+                syntax: "StringBuilder sb = new StringBuilder(\"hello\"); sb.append(\" world\");",
+                example: "Input: \"hello\" + \" world\" → Result: \"hello world\"",
+                explanation: "Adds text to the end of a mutable string buffer.",
+                visual: () => animateStringBuilderAppend("hello", " world")
+            },
+            {
+                title: "StringBuilder.insert()",
+                syntax: "StringBuilder sb = new StringBuilder(\"hello\"); sb.insert(5, \" there\");",
+                example: "Input: \"hello\", insert \" there\" at 5 → Result: \"hello there\"",
+                explanation: "Inserts text at the specified position in the buffer.",
+                visual: () => animateStringBuilderInsert("hello", 5, " there")
+            },
+            {
+                title: "StringBuilder.delete()",
+                syntax: "StringBuilder sb = new StringBuilder(\"hello world\"); sb.delete(5, 11);",
+                example: "Input: \"hello world\", delete (5,11) → Result: \"hello\"",
+                explanation: "Removes characters between start and end indices from buffer.",
+                visual: () => animateStringBuilderDelete("hello world", 5, 11)
+            },
+            {
+                title: "StringBuilder.reverse()",
+                syntax: "StringBuilder sb = new StringBuilder(\"hello\"); sb.reverse();",
+                example: "Input: \"hello\" → Result: \"olleh\"",
+                explanation: "Reverses the order of all characters in the buffer.",
+                visual: () => animateStringBuilderReverse("hello")
+            },
+            {
+                title: "StringBuilder.setCharAt()",
+                syntax: "StringBuilder sb = new StringBuilder(\"hello\"); sb.setCharAt(1, 'a');",
+                example: "Input: \"hello\", set index 1 to 'a' → Result: \"hallo\"",
+                explanation: "Changes the character at the specified index in the buffer.",
+                visual: () => animateStringBuilderSetCharAt("hello", 1, 'a')
+            },
+            {
+                title: "Navigation Complete",
+                syntax: "window.location.href = \"./index.html\";",
+                example: "Redirect to index.html",
+                explanation: "Returns to the main index page.",
+                visual: () => animateNavigation()
+            }
+        ];
+
+        let currentStep = 0;
+
+        function updateDisplay() {
+            const topic = topics[currentStep];
+            document.getElementById('topicTitle').textContent = topic.title;
+            document.getElementById('syntax').textContent = topic.syntax;
+            document.getElementById('example').textContent = topic.example;
+            document.getElementById('explanation').textContent = topic.explanation;
+            document.getElementById('stepCounter').textContent = `${currentStep + 1} / ${topics.length}`;
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === topics.length - 1;
+            
+            topic.visual();
+        }
+
+        function createCharBoxes(text) {
+            return text.split('').map((char, index) => 
+                `<span class="char-box" id="char-${index}">${char === ' ' ? '·' : char}</span>`
+            ).join('');
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function animateLength(text) {
+            document.getElementById('operationLabel').textContent = 'Counting characters';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            for (let i = 0; i < text.length; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(300);
+            }
+            
+            await delay(500);
+            document.getElementById('resultVisual').innerHTML = `<span class="char-box new">${text.length}</span>`;
+        }
+
+        async function animateCharAt(text, index) {
+            document.getElementById('operationLabel').textContent = `Getting character at index ${index}`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            document.getElementById(`char-${index}`).classList.add('highlight');
+            
+            await delay(800);
+            document.getElementById('resultVisual').innerHTML = `<span class="char-box new">${text[index]}</span>`;
+        }
+
+        async function animateSubstring(text, start, end) {
+            document.getElementById('operationLabel').textContent = `Extracting substring (${start}, ${end})`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            for (let i = start; i < end; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(200);
+            }
+            
+            await delay(500);
+            const result = text.substring(start, end);
+            document.getElementById('resultVisual').innerHTML = createCharBoxes(result);
+        }
+
+        async function animateIndexOf(text, char) {
+            document.getElementById('operationLabel').textContent = `Finding first occurrence of '${char}'`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            for (let i = 0; i < text.length; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(300);
+                
+                if (text[i] === char) {
+                    await delay(500);
+                    document.getElementById('resultVisual').innerHTML = `<span class="char-box new">${i}</span>`;
+                    return;
+                }
+                
+                document.getElementById(`char-${i}`).classList.remove('highlight');
+            }
+        }
+
+        async function animateToUpperCase(text) {
+            document.getElementById('operationLabel').textContent = 'Converting to uppercase';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const result = text.toUpperCase();
+            const resultBoxes = result.split('').map(char => `<span class="char-box">${char}</span>`).join('');
+            document.getElementById('resultVisual').innerHTML = resultBoxes;
+            
+            for (let i = 0; i < text.length; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(200);
+            }
+        }
+
+        async function animateToLowerCase(text) {
+            document.getElementById('operationLabel').textContent = 'Converting to lowercase';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const result = text.toLowerCase();
+            const resultBoxes = result.split('').map(char => `<span class="char-box">${char}</span>`).join('');
+            document.getElementById('resultVisual').innerHTML = resultBoxes;
+            
+            for (let i = 0; i < text.length; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(200);
+            }
+        }
+
+        async function animateTrim(text) {
+            document.getElementById('operationLabel').textContent = 'Removing whitespace';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const trimmed = text.trim();
+            document.getElementById('resultVisual').innerHTML = createCharBoxes(trimmed);
+            
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] !== ' ') {
+                    document.getElementById(`char-${i}`).classList.add('highlight');
+                }
+                await delay(200);
+            }
+        }
+
+        async function animateReplace(text, oldChar, newChar) {
+            document.getElementById('operationLabel').textContent = `Replacing '${oldChar}' with '${newChar}'`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const result = text.replace(new RegExp(oldChar, 'g'), newChar);
+            const resultBoxes = result.split('').map(char => `<span class="char-box">${char}</span>`).join('');
+            document.getElementById('resultVisual').innerHTML = resultBoxes;
+            
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] === oldChar) {
+                    document.getElementById(`char-${i}`).classList.add('highlight');
+                }
+                await delay(200);
+            }
+        }
+
+        async function animateSplit(text, delimiter) {
+            document.getElementById('operationLabel').textContent = `Splitting by '${delimiter}'`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const parts = text.split(delimiter);
+            const resultHTML = parts.map(part => 
+                `[${createCharBoxes(part)}]`
+            ).join(' ');
+            
+            document.getElementById('resultVisual').innerHTML = resultHTML;
+            
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] === delimiter) {
+                    document.getElementById(`char-${i}`).classList.add('highlight');
+                }
+                await delay(200);
+            }
+        }
+
+        async function animateConcat(str1, str2) {
+            document.getElementById('operationLabel').textContent = 'Concatenating strings';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(str1) + ' + ' + createCharBoxes(str2);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const result = str1 + str2;
+            document.getElementById('resultVisual').innerHTML = createCharBoxes(result);
+        }
+
+        async function animateStringBuilderAppend(initial, append) {
+            document.getElementById('operationLabel').textContent = 'Appending to StringBuilder';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(initial);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            document.getElementById('stringVisual').innerHTML += ' + ' + createCharBoxes(append);
+            
+            await delay(500);
+            
+            const result = initial + append;
+            document.getElementById('resultVisual').innerHTML = createCharBoxes(result);
+        }
+
+        async function animateStringBuilderInsert(text, pos, insert) {
+            document.getElementById('operationLabel').textContent = `Inserting at position ${pos}`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            if (pos < text.length) {
+                document.getElementById(`char-${pos}`).classList.add('highlight');
+            }
+            
+            await delay(800);
+            
+            const result = text.slice(0, pos) + insert + text.slice(pos);
+            document.getElementById('resultVisual').innerHTML = createCharBoxes(result);
+        }
+
+        async function animateStringBuilderDelete(text, start, end) {
+            document.getElementById('operationLabel').textContent = `Deleting characters (${start}, ${end})`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            for (let i = start; i < end && i < text.length; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(200);
+            }
+            
+            await delay(500);
+            
+            const result = text.slice(0, start) + text.slice(end);
+            document.getElementById('resultVisual').innerHTML = createCharBoxes(result);
+        }
+
+        async function animateStringBuilderReverse(text) {
+            document.getElementById('operationLabel').textContent = 'Reversing character order';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            for (let i = 0; i < text.length; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(200);
+            }
+            
+            await delay(500);
+            
+            const result = text.split('').reverse().join('');
+            document.getElementById('resultVisual').innerHTML = createCharBoxes(result);
+        }
+
+        async function animateToCharArray(text) {
+            document.getElementById('operationLabel').textContent = 'Converting to character array';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            for (let i = 0; i < text.length; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(200);
+            }
+            
+            await delay(500);
+            
+            const arrayDisplay = text.split('').map(char => `['${char}']`).join(' ');
+            document.getElementById('resultVisual').innerHTML = arrayDisplay;
+        }
+
+        async function animateLastIndexOf(text, char) {
+            document.getElementById('operationLabel').textContent = `Finding last occurrence of '${char}'`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            let lastIndex = -1;
+            for (let i = text.length - 1; i >= 0; i--) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(300);
+                
+                if (text[i] === char) {
+                    lastIndex = i;
+                    await delay(500);
+                    document.getElementById('resultVisual').innerHTML = `<span class="char-box new">${i}</span>`;
+                    return;
+                }
+                
+                document.getElementById(`char-${i}`).classList.remove('highlight');
+            }
+            
+            document.getElementById('resultVisual').innerHTML = `<span class="char-box new">-1</span>`;
+        }
+
+        async function animateContains(text, substring) {
+            document.getElementById('operationLabel').textContent = `Checking if contains "${substring}"`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const index = text.indexOf(substring);
+            if (index !== -1) {
+                for (let i = index; i < index + substring.length; i++) {
+                    document.getElementById(`char-${i}`).classList.add('highlight');
+                    await delay(200);
+                }
+                await delay(500);
+                document.getElementById('resultVisual').innerHTML = `<span class="char-box new">true</span>`;
+            } else {
+                for (let i = 0; i < text.length; i++) {
+                    document.getElementById(`char-${i}`).classList.add('highlight');
+                    await delay(100);
+                    document.getElementById(`char-${i}`).classList.remove('highlight');
+                }
+                document.getElementById('resultVisual').innerHTML = `<span class="char-box new">false</span>`;
+            }
+        }
+
+        async function animateStartsWith(text, prefix) {
+            document.getElementById('operationLabel').textContent = `Checking if starts with "${prefix}"`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            for (let i = 0; i < prefix.length && i < text.length; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(300);
+            }
+            
+            await delay(500);
+            const result = text.startsWith(prefix);
+            document.getElementById('resultVisual').innerHTML = `<span class="char-box new">${result}</span>`;
+        }
+
+        async function animateEndsWith(text, suffix) {
+            document.getElementById('operationLabel').textContent = `Checking if ends with "${suffix}"`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const startPos = text.length - suffix.length;
+            for (let i = startPos; i < text.length; i++) {
+                if (i >= 0) {
+                    document.getElementById(`char-${i}`).classList.add('highlight');
+                }
+                await delay(300);
+            }
+            
+            await delay(500);
+            const result = text.endsWith(suffix);
+            document.getElementById('resultVisual').innerHTML = `<span class="char-box new">${result}</span>`;
+        }
+
+        async function animateEquals(str1, str2) {
+            document.getElementById('operationLabel').textContent = 'Comparing for equality';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(str1) + ' == ' + createCharBoxes(str2);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const minLength = Math.min(str1.length, str2.length);
+            for (let i = 0; i < minLength; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(200);
+            }
+            
+            await delay(500);
+            const result = str1 === str2;
+            document.getElementById('resultVisual').innerHTML = `<span class="char-box new">${result}</span>`;
+        }
+
+        async function animateEqualsIgnoreCase(str1, str2) {
+            document.getElementById('operationLabel').textContent = 'Comparing (ignore case)';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(str1) + ' == ' + createCharBoxes(str2);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const minLength = Math.min(str1.length, str2.length);
+            for (let i = 0; i < minLength; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(200);
+            }
+            
+            await delay(500);
+            const result = str1.toLowerCase() === str2.toLowerCase();
+            document.getElementById('resultVisual').innerHTML = `<span class="char-box new">${result}</span>`;
+        }
+
+        async function animateCompareTo(str1, str2) {
+            document.getElementById('operationLabel').textContent = 'Lexicographic comparison';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(str1) + ' vs ' + createCharBoxes(str2);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const minLength = Math.min(str1.length, str2.length);
+            for (let i = 0; i < minLength; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(200);
+            }
+            
+            await delay(500);
+            const result = str1 < str2 ? -1 : str1 > str2 ? 1 : 0;
+            document.getElementById('resultVisual').innerHTML = `<span class="char-box new">${result}</span>`;
+        }
+
+        async function animateCompareToIgnoreCase(str1, str2) {
+            document.getElementById('operationLabel').textContent = 'Case-insensitive comparison';
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(str1) + ' vs ' + createCharBoxes(str2);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            const minLength = Math.min(str1.length, str2.length);
+            for (let i = 0; i < minLength; i++) {
+                document.getElementById(`char-${i}`).classList.add('highlight');
+                await delay(200);
+            }
+            
+            await delay(500);
+            const lower1 = str1.toLowerCase();
+            const lower2 = str2.toLowerCase();
+            const result = lower1 < lower2 ? -1 : lower1 > lower2 ? 1 : 0;
+            document.getElementById('resultVisual').innerHTML = `<span class="char-box new">${result}</span>`;
+        }
+
+        async function animateReplaceAll(text, pattern, replacement) {
+            document.getElementById('operationLabel').textContent = `Replacing pattern "${pattern}" with "${replacement}"`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            for (let i = 0; i < text.length; i++) {
+                if (/[0-9]/.test(text[i])) {
+                    document.getElementById(`char-${i}`).classList.add('highlight');
+                }
+                await delay(200);
+            }
+            
+            await delay(500);
+            
+            const result = text.replace(/[0-9]/g, replacement);
+            document.getElementById('resultVisual').innerHTML = createCharBoxes(result);
+        }
+
+        async function animateStringBuilderSetCharAt(text, index, newChar) {
+            document.getElementById('operationLabel').textContent = `Setting character at index ${index} to '${newChar}'`;
+            document.getElementById('stringVisual').innerHTML = createCharBoxes(text);
+            document.getElementById('resultVisual').innerHTML = '';
+            
+            await delay(500);
+            
+            document.getElementById(`char-${index}`).classList.add('highlight');
+            await delay(800);
+            
+            const result = text.slice(0, index) + newChar + text.slice(index + 1);
+            document.getElementById('resultVisual').innerHTML = createCharBoxes(result);
+        }
+
+        async function animateNavigation() {
+            document.getElementById('operationLabel').textContent = 'Navigating to index.html';
+            document.getElementById('stringVisual').innerHTML = '';
+            document.getElementById('resultVisual').innerHTML = '<span class="char-box">Redirecting...</span>';
+            
+            await delay(2000);
+            window.location.href = './index.html';
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentStep < topics.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            currentStep = 0;
+            updateDisplay();
+        });
+
+        document.getElementById('collapsibleHeader').addEventListener('click', () => {
+            const content = document.getElementById('collapsibleContent');
+            const header = document.getElementById('collapsibleHeader');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                header.textContent = '▼ Extended Notes & Details';
+            } else {
+                content.style.display = 'none';
+                header.textContent = '▶ Extended Notes & Details';
+            }
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>

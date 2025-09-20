@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Operators</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .header {
+            border-bottom: 2px solid black;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .syntax {
+            font-size: 16px;
+            background: #f5f5f5;
+            padding: 8px;
+            border: 1px solid black;
+            margin-bottom: 10px;
+        }
+        .example {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .explanation {
+            font-size: 14px;
+            font-style: italic;
+        }
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        .left-panel {
+            flex: 1;
+        }
+        .right-panel {
+            flex: 1;
+            border: 2px solid black;
+            padding: 20px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .visual {
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: black;
+            color: white;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        button:disabled:hover {
+            background: white;
+            color: black;
+        }
+        .notes-section {
+            border-top: 2px solid black;
+            padding-top: 15px;
+        }
+        .notes-toggle {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .notes-content {
+            display: none;
+            font-size: 12px;
+            line-height: 1.4;
+            background: #f9f9f9;
+            padding: 15px;
+            border: 1px solid black;
+        }
+        .visual-box {
+            border: 1px solid black;
+            padding: 10px;
+            margin: 5px;
+            min-width: 60px;
+            text-align: center;
+        }
+        .arrow {
+            font-size: 20px;
+            margin: 10px;
+        }
+        .stack-frame {
+            border: 2px solid black;
+            padding: 15px;
+            margin: 10px;
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title" id="topic-title"></div>
+        <div class="syntax" id="syntax"></div>
+        <div class="example" id="example"></div>
+        <div class="explanation" id="explanation"></div>
+    </div>
+    
+    <div class="main-content">
+        <div class="left-panel">
+            <div class="controls">
+                <button id="prev-btn">Previous</button>
+                <button id="next-btn">Next</button>
+                <button id="reset-btn">Reset</button>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="visual" id="visual"></div>
+        </div>
+    </div>
+    
+    <div class="notes-section">
+        <button class="notes-toggle" id="notes-toggle">Show Notes</button>
+        <div class="notes-content" id="notes-content">
+            <strong>Extended Notes:</strong><br><br>
+            <strong>Operator Precedence:</strong> * / % have higher precedence than + -<br>
+            <strong>Type Coercion:</strong> JavaScript automatically converts types in many operations<br>
+            <strong>Edge Cases:</strong> Division by zero returns Infinity, modulo by zero returns NaN<br>
+            <strong>Bitwise Operations:</strong> Work on 32-bit signed integers<br>
+            <strong>Short-circuit Evaluation:</strong> && and || don't always evaluate both operands<br>
+            <strong>Assignment Chaining:</strong> a = b = c assigns c to both a and b<br>
+            <strong>Comparison Gotchas:</strong> === checks type and value, == performs type coercion
+        </div>
+    </div>
+
+    <script>
+        const topics = [
+            {
+                title: "Addition Operator (+)",
+                syntax: "a + b",
+                example: "5 + 3 → 8",
+                explanation: "Adds two numbers together or concatenates strings.",
+                visual: `
+                    <div class="visual-box">5</div>
+                    <div class="arrow">+</div>
+                    <div class="visual-box">3</div>
+                    <div class="arrow">=</div>
+                    <div class="visual-box">8</div>
+                `
+            },
+            {
+                title: "Subtraction Operator (-)",
+                syntax: "a - b",
+                example: "10 - 4 → 6",
+                explanation: "Subtracts the second number from the first.",
+                visual: `
+                    <div class="visual-box">10</div>
+                    <div class="arrow">-</div>
+                    <div class="visual-box">4</div>
+                    <div class="arrow">=</div>
+                    <div class="visual-box">6</div>
+                `
+            },
+            {
+                title: "Multiplication Operator (*)",
+                syntax: "a * b",
+                example: "7 * 3 → 21",
+                explanation: "Multiplies two numbers together.",
+                visual: `
+                    <div class="visual-box">7</div>
+                    <div class="arrow">×</div>
+                    <div class="visual-box">3</div>
+                    <div class="arrow">=</div>
+                    <div class="visual-box">21</div>
+                `
+            },
+            {
+                title: "Division Operator (/)",
+                syntax: "a / b",
+                example: "15 / 3 → 5",
+                explanation: "Divides the first number by the second.",
+                visual: `
+                    <div class="visual-box">15</div>
+                    <div class="arrow">÷</div>
+                    <div class="visual-box">3</div>
+                    <div class="arrow">=</div>
+                    <div class="visual-box">5</div>
+                `
+            },
+            {
+                title: "Modulo Operator (%)",
+                syntax: "a % b",
+                example: "17 % 5 → 2",
+                explanation: "Returns the remainder after division.",
+                visual: `
+                    <div class="visual-box">17</div>
+                    <div class="arrow">%</div>
+                    <div class="visual-box">5</div>
+                    <div class="arrow">=</div>
+                    <div class="visual-box">2</div>
+                `
+            },
+            {
+                title: "Assignment Operator (=)",
+                syntax: "a = b",
+                example: "x = 10 → x becomes 10",
+                explanation: "Assigns a value to a variable.",
+                visual: `
+                    <div class="visual-box">x</div>
+                    <div class="arrow">←</div>
+                    <div class="visual-box">10</div>
+                `
+            },
+            {
+                title: "Add Assignment (+=)",
+                syntax: "a += b",
+                example: "x += 5 (if x=3) → x becomes 8",
+                explanation: "Adds the value to the variable and assigns the result.",
+                visual: `
+                    <div class="visual-box">x: 3</div>
+                    <div class="arrow">+= 5</div>
+                    <div class="visual-box">x: 8</div>
+                `
+            },
+            {
+                title: "Subtract Assignment (-=)",
+                syntax: "a -= b",
+                example: "x -= 3 (if x=10) → x becomes 7",
+                explanation: "Subtracts the value from the variable and assigns the result.",
+                visual: `
+                    <div class="visual-box">x: 10</div>
+                    <div class="arrow">-= 3</div>
+                    <div class="visual-box">x: 7</div>
+                `
+            },
+            {
+                title: "Equality Operator (==)",
+                syntax: "a == b",
+                example: "5 == '5' → true",
+                explanation: "Compares values for equality with type conversion.",
+                visual: `
+                    <div class="visual-box">5</div>
+                    <div class="arrow">==</div>
+                    <div class="visual-box">'5'</div>
+                    <div class="arrow">→</div>
+                    <div class="visual-box">true</div>
+                `
+            },
+            {
+                title: "Strict Equality (===)",
+                syntax: "a === b",
+                example: "5 === '5' → false",
+                explanation: "Compares values for equality without type conversion.",
+                visual: `
+                    <div class="visual-box">5</div>
+                    <div class="arrow">===</div>
+                    <div class="visual-box">'5'</div>
+                    <div class="arrow">→</div>
+                    <div class="visual-box">false</div>
+                `
+            },
+            {
+                title: "Greater Than (>)",
+                syntax: "a > b",
+                example: "8 > 3 → true",
+                explanation: "Checks if the left value is greater than the right value.",
+                visual: `
+                    <div class="visual-box">8</div>
+                    <div class="arrow">></div>
+                    <div class="visual-box">3</div>
+                    <div class="arrow">→</div>
+                    <div class="visual-box">true</div>
+                `
+            },
+            {
+                title: "Less Than (<)",
+                syntax: "a < b",
+                example: "2 < 9 → true",
+                explanation: "Checks if the left value is less than the right value.",
+                visual: `
+                    <div class="visual-box">2</div>
+                    <div class="arrow"><</div>
+                    <div class="visual-box">9</div>
+                    <div class="arrow">→</div>
+                    <div class="visual-box">true</div>
+                `
+            },
+            {
+                title: "Logical AND (&&)",
+                syntax: "a && b",
+                example: "true && false → false",
+                explanation: "Returns true only if both operands are true.",
+                visual: `
+                    <div class="visual-box">true</div>
+                    <div class="arrow">&&</div>
+                    <div class="visual-box">false</div>
+                    <div class="arrow">→</div>
+                    <div class="visual-box">false</div>
+                `
+            },
+            {
+                title: "Logical OR (||)",
+                syntax: "a || b",
+                example: "true || false → true",
+                explanation: "Returns true if at least one operand is true.",
+                visual: `
+                    <div class="visual-box">true</div>
+                    <div class="arrow">||</div>
+                    <div class="visual-box">false</div>
+                    <div class="arrow">→</div>
+                    <div class="visual-box">true</div>
+                `
+            },
+            {
+                title: "Logical NOT (!)",
+                syntax: "!a",
+                example: "!true → false",
+                explanation: "Inverts the boolean value of the operand.",
+                visual: `
+                    <div class="arrow">!</div>
+                    <div class="visual-box">true</div>
+                    <div class="arrow">→</div>
+                    <div class="visual-box">false</div>
+                `
+            },
+            {
+                title: "Bitwise AND (&)",
+                syntax: "a & b",
+                example: "5 & 3 → 1",
+                explanation: "Performs bitwise AND operation on each bit pair.",
+                visual: `
+                    <div style="font-size: 12px;">
+                        101 (5)<br>
+                        011 (3)<br>
+                        -----<br>
+                        001 (1)
+                    </div>
+                `
+            },
+            {
+                title: "Bitwise OR (|)",
+                syntax: "a | b",
+                example: "5 | 3 → 7",
+                explanation: "Performs bitwise OR operation on each bit pair.",
+                visual: `
+                    <div style="font-size: 12px;">
+                        101 (5)<br>
+                        011 (3)<br>
+                        -----<br>
+                        111 (7)
+                    </div>
+                `
+            },
+            {
+                title: "Ternary Operator (?:)",
+                syntax: "condition ? a : b",
+                example: "5 > 3 ? 'yes' : 'no' → 'yes'",
+                explanation: "Returns the first value if condition is true, otherwise the second.",
+                visual: `
+                    <div class="visual-box">5 > 3</div>
+                    <div class="arrow">?</div>
+                    <div class="visual-box">'yes'</div>
+                    <div class="arrow">:</div>
+                    <div class="visual-box">'no'</div>
+                    <div class="arrow">→</div>
+                    <div class="visual-box">'yes'</div>
+                `
+            }
+        ];
+
+        let currentIndex = 0;
+
+        function updateDisplay() {
+            const topic = topics[currentIndex];
+            document.getElementById('topic-title').textContent = topic.title;
+            document.getElementById('syntax').textContent = topic.syntax;
+            document.getElementById('example').textContent = topic.example;
+            document.getElementById('explanation').textContent = topic.explanation;
+            document.getElementById('visual').innerHTML = topic.visual;
+            
+            document.getElementById('prev-btn').disabled = currentIndex === 0;
+            document.getElementById('next-btn').disabled = currentIndex === topics.length - 1;
+        }
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentIndex < topics.length - 1) {
+                currentIndex++;
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            currentIndex = 0;
+            updateDisplay();
+        });
+
+        document.getElementById('notes-toggle').addEventListener('click', () => {
+            const notesContent = document.getElementById('notes-content');
+            const toggleBtn = document.getElementById('notes-toggle');
+            
+            if (notesContent.style.display === 'none' || notesContent.style.display === '') {
+                notesContent.style.display = 'block';
+                toggleBtn.textContent = 'Hide Notes';
+            } else {
+                notesContent.style.display = 'none';
+                toggleBtn.textContent = 'Show Notes';
+            }
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
