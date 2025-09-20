@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Questions - Algorithm Practice</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            background: white;
+            color: black;
+            line-height: 1.6;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid black;
+            padding-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .progress-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .total-questions {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .progress-stats {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .category {
+            margin-bottom: 40px;
+            border: 1px solid black;
+            background: white;
+        }
+
+        .category-header {
+            background: black;
+            color: white;
+            padding: 15px 20px;
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .category-header:hover {
+            background: #333;
+        }
+
+        .category-percentage {
+            font-size: 16px;
+            font-weight: normal;
+        }
+
+        .questions-list {
+            padding: 0;
+            margin: 0;
+            display: none;
+        }
+
+        .category.expanded .questions-list {
+            display: block;
+        }
+
+        .question-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .question-item:hover {
+            background: #f5f5f5;
+        }
+
+        .question-item:last-child {
+            border-bottom: none;
+        }
+
+        .question-item.completed {
+            background: #f0f8ff;
+        }
+
+        .question-number {
+            background: black;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .question-content {
+            flex: 1;
+        }
+
+        .question-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .question-example {
+            color: #666;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        .tick-button {
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: #28a745;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .tick-button:hover {
+            border-color: #28a745;
+        }
+
+        .tick-button.completed {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .expand-icon {
+            transition: transform 0.3s;
+            margin-left: 10px;
+        }
+
+        .category.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .category-progress {
+            margin-left: 10px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .loading-message {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            padding: 40px 20px;
+        }
+
+        .error-message {
+            text-align: center;
+            font-size: 16px;
+            color: #d32f2f;
+            padding: 40px 20px;
+            border: 1px solid #d32f2f;
+            background: #ffeaea;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .question-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .question-number {
+                align-self: flex-start;
+            }
+
+            .progress-info {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .category-percentage {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Graphiti</h1>
+        <div class="progress-info">
+            <div class="total-questions" id="totalQuestions">
+                Loading questions...
+            </div>
+            <div class="progress-stats" id="progressStats">
+                0 / 0 completed
+            </div>
+        </div>
+    </div>
+
+    <div id="questionsContainer">
+        <div class="loading-message">Loading questions...</div>
+    </div>
+
+    <script>
+        let allQuestions = [];
+        let questionCounter = 1;
+        let completedQuestions = new Set();
+
+        // Load completed questions from storage
+        function loadCompletedQuestions() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('completedQuestions') || '[]');
+                completedQuestions = new Set(saved);
+            } catch (e) {
+                completedQuestions = new Set();
+                console.warn('Failed to load completed questions from storage');
+            }
+        }
+
+        // Save completed questions to storage
+        function saveCompletedQuestions() {
+            try {
+                localStorage.setItem('completedQuestions', JSON.stringify([...completedQuestions]));
+            } catch (e) {
+                console.error('Failed to save progress to storage');
+            }
+        }
+
+        // Toggle question completion status
+        function toggleQuestionCompletion(questionId, event) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            if (completedQuestions.has(questionId)) {
+                completedQuestions.delete(questionId);
+            } else {
+                completedQuestions.add(questionId);
+            }
+            
+            saveCompletedQuestions();
+            updateQuestionDisplay(questionId);
+            updateProgressStats();
+            updateCategoryProgress();
+        }
+
+        // Update individual question display
+        function updateQuestionDisplay(questionId) {
+            const questionItem = document.querySelector(`[data-question-id="${questionId}"]`);
+            if (!questionItem) return;
+            
+            const tickButton = questionItem.querySelector('.tick-button');
+            
+            if (completedQuestions.has(questionId)) {
+                questionItem.classList.add('completed');
+                tickButton.classList.add('completed');
+                tickButton.innerHTML = '✓';
+            } else {
+                questionItem.classList.remove('completed');
+                tickButton.classList.remove('completed');
+                tickButton.innerHTML = '';
+            }
+        }
+
+        // Update progress statistics
+        function updateProgressStats() {
+            const totalQuestions = allQuestions.length;
+            const completedCount = completedQuestions.size;
+            document.getElementById('progressStats').textContent = 
+                `${completedCount} / ${totalQuestions} completed`;
+        }
+
+        // Update category progress
+        function updateCategoryProgress() {
+            if (typeof questions === 'undefined') return;
+            
+            questions.forEach((category, categoryIndex) => {
+                const categoryStartId = getCategoryStartId(categoryIndex);
+                let completedInCategory = 0;
+                
+                for (let i = 0; i < category.questions.length; i++) {
+                    if (completedQuestions.has(categoryStartId + i)) {
+                        completedInCategory++;
+                    }
+                }
+                
+                const progressElement = document.querySelector(`[data-category-index="${categoryIndex}"] .category-progress`);
+                if (progressElement) {
+                    progressElement.textContent = `(${completedInCategory}/${category.questions.length})`;
+                }
+            });
+        }
+
+        // Get the starting question ID for a category
+        function getCategoryStartId(categoryIndex) {
+            if (typeof questions === 'undefined') return 1;
+            
+            let startId = 1;
+            for (let i = 0; i < categoryIndex; i++) {
+                startId += questions[i].questions.length;
+            }
+            return startId;
+        }
+
+        // Toggle category dropdown
+        function toggleCategory(categoryElement, event) {
+            event.stopPropagation();
+            categoryElement.classList.toggle('expanded');
+        }
+
+        // Navigate to question page
+        function navigateToQuestion(questionId, event) {
+            if (event && event.target.classList.contains('tick-button')) {
+                return; // Don't navigate if clicking the tick button
+            }
+            window.location.href = `code/${questionId}`;
+        }
+
+        // Create question element
+        function createQuestionElement(question, questionId) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-item';
+            questionDiv.setAttribute('data-question-id', questionId);
+            
+            const isCompleted = completedQuestions.has(questionId);
+            
+            questionDiv.innerHTML = `
+                <div class="question-number">${questionId}</div>
+                <div class="question-content">
+                    <div class="question-title">${question.title}</div>
+                    <div class="question-example">${question.example}</div>
+                </div>
+                <div class="tick-button ${isCompleted ? 'completed' : ''}" 
+                     data-question-id="${questionId}">
+                    ${isCompleted ? '✓' : ''}
+                </div>
+            `;
+            
+            if (isCompleted) {
+                questionDiv.classList.add('completed');
+            }
+
+            // Add event listeners
+            questionDiv.addEventListener('click', (e) => navigateToQuestion(questionId, e));
+            
+            const tickButton = questionDiv.querySelector('.tick-button');
+            tickButton.addEventListener('click', (e) => toggleQuestionCompletion(questionId, e));
+            
+            return questionDiv;
+        }
+
+        // Create category element
+        function createCategoryElement(categoryName, percentage, questions, categoryIndex) {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'category';
+            categoryDiv.setAttribute('data-category-index', categoryIndex);
+            
+            const header = document.createElement('div');
+            header.className = 'category-header';
+            header.innerHTML = `
+                <span>${categoryName}</span>
+                <span class="category-percentage">
+                    ${percentage} - ${questions.length} questions
+                    <span class="category-progress">(0/${questions.length})</span>
+                    <span class="expand-icon">▼</span>
+                </span>
+            `;
+            
+            const questionsList = document.createElement('div');
+            questionsList.className = 'questions-list';
+            
+            questions.forEach(question => {
+                const questionElement = createQuestionElement(question, questionCounter);
+                questionsList.appendChild(questionElement);
+                allQuestions.push({
+                    id: questionCounter,
+                    title: question.title,
+                    example: question.example,
+                    category: categoryName
+                });
+                questionCounter++;
+            });
+            
+            categoryDiv.appendChild(header);
+            categoryDiv.appendChild(questionsList);
+            
+            // Add click event for dropdown toggle
+            header.addEventListener('click', (e) => toggleCategory(categoryDiv, e));
+            
+            return categoryDiv;
+        }
+
+        // Render all questions
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            
+            if (typeof questions === 'undefined' || !Array.isArray(questions)) {
+                container.innerHTML = '<div class="error-message">Error: questions.js file not found or invalid format</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            questionCounter = 1;
+            allQuestions = [];
+            
+            questions.forEach((category, index) => {
+                if (!category.questions || !Array.isArray(category.questions)) {
+                    console.warn(`Category ${category.name} has invalid questions format`);
+                    return;
+                }
+                
+                const categoryElement = createCategoryElement(
+                    category.name, 
+                    category.percentage, 
+                    category.questions,
+                    index
+                );
+                container.appendChild(categoryElement);
+            });
+            
+            document.getElementById('totalQuestions').textContent = 
+                `${allQuestions.length} Total Questions`;
+            
+            updateProgressStats();
+            updateCategoryProgress();
+        }
+
+        // Find the first incomplete question
+        function findFirstIncompleteQuestion() {
+            for (let i = 1; i <= allQuestions.length; i++) {
+                if (!completedQuestions.has(i)) {
+                    return i;
+                }
+            }
+            return 1; // Default to first question if all are completed
+        }
+
+        // Auto-scroll to first incomplete question and expand its category
+        function autoNavigateToIncomplete() {
+            const firstIncompleteId = findFirstIncompleteQuestion();
+            
+            // Find which category this question belongs to
+            let currentQuestionId = 1;
+            let targetCategoryIndex = 0;
+            
+            if (typeof questions !== 'undefined') {
+                for (let categoryIndex = 0; categoryIndex < questions.length; categoryIndex++) {
+                    const categoryQuestions = questions[categoryIndex].questions.length;
+                    
+                    if (firstIncompleteId >= currentQuestionId && firstIncompleteId < currentQuestionId + categoryQuestions) {
+                        targetCategoryIndex = categoryIndex;
+                        break;
+                    }
+                    
+                    currentQuestionId += categoryQuestions;
+                }
+            }
+            
+            // Expand the target category
+            const targetCategory = document.querySelector(`[data-category-index="${targetCategoryIndex}"]`);
+            if (targetCategory) {
+                targetCategory.classList.add('expanded');
+                
+                // Wait a moment for the expansion animation, then scroll
+                setTimeout(() => {
+                    const targetQuestion = document.querySelector(`[data-question-id="${firstIncompleteId}"]`);
+                    if (targetQuestion) {
+                        targetQuestion.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                        
+                        // Add a subtle highlight effect
+                        targetQuestion.style.background = '#fff3cd';
+                        setTimeout(() => {
+                            targetQuestion.style.background = '';
+                        }, 2000);
+                    }
+                }, 300);
+            }
+        }
+
+        // Initialize the application
+        function initialize() {
+            loadCompletedQuestions();
+            
+            // Check if questions.js has loaded
+            if (typeof questions !== 'undefined') {
+                renderQuestions();
+                // Auto-navigate after rendering
+                setTimeout(autoNavigateToIncomplete, 100);
+            } else {
+                // Wait a bit for the script to load
+                setTimeout(() => {
+                    renderQuestions();
+                    setTimeout(autoNavigateToIncomplete, 100);
+                }, 100);
+            }
+        }
+
+        // Load the questions.js file dynamically
+        function loadQuestionsScript() {
+            const script = document.createElement('script');
+            script.src = 'questions.js';
+            script.onload = initialize;
+            script.onerror = () => {
+                document.getElementById('questionsContainer').innerHTML = 
+                    '<div class="error-message">Failed to load questions.js file</div>';
+            };
+            document.head.appendChild(script);
+        }
+
+        // Start the application when DOM is ready
+        document.addEventListener('DOMContentLoaded', loadQuestionsScript);
+    </script>
+</body>
+</html>
