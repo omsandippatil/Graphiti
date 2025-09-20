@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dutch National Flag Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+
+        .problem-section {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .variables-section {
+            font-size: 13px;
+        }
+
+        .variable-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            margin: 2px 0;
+        }
+
+        .highlight-yellow { background: yellow; }
+        .highlight-green { background: #90EE90; }
+        .highlight-red { background: #FFB6C1; }
+
+        .conditions-section {
+            font-size: 13px;
+        }
+
+        .condition {
+            margin: 5px 0;
+            padding: 3px;
+        }
+
+        .condition-true { background: #90EE90; }
+        .condition-false { background: #FFB6C1; }
+
+        .operations-section {
+            font-size: 13px;
+        }
+
+        .operation {
+            margin: 5px 0;
+            padding: 3px;
+        }
+
+        .op-increment { background: #90EE90; }
+        .op-decrement { background: #FFB6C1; }
+        .op-swap { background: #ADD8E6; }
+
+        .array-display {
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .array-cell {
+            width: 60px;
+            height: 60px;
+            border: 3px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            position: relative;
+            background: white;
+        }
+
+        .array-cell.current-mid { border-color: #FF1493; }
+        .array-cell.processed-0 { background: #E6E6FA; }
+        .array-cell.processed-2 { background: #F0F0F0; }
+
+        .pointer {
+            position: absolute;
+            width: 0;
+            height: 0;
+            z-index: 10;
+        }
+
+        .pointer-low {
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 15px solid #32CD32;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .pointer-low::after {
+            content: 'L';
+            position: absolute;
+            top: 18px;
+            left: -4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #32CD32;
+        }
+
+        .pointer-mid {
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 15px solid #FF1493;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .pointer-mid::after {
+            content: 'M';
+            position: absolute;
+            top: 18px;
+            left: -4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #FF1493;
+        }
+
+        .pointer-high {
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 15px solid #4169E1;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .pointer-high::after {
+            content: 'H';
+            position: absolute;
+            top: 18px;
+            left: -4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #4169E1;
+        }
+
+        .step-counter {
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .collapsible {
+            margin-top: 20px;
+        }
+
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid black;
+            border-top: none;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .collapsible-content.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="section problem-section">
+                <strong>Sort 0,1,2 (Dutch National Flag)</strong><br>
+                Sort an array containing only 0s, 1s, and 2s in one pass.<br>
+                Input: [2,0,2,1,1,0] → Output: [0,0,1,1,2,2]
+            </div>
+
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+
+            <div class="section step-counter">
+                Step: <span id="stepCount">0</span>
+            </div>
+
+            <div class="section variables-section">
+                <strong>Variables</strong>
+                <div class="variable-row" id="var-low">
+                    <span>low (0s boundary):</span>
+                    <span id="low-val">0</span>
+                </div>
+                <div class="variable-row" id="var-mid">
+                    <span>mid (current position):</span>
+                    <span id="mid-val">0</span>
+                </div>
+                <div class="variable-row" id="var-high">
+                    <span>high (2s boundary):</span>
+                    <span id="high-val">5</span>
+                </div>
+            </div>
+
+            <div class="section conditions-section">
+                <strong>Current Condition</strong>
+                <div id="current-condition"></div>
+            </div>
+
+            <div class="section operations-section">
+                <strong>Current Operation</strong>
+                <div id="current-operation"></div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('theory')">
+                    Theory & Algorithm Explanation
+                </div>
+                <div class="collapsible-content" id="theory">
+                    <strong>Dutch National Flag Problem:</strong><br>
+                    Named after the Dutch flag (red, white, blue), this algorithm sorts an array of three distinct values in one pass using three pointers.<br><br>
+                    <strong>Algorithm Steps:</strong><br>
+                    1. Initialize three pointers: low=0, mid=0, high=n-1<br>
+                    2. While mid ≤ high:<br>
+                    &nbsp;&nbsp;- If arr[mid] = 0: swap with arr[low], increment both low and mid<br>
+                    &nbsp;&nbsp;- If arr[mid] = 1: just increment mid<br>
+                    &nbsp;&nbsp;- If arr[mid] = 2: swap with arr[high], decrement high (don't increment mid)<br><br>
+                    <strong>Time Complexity:</strong> O(n)<br>
+                    <strong>Space Complexity:</strong> O(1)
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('tricks')">
+                    Tricks & Edge Cases
+                </div>
+                <div class="collapsible-content" id="tricks">
+                    <strong>Key Insights:</strong><br>
+                    - After swapping with high, don't increment mid because the swapped element needs to be processed<br>
+                    - The low pointer tracks the boundary for 0s, high pointer tracks boundary for 2s<br>
+                    - Elements between low and mid are guaranteed to be 1s<br><br>
+                    <strong>Edge Cases:</strong><br>
+                    - Empty array or single element<br>
+                    - Array with all same elements<br>
+                    - Already sorted array<br>
+                    - Reverse sorted array
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="array-display">
+                <strong>Array Visualization</strong>
+            </div>
+            <div class="array-container" id="array-container"></div>
+            <div class="array-display">
+                Current Array: <span id="current-array"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let arr = [2, 0, 2, 1, 1, 0];
+        let low = 0, mid = 0, high = 5;
+        let step = 0;
+        let maxSteps = 0;
+        let steps = [];
+
+        function generateSteps() {
+            steps = [];
+            let tempArr = [...arr];
+            let tempLow = 0, tempMid = 0, tempHigh = arr.length - 1;
+            
+            steps.push({
+                arr: [...tempArr],
+                low: tempLow,
+                mid: tempMid,
+                high: tempHigh,
+                condition: 'Initialize pointers',
+                operation: 'low=0, mid=0, high=' + (arr.length - 1),
+                activeVar: null
+            });
+
+            while (tempMid <= tempHigh) {
+                let currentVal = tempArr[tempMid];
+                
+                if (currentVal === 0) {
+                    steps.push({
+                        arr: [...tempArr],
+                        low: tempLow,
+                        mid: tempMid,
+                        high: tempHigh,
+                        condition: `arr[${tempMid}] === 0 (${currentVal} === 0) ✓`,
+                        operation: `Swap arr[${tempMid}] with arr[${tempLow}]`,
+                        activeVar: 'mid'
+                    });
+                    
+                    [tempArr[tempLow], tempArr[tempMid]] = [tempArr[tempMid], tempArr[tempLow]];
+                    tempLow++;
+                    tempMid++;
+                    
+                    steps.push({
+                        arr: [...tempArr],
+                        low: tempLow,
+                        mid: tempMid,
+                        high: tempHigh,
+                        condition: 'After swap',
+                        operation: `low++ (${tempLow-1} → ${tempLow}), mid++ (${tempMid-1} → ${tempMid})`,
+                        activeVar: 'low'
+                    });
+                } else if (currentVal === 1) {
+                    steps.push({
+                        arr: [...tempArr],
+                        low: tempLow,
+                        mid: tempMid,
+                        high: tempHigh,
+                        condition: `arr[${tempMid}] === 1 (${currentVal} === 1) ✓`,
+                        operation: `mid++ (${tempMid} → ${tempMid + 1})`,
+                        activeVar: 'mid'
+                    });
+                    tempMid++;
+                } else {
+                    steps.push({
+                        arr: [...tempArr],
+                        low: tempLow,
+                        mid: tempMid,
+                        high: tempHigh,
+                        condition: `arr[${tempMid}] === 2 (${currentVal} === 2) ✓`,
+                        operation: `Swap arr[${tempMid}] with arr[${tempHigh}]`,
+                        activeVar: 'mid'
+                    });
+                    
+                    [tempArr[tempMid], tempArr[tempHigh]] = [tempArr[tempHigh], tempArr[tempMid]];
+                    tempHigh--;
+                    
+                    steps.push({
+                        arr: [...tempArr],
+                        low: tempLow,
+                        mid: tempMid,
+                        high: tempHigh,
+                        condition: 'After swap',
+                        operation: `high-- (${tempHigh+1} → ${tempHigh})`,
+                        activeVar: 'high'
+                    });
+                }
+            }
+            
+            steps.push({
+                arr: [...tempArr],
+                low: tempLow,
+                mid: tempMid,
+                high: tempHigh,
+                condition: `mid > high (${tempMid} > ${tempHigh}) - Complete`,
+                operation: 'Sorting complete!',
+                activeVar: null
+            });
+            
+            maxSteps = steps.length - 1;
+        }
+
+        function updateDisplay() {
+            const currentStep = steps[step];
+            
+            document.getElementById('stepCount').textContent = step;
+            document.getElementById('low-val').textContent = currentStep.low;
+            document.getElementById('mid-val').textContent = currentStep.mid;
+            document.getElementById('high-val').textContent = currentStep.high;
+            document.getElementById('current-array').textContent = '[' + currentStep.arr.join(',') + ']';
+            
+            document.querySelectorAll('.variable-row').forEach(row => {
+                row.className = 'variable-row';
+            });
+            
+            if (currentStep.activeVar) {
+                document.getElementById(`var-${currentStep.activeVar}`).className = 'variable-row highlight-yellow';
+            }
+            
+            document.getElementById('current-condition').innerHTML = currentStep.condition;
+            document.getElementById('current-operation').innerHTML = currentStep.operation;
+            
+            renderArray(currentStep);
+            
+            document.getElementById('prevBtn').disabled = step === 0;
+            document.getElementById('nextBtn').disabled = step === maxSteps;
+        }
+
+        function renderArray(stepData) {
+            const container = document.getElementById('array-container');
+            container.innerHTML = '';
+            
+            stepData.arr.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = val;
+                
+                if (idx === stepData.mid && stepData.mid <= stepData.high) {
+                    cell.classList.add('current-mid');
+                }
+                
+                if (idx < stepData.low) {
+                    cell.classList.add('processed-0');
+                } else if (idx > stepData.high) {
+                    cell.classList.add('processed-2');
+                }
+                
+                if (idx === stepData.low) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer pointer-low';
+                    cell.appendChild(pointer);
+                }
+                
+                if (idx === stepData.mid && stepData.mid <= stepData.high) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer pointer-mid';
+                    cell.appendChild(pointer);
+                }
+                
+                if (idx === stepData.high) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer pointer-high';
+                    cell.appendChild(pointer);
+                }
+                
+                container.appendChild(cell);
+            });
+        }
+
+        function nextStep() {
+            if (step < maxSteps) {
+                step++;
+                updateDisplay();
+            }
+        }
+
+        function prevStep() {
+            if (step > 0) {
+                step--;
+                updateDisplay();
+            }
+        }
+
+        function reset() {
+            step = 0;
+            updateDisplay();
+        }
+
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            content.classList.toggle('show');
+        }
+
+        document.getElementById('nextBtn').onclick = nextStep;
+        document.getElementById('prevBtn').onclick = prevStep;
+        document.getElementById('resetBtn').onclick = reset;
+
+        generateSteps();
+        updateDisplay();
+    </script>
+</body>
+</html>
