@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spiral Matrix Traversal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            padding: 10px;
+            line-height: 1.3;
+            font-size: 12px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .problem-section {
+            background: black;
+            color: white;
+            padding: 10px;
+            border: 1px solid black;
+        }
+        
+        .collapsible {
+            background: white;
+            border: 1px solid black;
+            margin: 5px 0;
+        }
+        
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 8px;
+            cursor: pointer;
+            user-select: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            font-size: inherit;
+        }
+        
+        .collapsible-header:hover {
+            background: #333;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            background: white;
+            color: black;
+        }
+        
+        .collapsible.active .collapsible-content {
+            display: block;
+        }
+        
+        .variables {
+            background: white;
+            border: 2px solid black;
+            padding: 10px;
+            min-height: 120px;
+        }
+        
+        .variable-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 3px;
+            border-bottom: 1px solid #ccc;
+        }
+        
+        .variable-row.highlight {
+            background: #ffeb3b;
+            border: 2px solid #f57f17;
+            font-weight: bold;
+        }
+        
+        .variable-row.increment {
+            background: #c8e6c9;
+            border: 2px solid #4caf50;
+        }
+        
+        .variable-row.decrement {
+            background: #ffcdd2;
+            border: 2px solid #f44336;
+        }
+        
+        .current-step {
+            background: white;
+            border: 2px solid black;
+            padding: 10px;
+            min-height: 80px;
+        }
+        
+        .step-counter {
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .condition-display {
+            background: white;
+            border: 2px solid black;
+            padding: 10px;
+            min-height: 80px;
+        }
+        
+        .condition-text {
+            font-weight: bold;
+            margin: 5px 0;
+            padding: 5px;
+        }
+        
+        .condition-true {
+            background: #c8e6c9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .condition-false {
+            background: #ffcdd2;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+        
+        .operation-display {
+            background: white;
+            border: 2px solid black;
+            padding: 10px;
+            min-height: 60px;
+        }
+        
+        .operation {
+            font-weight: bold;
+            padding: 5px;
+            margin: 3px 0;
+        }
+        
+        .operation.increment {
+            background: #c8e6c9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .operation.decrement {
+            background: #ffcdd2;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+        
+        .operation.add {
+            background: #e1f5fe;
+            color: #0277bd;
+            border-left: 4px solid #03a9f4;
+        }
+        
+        .result {
+            background: white;
+            border: 2px solid black;
+            padding: 10px;
+            min-height: 60px;
+        }
+        
+        .result-array {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            padding: 10px 0;
+        }
+        
+        .btn {
+            background: white;
+            color: black;
+            border: 2px solid black;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: inherit;
+        }
+        
+        .btn:hover {
+            background: black;
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: white;
+            color: black;
+        }
+        
+        .right-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            border: 2px solid black;
+            padding: 20px;
+        }
+        
+        .matrix-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .matrix {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            position: relative;
+            padding: 40px;
+            background: white;
+            border: 2px solid black;
+        }
+        
+        .cell {
+            width: 80px;
+            height: 80px;
+            border: 3px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+            background: white;
+        }
+        
+        .cell.visited {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        
+        .cell.current {
+            background: #ffeb3b;
+            border-color: #f57f17;
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.7);
+        }
+        
+        .pointer {
+            position: absolute;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .pointer-triangle {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid;
+        }
+        
+        .pointer-label {
+            position: absolute;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 8px;
+            color: white;
+            white-space: nowrap;
+        }
+        
+        h3 {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="problem-section">
+                <h3>Problem: Spiral Matrix Traversal</h3>
+                <p>Traverse a 3×3 matrix in spiral order (clockwise from outside to inside)</p>
+                <p><strong>Example:</strong></p>
+                <p>Input: [[1,2,3],[4,5,6],[7,8,9]]</p>
+                <p>Output: [1,2,3,6,9,8,7,4,5]</p>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" id="prevBtn">Previous</button>
+                <button class="btn" id="nextBtn">Next</button>
+                <button class="btn" id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="variables">
+                <h3>Variables</h3>
+                <div id="variableDisplay"></div>
+            </div>
+            
+            <div class="condition-display">
+                <h3>Condition Check</h3>
+                <div id="conditionDisplay">No conditions to check</div>
+            </div>
+            
+            <div class="operation-display">
+                <h3>Operations</h3>
+                <div id="operationDisplay">Initialize algorithm</div>
+            </div>
+            
+            <div class="current-step">
+                <div class="step-counter" id="stepCounter">Step 0/12</div>
+                <div id="stepDescription">Initialize boundaries and result array</div>
+            </div>
+            
+            <div class="result">
+                <h3>Result Array</h3>
+                <div class="result-array" id="resultArray">[]</div>
+            </div>
+            
+            <div class="collapsible">
+                <button class="collapsible-header">Algorithm Theory</button>
+                <div class="collapsible-content">
+                    <p>The spiral traversal follows four directions in sequence: RIGHT → DOWN → LEFT → UP. We maintain four boundaries (top, right, bottom, left) that shrink inward after completing each direction. The algorithm continues until all elements are visited.</p>
+                </div>
+            </div>
+            
+            <div class="collapsible">
+                <button class="collapsible-header">Implementation Details</button>
+                <div class="collapsible-content">
+                    <p>Use four variables to track boundaries: top, right, bottom, left. After traversing each side, update the corresponding boundary. Check if boundaries are valid before each traversal direction to handle edge cases.</p>
+                </div>
+            </div>
+            
+            <div class="collapsible">
+                <button class="collapsible-header">Edge Cases & Boundary Logic</button>
+                <div class="collapsible-content">
+                    <p>Handle single row/column matrices, empty matrices, and ensure boundaries don't cross. After each direction, check if the updated boundary is still valid (top ≤ bottom, left ≤ right).</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="matrix-container">
+                <div class="matrix" id="matrix"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const matrix = [[1,2,3],[4,5,6],[7,8,9]];
+        let currentStep = 0;
+        let pointers = [];
+        
+        const pointerColors = {
+            'current': '#e91e63',      // Pink
+            'top': '#4caf50',         // Green
+            'right': '#2196f3',       // Blue
+            'bottom': '#ff9800',      // Orange
+            'left': '#9c27b0'         // Purple
+        };
+        
+        const steps = [
+            {
+                desc: "Initialize boundaries: top=0, right=2, bottom=2, left=0",
+                vars: { top: 0, right: 2, bottom: 2, left: 0, direction: "INIT", row: "-", col: "-" },
+                highlights: [],
+                result: [],
+                current: null,
+                boundaries: { top: [0,0], right: [0,2], bottom: [2,2], left: [2,0] },
+                condition: "Initialize algorithm variables",
+                operation: "Set boundaries to matrix edges"
+            },
+            {
+                desc: "Start RIGHT traversal from position (0,0) - add value 1",
+                vars: { top: 0, right: 2, bottom: 2, left: 0, direction: "RIGHT", row: 0, col: 0 },
+                highlights: ['direction'],
+                result: [1],
+                current: [0, 0],
+                boundaries: { top: [0,0], right: [0,2], bottom: [2,2], left: [2,0] },
+                condition: "col <= right (0 <= 2) ✓",
+                operation: "Add matrix[0][0] = 1 to result"
+            },
+            {
+                desc: "Continue RIGHT to (0,1) - add value 2", 
+                vars: { top: 0, right: 2, bottom: 2, left: 0, direction: "RIGHT", row: 0, col: 1 },
+                highlights: ['col'],
+                result: [1, 2],
+                current: [0, 1],
+                boundaries: { top: [0,0], right: [0,2], bottom: [2,2], left: [2,0] },
+                condition: "col <= right (1 <= 2) ✓",
+                operation: "Add matrix[0][1] = 2 to result"
+            },
+            {
+                desc: "Continue RIGHT to (0,2) - add value 3",
+                vars: { top: 0, right: 2, bottom: 2, left: 0, direction: "RIGHT", row: 0, col: 2 },
+                highlights: ['col'],
+                result: [1, 2, 3],
+                current: [0, 2],
+                boundaries: { top: [0,0], right: [0,2], bottom: [2,2], left: [2,0] },
+                condition: "col <= right (2 <= 2) ✓",
+                operation: "Add matrix[0][2] = 3 to result"
+            },
+            {
+                desc: "Finished RIGHT row, increment top boundary to 1",
+                vars: { top: 1, right: 2, bottom: 2, left: 0, direction: "DOWN", row: 1, col: 2 },
+                highlights: ['top'],
+                increments: ['top'],
+                result: [1, 2, 3],
+                current: null,
+                boundaries: { top: [1,1], right: [1,2], bottom: [2,2], left: [2,0] },
+                condition: "top <= bottom (1 <= 2) ✓",
+                operation: "top++ (0 → 1)"
+            },
+            {
+                desc: "Start DOWN traversal from (1,2) - add value 6",
+                vars: { top: 1, right: 2, bottom: 2, left: 0, direction: "DOWN", row: 1, col: 2 },
+                highlights: ['direction'],
+                result: [1, 2, 3, 6],
+                current: [1, 2],
+                boundaries: { top: [1,1], right: [1,2], bottom: [2,2], left: [2,0] },
+                condition: "row <= bottom (1 <= 2) ✓",
+                operation: "Add matrix[1][2] = 6 to result"
+            },
+            {
+                desc: "Continue DOWN to (2,2) - add value 9",
+                vars: { top: 1, right: 2, bottom: 2, left: 0, direction: "DOWN", row: 2, col: 2 },
+                highlights: ['row'],
+                result: [1, 2, 3, 6, 9],
+                current: [2, 2],
+                boundaries: { top: [1,1], right: [1,2], bottom: [2,2], left: [2,0] },
+                condition: "row <= bottom (2 <= 2) ✓",
+                operation: "Add matrix[2][2] = 9 to result"
+            },
+            {
+                desc: "Finished DOWN column, decrement right boundary to 1",
+                vars: { top: 1, right: 1, bottom: 2, left: 0, direction: "LEFT", row: 2, col: 1 },
+                highlights: ['right'],
+                decrements: ['right'],
+                result: [1, 2, 3, 6, 9],
+                current: null,
+                boundaries: { top: [1,1], right: [1,1], bottom: [2,1], left: [2,0] },
+                condition: "left <= right (0 <= 1) ✓",
+                operation: "right-- (2 → 1)"
+            },
+            {
+                desc: "Start LEFT traversal from (2,1) - add value 8",
+                vars: { top: 1, right: 1, bottom: 2, left: 0, direction: "LEFT", row: 2, col: 1 },
+                highlights: ['direction'],
+                result: [1, 2, 3, 6, 9, 8],
+                current: [2, 1],
+                boundaries: { top: [1,1], right: [1,1], bottom: [2,1], left: [2,0] },
+                condition: "col >= left (1 >= 0) ✓",
+                operation: "Add matrix[2][1] = 8 to result"
+            },
+            {
+                desc: "Continue LEFT to (2,0) - add value 7",
+                vars: { top: 1, right: 1, bottom: 2, left: 0, direction: "LEFT", row: 2, col: 0 },
+                highlights: ['col'],
+                result: [1, 2, 3, 6, 9, 8, 7],
+                current: [2, 0],
+                boundaries: { top: [1,1], right: [1,1], bottom: [2,1], left: [2,0] },
+                condition: "col >= left (0 >= 0) ✓",
+                operation: "Add matrix[2][0] = 7 to result"
+            },
+            {
+                desc: "Finished LEFT row, decrement bottom boundary to 1",
+                vars: { top: 1, right: 1, bottom: 1, left: 0, direction: "UP", row: 1, col: 0 },
+                highlights: ['bottom'],
+                decrements: ['bottom'],
+                result: [1, 2, 3, 6, 9, 8, 7],
+                current: null,
+                boundaries: { top: [1,1], right: [1,1], bottom: [1,1], left: [1,0] },
+                condition: "top <= bottom (1 <= 1) ✓",
+                operation: "bottom-- (2 → 1)"
+            },
+            {
+                desc: "Start UP traversal from (1,0) - add value 4",
+                vars: { top: 1, right: 1, bottom: 1, left: 0, direction: "UP", row: 1, col: 0 },
+                highlights: ['direction'],
+                result: [1, 2, 3, 6, 9, 8, 7, 4],
+                current: [1, 0],
+                boundaries: { top: [1,1], right: [1,1], bottom: [1,1], left: [1,0] },
+                condition: "row >= top (1 >= 1) ✓",
+                operation: "Add matrix[1][0] = 4 to result"
+            },
+            {
+                desc: "Final CENTER element at (1,1) - add value 5. Spiral complete!",
+                vars: { top: 1, right: 1, bottom: 1, left: 1, direction: "CENTER", row: 1, col: 1 },
+                highlights: ['left'],
+                increments: ['left'],
+                result: [1, 2, 3, 6, 9, 8, 7, 4, 5],
+                current: [1, 1],
+                boundaries: { top: [1,1], right: [1,1], bottom: [1,1], left: [1,1] },
+                condition: "All boundaries converged ✓",
+                operation: "Add matrix[1][1] = 5 to result"
+            }
+        ];
+        
+        function initMatrix() {
+            const matrixEl = document.getElementById('matrix');
+            matrixEl.innerHTML = '';
+            
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.id = `cell-${i}-${j}`;
+                    cell.textContent = matrix[i][j];
+                    matrixEl.appendChild(cell);
+                }
+            }
+        }
+        
+        function clearPointers() {
+            pointers.forEach(p => p.element.remove());
+            pointers = [];
+        }
+        
+        function createPointer(row, col, label, color, position) {
+            const cell = document.getElementById(`cell-${row}-${col}`);
+            if (!cell) return;
+            
+            const pointer = document.createElement('div');
+            pointer.className = 'pointer';
+            
+            const triangle = document.createElement('div');
+            triangle.className = 'pointer-triangle';
+            triangle.style.borderTopColor = color;
+            
+            const labelEl = document.createElement('div');
+            labelEl.className = 'pointer-label';
+            labelEl.textContent = label;
+            labelEl.style.backgroundColor = color;
+            
+            pointer.appendChild(triangle);
+            pointer.appendChild(labelEl);
+            
+            let offsetX = 0, offsetY = 0;
+            switch(position) {
+                case 'top':
+                    offsetX = 0;
+                    offsetY = -50;
+                    labelEl.style.left = '-25px';
+                    labelEl.style.top = '-30px';
+                    break;
+                case 'right':
+                    offsetX = 35;
+                    offsetY = -20;
+                    labelEl.style.left = '-20px';
+                    labelEl.style.top = '-30px';
+                    break;
+                case 'bottom':
+                    offsetX = 0;
+                    offsetY = 15;
+                    labelEl.style.left = '-25px';
+                    labelEl.style.top = '-30px';
+                    break;
+                case 'left':
+                    offsetX = -35;
+                    offsetY = -20;
+                    labelEl.style.left = '-20px';
+                    labelEl.style.top = '-30px';
+                    break;
+                default:
+                    offsetX = 0;
+                    offsetY = -30;
+                    labelEl.style.left = '-25px';
+                    labelEl.style.top = '-30px';
+            }
+            
+            pointer.style.position = 'absolute';
+            pointer.style.left = '50%';
+            pointer.style.top = '50%';
+            pointer.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
+            
+            cell.style.position = 'relative';
+            cell.appendChild(pointer);
+            
+            pointers.push({ element: pointer, row, col, label, color });
+        }
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep}/${steps.length - 1}`;
+            document.getElementById('stepDescription').textContent = step.desc;
+            
+            // Update variables with highlighting
+            const varsHtml = Object.entries(step.vars).map(([key, value]) => {
+                let className = 'variable-row';
+                if (step.highlights && step.highlights.includes(key)) {
+                    className += ' highlight';
+                }
+                if (step.increments && step.increments.includes(key)) {
+                    className += ' increment';
+                }
+                if (step.decrements && step.decrements.includes(key)) {
+                    className += ' decrement';
+                }
+                return `<div class="${className}"><span>${key}:</span><span>${value}</span></div>`;
+            }).join('');
+            document.getElementById('variableDisplay').innerHTML = varsHtml;
+            
+            // Update condition display
+            const conditionHtml = step.condition.includes('✓') 
+                ? `<div class="condition-text condition-true">${step.condition}</div>`
+                : step.condition.includes('✗')
+                ? `<div class="condition-text condition-false">${step.condition}</div>`
+                : `<div class="condition-text">${step.condition}</div>`;
+            document.getElementById('conditionDisplay').innerHTML = conditionHtml;
+            
+            // Update operation display
+            let operationClass = 'operation';
+            if (step.operation.includes('++')) {
+                operationClass += ' increment';
+            } else if (step.operation.includes('--')) {
+                operationClass += ' decrement';
+            } else if (step.operation.includes('Add')) {
+                operationClass += ' add';
+            }
+            document.getElementById('operationDisplay').innerHTML = 
+                `<div class="${operationClass}">${step.operation}</div>`;
+            
+            // Clear previous highlights
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('visited', 'current');
+            });
+            
+            clearPointers();
+            
+            // Mark visited cells
+            step.result.forEach((value) => {
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        if (matrix[i][j] === value) {
+                            const cell = document.getElementById(`cell-${i}-${j}`);
+                            if (cell) {
+                                cell.classList.add('visited');
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
+            
+            // Show boundary pointers
+            if (step.boundaries) {
+                const positions = ['top', 'right', 'bottom', 'left'];
+                positions.forEach(pos => {
+                    if (step.boundaries[pos]) {
+                        const [row, col] = step.boundaries[pos];
+                        createPointer(row, col, pos, pointerColors[pos], pos);
+                    }
+                });
+            }
+            
+            // Show current position
+            if (step.current) {
+                const [row, col] = step.current;
+                const cell = document.getElementById(`cell-${row}-${col}`);
+                if (cell) {
+                    cell.classList.add('current');
+                    createPointer(row, col, 'current', pointerColors.current, 'center');
+                }
+            }
+            
+            document.getElementById('resultArray').textContent = '[' + step.result.join(', ') + ']';
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('prevBtn').addEventListener('click', function() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            currentStep = 0;
+            updateDisplay();
+        });
+        
+        document.querySelectorAll('.collapsible-header').forEach(function(header) {
+            header.addEventListener('click', function() {
+                const collapsible = header.parentElement;
+                collapsible.classList.toggle('active');
+            });
+        });
+        
+        initMatrix();
+        updateDisplay();
+    </script>
+</body>
+</html>

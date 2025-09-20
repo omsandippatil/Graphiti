@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Frequency Counter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        
+        .section h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid black;
+            padding-bottom: 4px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: white;
+            border: 2px solid black;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: black;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .variable-highlight {
+            transition: background-color 0.3s;
+        }
+        
+        .active { background: yellow; }
+        .increment { background: lightgreen; }
+        .decrement { background: lightcoral; }
+        
+        .condition-true { color: green; font-weight: bold; }
+        .condition-false { color: red; font-weight: bold; }
+        
+        .operation-increment { color: green; font-weight: bold; }
+        .operation-decrement { color: red; font-weight: bold; }
+        .operation-add { color: blue; font-weight: bold; }
+        
+        .array-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .array-display {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .array-cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .current-cell {
+            background: yellow;
+        }
+        
+        .processed-cell {
+            background: lightgray;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -25px;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            transform: translateX(-50%);
+            left: 50%;
+        }
+        
+        .pointer-current {
+            background: hotpink;
+            color: white;
+        }
+        
+        .frequency-map {
+            border: 2px solid black;
+            padding: 10px;
+            min-height: 100px;
+            font-size: 14px;
+        }
+        
+        .frequency-entry {
+            margin: 5px 0;
+            padding: 3px;
+            border: 1px solid black;
+        }
+        
+        .frequency-entry.new {
+            background: lightgreen;
+        }
+        
+        .frequency-entry.updated {
+            background: lightblue;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+        }
+        
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid black;
+            border-top: none;
+        }
+        
+        .collapsible-content.open {
+            display: block;
+        }
+        
+        .step-info {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="section">
+            <h3>Problem Statement</h3>
+            <p>Count frequency of integers in array</p>
+            <p><strong>Input:</strong> [1,2,3,3,4,1,4,5,1,2]</p>
+            <p><strong>Expected:</strong> 1:3,2:2,3:2,4:2,5:1</p>
+        </div>
+        
+        <div class="controls">
+            <button onclick="prevStep()">Previous</button>
+            <button onclick="nextStep()">Next</button>
+            <button onclick="resetVisualization()">Reset</button>
+        </div>
+        
+        <div class="section">
+            <h3>Variables</h3>
+            <div id="variables"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Current Condition</h3>
+            <div id="condition"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Current Operation</h3>
+            <div id="operation"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Step Info</h3>
+            <div id="step-info" class="step-info"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Result</h3>
+            <div id="result"></div>
+        </div>
+        
+        <div class="collapsible">
+            <div class="collapsible-header" onclick="toggleCollapsible()">
+                ▼ Algorithm Theory & Explanations
+            </div>
+            <div class="collapsible-content" id="theory-content">
+                <h4>Algorithm Explanation</h4>
+                <p>This visualization demonstrates a simple frequency counting algorithm using a hash map approach.</p>
+                
+                <h4>Time Complexity</h4>
+                <p>O(n) - Single pass through the array</p>
+                
+                <h4>Space Complexity</h4>
+                <p>O(k) - where k is the number of unique elements</p>
+                
+                <h4>Key Concepts</h4>
+                <ul>
+                    <li>Hash Map/Object for storing frequencies</li>
+                    <li>Single iteration through input array</li>
+                    <li>Increment counter for existing keys</li>
+                    <li>Initialize counter for new keys</li>
+                </ul>
+                
+                <h4>Edge Cases</h4>
+                <ul>
+                    <li>Empty array returns empty frequency map</li>
+                    <li>Single element returns frequency of 1</li>
+                    <li>All same elements return single entry</li>
+                    <li>All different elements return frequency 1 for each</li>
+                </ul>
+                
+                <h4>Boundary Conditions</h4>
+                <ul>
+                    <li>First element always creates new entry</li>
+                    <li>Last element completes the counting</li>
+                    <li>Duplicate checking at each step</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="right-panel">
+        <div class="array-container">
+            <h3>Array Visualization</h3>
+            <div id="array-display" class="array-display"></div>
+            
+            <h3>Frequency Map</h3>
+            <div id="frequency-display" class="frequency-map"></div>
+            
+            <div>Step: <span id="step-counter">0</span> / <span id="total-steps">0</span></div>
+        </div>
+    </div>
+
+    <script>
+        const inputArray = [1, 2, 3, 3, 4, 1, 4, 5, 1, 2];
+        let currentStep = 0;
+        let steps = [];
+        let frequencyMap = {};
+
+        function initializeSteps() {
+            steps = [];
+            frequencyMap = {};
+            
+            steps.push({
+                index: -1,
+                currentElement: null,
+                frequencyMap: {},
+                condition: "Start algorithm",
+                operation: "Initialize frequency map",
+                stepInfo: "Beginning frequency counting algorithm. Initialize empty frequency map to store counts.",
+                variables: { i: -1, currentElement: 'null', mapSize: 0 }
+            });
+
+            for (let i = 0; i < inputArray.length; i++) {
+                const element = inputArray[i];
+                const isNewElement = !(element in frequencyMap);
+                
+                if (isNewElement) {
+                    frequencyMap[element] = 1;
+                    steps.push({
+                        index: i,
+                        currentElement: element,
+                        frequencyMap: { ...frequencyMap },
+                        condition: `element ${element} not in map`,
+                        operation: `Create new entry: ${element} = 1`,
+                        stepInfo: `Element ${element} not found in frequency map. Creating new entry with count 1.`,
+                        variables: { i: i, currentElement: element, mapSize: Object.keys(frequencyMap).length },
+                        isNew: true
+                    });
+                } else {
+                    frequencyMap[element]++;
+                    steps.push({
+                        index: i,
+                        currentElement: element,
+                        frequencyMap: { ...frequencyMap },
+                        condition: `element ${element} exists in map`,
+                        operation: `Increment: ${element} = ${frequencyMap[element]}`,
+                        stepInfo: `Element ${element} found in frequency map. Incrementing count from ${frequencyMap[element] - 1} to ${frequencyMap[element]}.`,
+                        variables: { i: i, currentElement: element, mapSize: Object.keys(frequencyMap).length },
+                        isUpdate: true
+                    });
+                }
+            }
+            
+            steps.push({
+                index: inputArray.length,
+                currentElement: null,
+                frequencyMap: { ...frequencyMap },
+                condition: "Algorithm complete",
+                operation: "Return frequency map",
+                stepInfo: "All elements processed. Frequency counting complete. Final result contains counts for all unique elements.",
+                variables: { i: inputArray.length, currentElement: 'complete', mapSize: Object.keys(frequencyMap).length }
+            });
+        }
+
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('step-counter').textContent = currentStep;
+            document.getElementById('total-steps').textContent = steps.length - 1;
+            
+            updateVariables(step);
+            updateCondition(step);
+            updateOperation(step);
+            updateStepInfo(step);
+            updateArrayDisplay(step);
+            updateFrequencyDisplay(step);
+            updateResult(step);
+            updateButtons();
+        }
+
+        function updateVariables(step) {
+            const vars = step.variables;
+            let html = '';
+            for (const [key, value] of Object.entries(vars)) {
+                const highlight = (key === 'i' && step.index >= 0) ? 'active' : '';
+                html += `<div class="variable-highlight ${highlight}">${key}: ${value}</div>`;
+            }
+            document.getElementById('variables').innerHTML = html;
+        }
+
+        function updateCondition(step) {
+            const isTrue = step.condition.includes('not in map') || step.condition.includes('exists in map') || step.condition.includes('Start') || step.condition.includes('complete');
+            const className = isTrue ? 'condition-true' : 'condition-false';
+            document.getElementById('condition').innerHTML = `<span class="${className}">${step.condition}</span>`;
+        }
+
+        function updateOperation(step) {
+            let className = 'operation-add';
+            if (step.operation.includes('Increment')) className = 'operation-increment';
+            else if (step.operation.includes('Create')) className = 'operation-add';
+            
+            document.getElementById('operation').innerHTML = `<span class="${className}">${step.operation}</span>`;
+        }
+
+        function updateStepInfo(step) {
+            document.getElementById('step-info').textContent = step.stepInfo;
+        }
+
+        function updateArrayDisplay(step) {
+            let html = '';
+            for (let i = 0; i < inputArray.length; i++) {
+                let cellClass = 'array-cell';
+                if (i === step.index) cellClass += ' current-cell';
+                else if (i < step.index) cellClass += ' processed-cell';
+                
+                html += `<div class="${cellClass}">
+                    ${inputArray[i]}
+                    ${i === step.index ? '<div class="pointer pointer-current">Current</div>' : ''}
+                </div>`;
+            }
+            document.getElementById('array-display').innerHTML = html;
+        }
+
+        function updateFrequencyDisplay(step) {
+            let html = '<div><strong>Frequency Map:</strong></div>';
+            const entries = Object.entries(step.frequencyMap);
+            
+            if (entries.length === 0) {
+                html += '<div>Empty</div>';
+            } else {
+                entries.forEach(([key, value]) => {
+                    let entryClass = 'frequency-entry';
+                    if (step.isNew && key == step.currentElement) entryClass += ' new';
+                    else if (step.isUpdate && key == step.currentElement) entryClass += ' updated';
+                    
+                    html += `<div class="${entryClass}">${key}: ${value}</div>`;
+                });
+            }
+            document.getElementById('frequency-display').innerHTML = html;
+        }
+
+        function updateResult(step) {
+            const entries = Object.entries(step.frequencyMap);
+            const result = entries.map(([k, v]) => `${k}:${v}`).join(', ');
+            document.getElementById('result').innerHTML = result || 'Empty';
+        }
+
+        function updateButtons() {
+            document.querySelector('button[onclick="prevStep()"]').disabled = currentStep === 0;
+            document.querySelector('button[onclick="nextStep()"]').disabled = currentStep === steps.length - 1;
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+
+        function resetVisualization() {
+            currentStep = 0;
+            initializeSteps();
+            updateDisplay();
+        }
+
+        function toggleCollapsible() {
+            const content = document.getElementById('theory-content');
+            const header = document.querySelector('.collapsible-header');
+            
+            content.classList.toggle('open');
+            header.textContent = content.classList.contains('open') ? 
+                '▲ Algorithm Theory & Explanations' : 
+                '▼ Algorithm Theory & Explanations';
+        }
+
+        initializeSteps();
+        updateDisplay();
+    </script>
+</body>
+</html>

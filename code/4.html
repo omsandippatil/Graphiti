@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            background: white;
+            border: 2px solid black;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .variables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+        }
+        
+        .variable {
+            padding: 4px 8px;
+            border: 1px solid black;
+            background: white;
+        }
+        
+        .variable.active {
+            background: yellow;
+        }
+        
+        .variable.increment {
+            background: #90EE90;
+        }
+        
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+        
+        .condition {
+            padding: 6px;
+            margin: 4px 0;
+            border: 1px solid black;
+            font-size: 12px;
+        }
+        
+        .condition.true {
+            background: #90EE90;
+        }
+        
+        .condition.false {
+            background: #FFB6C1;
+        }
+        
+        .operation {
+            padding: 6px;
+            margin: 4px 0;
+            border: 1px solid black;
+            font-size: 12px;
+        }
+        
+        .operation.increment {
+            background: #90EE90;
+        }
+        
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+        
+        .operation.add {
+            background: #ADD8E6;
+        }
+        
+        .matrix-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .matrix {
+            display: grid;
+            gap: 2px;
+            border: 2px solid black;
+            padding: 10px;
+        }
+        
+        .cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            background: white;
+            position: relative;
+        }
+        
+        .cell.visited {
+            background: #f5f5f5;
+        }
+        
+        .cell.current {
+            background: #ffff99;
+        }
+        
+        .pointer {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            z-index: 10;
+            border: 2px solid black;
+        }
+        
+        .pointer.current {
+            background: #ff1493;
+        }
+        
+        .pointer.top {
+            background: #00ff00;
+        }
+        
+        .pointer.right {
+            background: #0000ff;
+        }
+        
+        .pointer.bottom {
+            background: #ffa500;
+        }
+        
+        .pointer.left {
+            background: #800080;
+        }
+        
+        .pointer-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .result-array {
+            margin-top: 15px;
+            padding: 10px;
+            border: 2px solid black;
+            font-size: 14px;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+        }
+        
+        .collapsible-header {
+            background: #f0f0f0;
+            padding: 10px;
+            border: 1px solid black;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            border: 1px solid black;
+            border-top: none;
+        }
+        
+        .collapsible-content.active {
+            display: block;
+        }
+        
+        .step-info {
+            font-size: 12px;
+            padding: 8px;
+            border: 1px solid black;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="section">
+                <div class="section-title">Problem: Maximum Marks per Semester</div>
+                <div style="font-size: 12px;">Find max mark per group</div>
+                <div style="font-size: 11px; margin-top: 5px;">Input: [50,60,70],[90,98,76,67],[89,76] → Output: 70,98,89</div>
+            </div>
+            
+            <div class="controls">
+                <button id="prev">Previous</button>
+                <button id="next">Next</button>
+                <button id="reset">Reset</button>
+            </div>
+            
+            <div class="step-info" id="step-info">
+                Step 1: Initialize variables
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Variables</div>
+                <div class="variables-grid" id="variables">
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Current Condition</div>
+                <div id="conditions">
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Current Operation</div>
+                <div id="operations">
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Result</div>
+                <div id="result" style="font-size: 12px;">[]</div>
+                <div id="step-counter" style="font-size: 11px; margin-top: 5px;">Step: 1</div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('theory')">
+                    Theory & Algorithm Explanation ▼
+                </div>
+                <div class="collapsible-content" id="theory">
+                    <p><strong>Algorithm:</strong> Iterate through each group and find maximum value</p>
+                    <p><strong>Time Complexity:</strong> O(n*m) where n is number of groups, m is average group size</p>
+                    <p><strong>Space Complexity:</strong> O(1) excluding output array</p>
+                </div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('edge-cases')">
+                    Edge Cases & Boundary Logic ▼
+                </div>
+                <div class="collapsible-content" id="edge-cases">
+                    <p><strong>Empty groups:</strong> Skip empty arrays</p>
+                    <p><strong>Single element:</strong> Return that element as maximum</p>
+                    <p><strong>Negative numbers:</strong> Algorithm works with any numeric values</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="matrix-container" id="matrix-container">
+                <div class="matrix" id="matrix">
+                </div>
+            </div>
+            
+            <div class="result-array" id="result-display">
+                Result: []
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const data = [
+            [50, 60, 70],
+            [90, 98, 76, 67],
+            [89, 76]
+        ];
+        
+        let currentStep = 0;
+        let maxSteps = 0;
+        let steps = [];
+        
+        function initializeSteps() {
+            steps = [
+                {
+                    groupIndex: -1,
+                    elementIndex: -1,
+                    variables: { groupIndex: 0, elementIndex: 0, currentMax: null, result: [] },
+                    condition: "",
+                    operation: "Initialize variables",
+                    description: "Starting algorithm execution"
+                }
+            ];
+            
+            for (let i = 0; i < data.length; i++) {
+                steps.push({
+                    groupIndex: i,
+                    elementIndex: -1,
+                    variables: { groupIndex: i, elementIndex: 0, currentMax: data[i][0], result: steps[steps.length-1].variables.result.slice() },
+                    condition: `groupIndex < data.length (${i} < ${data.length})`,
+                    operation: `Initialize currentMax = ${data[i][0]}`,
+                    description: `Starting to process group ${i}`
+                });
+                
+                for (let j = 0; j < data[i].length; j++) {
+                    const prevMax = j === 0 ? data[i][0] : Math.max(...data[i].slice(0, j + 1));
+                    const newMax = Math.max(...data[i].slice(0, j + 1));
+                    
+                    steps.push({
+                        groupIndex: i,
+                        elementIndex: j,
+                        variables: { 
+                            groupIndex: i, 
+                            elementIndex: j, 
+                            currentMax: newMax, 
+                            result: steps[steps.length-1].variables.result.slice() 
+                        },
+                        condition: j < data[i].length - 1 ? `elementIndex < group.length (${j} < ${data[i].length})` : "",
+                        operation: data[i][j] > prevMax ? `Update currentMax = ${data[i][j]} (${data[i][j]} > ${prevMax})` : `Keep currentMax = ${prevMax} (${data[i][j]} <= ${prevMax})`,
+                        description: `Comparing element ${data[i][j]} with current max`
+                    });
+                }
+                
+                const finalResult = steps[steps.length-1].variables.result.slice();
+                finalResult.push(steps[steps.length-1].variables.currentMax);
+                
+                steps.push({
+                    groupIndex: i,
+                    elementIndex: -1,
+                    variables: { 
+                        groupIndex: i, 
+                        elementIndex: -1, 
+                        currentMax: steps[steps.length-1].variables.currentMax, 
+                        result: finalResult 
+                    },
+                    condition: "",
+                    operation: `Add ${steps[steps.length-1].variables.currentMax} to result`,
+                    description: `Completed group ${i}, added maximum to result`
+                });
+            }
+            
+            maxSteps = steps.length - 1;
+        }
+        
+        function createMatrix() {
+            const matrix = document.getElementById('matrix');
+            matrix.innerHTML = '';
+            
+            const maxCols = Math.max(...data.map(row => row.length));
+            matrix.style.gridTemplateColumns = `repeat(${maxCols}, 1fr)`;
+            
+            for (let i = 0; i < data.length; i++) {
+                for (let j = 0; j < maxCols; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.id = `cell-${i}-${j}`;
+                    
+                    if (j < data[i].length) {
+                        cell.textContent = data[i][j];
+                    } else {
+                        cell.style.visibility = 'hidden';
+                    }
+                    
+                    matrix.appendChild(cell);
+                }
+            }
+        }
+        
+        function updateVisualization() {
+            const step = steps[currentStep];
+            const { groupIndex, elementIndex, variables, condition, operation, description } = step;
+            
+            document.getElementById('step-info').textContent = `Step ${currentStep + 1}: ${description}`;
+            document.getElementById('step-counter').textContent = `Step: ${currentStep + 1}/${steps.length}`;
+            
+            const variablesDiv = document.getElementById('variables');
+            variablesDiv.innerHTML = '';
+            
+            Object.entries(variables).forEach(([key, value]) => {
+                const div = document.createElement('div');
+                div.className = 'variable';
+                div.textContent = `${key}: ${Array.isArray(value) ? `[${value.join(',')}]` : value}`;
+                variablesDiv.appendChild(div);
+            });
+            
+            const conditionsDiv = document.getElementById('conditions');
+            conditionsDiv.innerHTML = '';
+            if (condition) {
+                const div = document.createElement('div');
+                div.className = 'condition true';
+                div.textContent = condition + ' ✓';
+                conditionsDiv.appendChild(div);
+            }
+            
+            const operationsDiv = document.getElementById('operations');
+            operationsDiv.innerHTML = '';
+            const div = document.createElement('div');
+            div.className = 'operation';
+            div.textContent = operation;
+            operationsDiv.appendChild(div);
+            
+            document.getElementById('result').textContent = `[${variables.result.join(', ')}]`;
+            document.getElementById('result-display').textContent = `Result: [${variables.result.join(', ')}]`;
+            
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.className = 'cell';
+            });
+            
+            if (groupIndex >= 0 && elementIndex >= 0) {
+                const currentCell = document.getElementById(`cell-${groupIndex}-${elementIndex}`);
+                if (currentCell) {
+                    currentCell.className = 'cell current';
+                }
+                
+                for (let i = 0; i < data.length; i++) {
+                    for (let j = 0; j < data[i].length; j++) {
+                        if (i < groupIndex || (i === groupIndex && j < elementIndex)) {
+                            const visitedCell = document.getElementById(`cell-${i}-${j}`);
+                            if (visitedCell) {
+                                visitedCell.className = 'cell visited';
+                            }
+                        }
+                    }
+                }
+            }
+            
+            document.getElementById('prev').disabled = currentStep === 0;
+            document.getElementById('next').disabled = currentStep === maxSteps;
+        }
+        
+        function nextStep() {
+            if (currentStep < maxSteps) {
+                currentStep++;
+                updateVisualization();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateVisualization();
+            }
+        }
+        
+        function resetVisualization() {
+            currentStep = 0;
+            updateVisualization();
+        }
+        
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const header = content.previousElementSibling;
+            
+            content.classList.toggle('active');
+            header.textContent = content.classList.contains('active') ? 
+                header.textContent.replace('▼', '▲') : 
+                header.textContent.replace('▲', '▼');
+        }
+        
+        document.getElementById('next').addEventListener('click', nextStep);
+        document.getElementById('prev').addEventListener('click', prevStep);
+        document.getElementById('reset').addEventListener('click', resetVisualization);
+        
+        initializeSteps();
+        createMatrix();
+        updateVisualization();
+    </script>
+</body>
+</html>

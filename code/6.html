@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dealership Tyre Calculation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: white;
+            color: black;
+            padding: 10px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100%;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 600px;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .section {
+            border: 2px solid black;
+            padding: 8px;
+            background: white;
+        }
+
+        .question {
+            font-size: 14px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .variables-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .variable {
+            border: 1px solid black;
+            padding: 4px 8px;
+            background: white;
+            min-width: 60px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .variable.active {
+            background: yellow;
+        }
+
+        .variable.increment {
+            background: lightgreen;
+        }
+
+        .variable.decrement {
+            background: lightcoral;
+        }
+
+        .conditions, .operations {
+            font-size: 12px;
+        }
+
+        .condition {
+            padding: 2px 4px;
+            margin: 2px 0;
+        }
+
+        .condition.true {
+            background: lightgreen;
+        }
+
+        .condition.false {
+            background: lightcoral;
+        }
+
+        .operation {
+            padding: 2px 4px;
+            margin: 2px 0;
+        }
+
+        .operation.increment {
+            background: lightgreen;
+        }
+
+        .operation.decrement {
+            background: lightcoral;
+        }
+
+        .operation.add {
+            background: lightblue;
+        }
+
+        .matrix-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .matrix {
+            display: grid;
+            gap: 2px;
+            background: black;
+            padding: 2px;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .cell.current {
+            background: yellow;
+        }
+
+        .cell.visited {
+            background: #f0f0f0;
+        }
+
+        .pointer {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            z-index: 10;
+        }
+
+        .pointer.current { background: deeppink; }
+        .pointer.row { background: limegreen; }
+        .pointer.col { background: dodgerblue; }
+
+        .result-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .result-item {
+            border: 1px solid black;
+            padding: 4px 8px;
+            background: white;
+            font-size: 12px;
+        }
+
+        .collapsible {
+            margin-top: auto;
+        }
+
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 8px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            border: 2px solid black;
+            border-top: none;
+            background: white;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .collapsible-content.open {
+            display: block;
+        }
+
+        .step-info {
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="section question">
+                <h3>Dealership Tyre Inventory</h3>
+                <p>Calculate total tyres across all dealership locations arranged in a grid. Each cell represents a dealership with its tyre count.</p>
+                <p><strong>Example:</strong> Grid [[12,8,5],[15,20,3],[7,11,9]] → Total: 90 tyres</p>
+            </div>
+
+            <div class="section controls">
+                <button onclick="previousStep()" id="prevBtn">Previous</button>
+                <button onclick="nextStep()" id="nextBtn">Next</button>
+                <button onclick="reset()">Reset</button>
+            </div>
+
+            <div class="section">
+                <h4>Variables</h4>
+                <div class="variables-section" id="variables"></div>
+            </div>
+
+            <div class="section">
+                <h4>Current Conditions</h4>
+                <div class="conditions" id="conditions"></div>
+            </div>
+
+            <div class="section">
+                <h4>Current Operation</h4>
+                <div class="operations" id="operations"></div>
+            </div>
+
+            <div class="section">
+                <h4>Step Information</h4>
+                <div class="step-info" id="stepInfo"></div>
+            </div>
+
+            <div class="section">
+                <h4>Result & Progress</h4>
+                <div class="result-section" id="results"></div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible()">
+                    ▼ Theory & Algorithm Details
+                </div>
+                <div class="collapsible-content" id="theory">
+                    <h4>Algorithm Explanation</h4>
+                    <p>This implements a simple matrix traversal for inventory calculation:</p>
+                    <ul>
+                        <li>Nested loops to visit each dealership location</li>
+                        <li>Row-by-row traversal (row-major order)</li>
+                        <li>Accumulate tyre counts from each location</li>
+                    </ul>
+                    <h4>Time Complexity</h4>
+                    <p>O(m×n) where m is rows and n is columns</p>
+                    <h4>Edge Cases</h4>
+                    <ul>
+                        <li>Empty matrix: returns 0</li>
+                        <li>Single cell: returns that value</li>
+                        <li>Negative values: treated as debt/returns</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="matrix-container">
+                <div class="matrix" id="matrix"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const matrix = [
+            [12, 8, 5],
+            [15, 20, 3],
+            [7, 11, 9]
+        ];
+
+        let currentStep = 0;
+        let steps = [];
+        let totalSum = 0;
+
+        function generateSteps() {
+            steps = [];
+            let sum = 0;
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+
+            steps.push({
+                type: 'init',
+                row: -1,
+                col: -1,
+                sum: 0,
+                variables: { row: 0, col: 0, sum: 0, rows: rows, cols: cols },
+                conditions: [],
+                operations: [],
+                stepInfo: 'Initialize variables for matrix traversal',
+                visited: []
+            });
+
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const visited = [];
+                    for (let vi = 0; vi <= i; vi++) {
+                        for (let vj = 0; vj < cols; vj++) {
+                            if (vi < i || vj < j) {
+                                visited.push([vi, vj]);
+                            }
+                        }
+                    }
+
+                    const rowCondition = i < rows;
+                    const colCondition = j < cols;
+                    
+                    steps.push({
+                        type: 'check',
+                        row: i,
+                        col: j,
+                        sum: sum,
+                        variables: { row: i, col: j, sum: sum, rows: rows, cols: cols },
+                        conditions: [
+                            { text: `row < rows (${i} < ${rows})`, result: rowCondition },
+                            { text: `col < cols (${j} < ${cols})`, result: colCondition }
+                        ],
+                        operations: [],
+                        stepInfo: `Checking bounds for position (${i}, ${j})`,
+                        visited: visited
+                    });
+
+                    sum += matrix[i][j];
+                    visited.push([i, j]);
+
+                    steps.push({
+                        type: 'add',
+                        row: i,
+                        col: j,
+                        sum: sum,
+                        variables: { row: i, col: j, sum: sum, rows: rows, cols: cols },
+                        conditions: [],
+                        operations: [
+                            { text: `Add matrix[${i}][${j}] = ${matrix[i][j]} to sum`, type: 'add' },
+                            { text: `sum = ${sum - matrix[i][j]} + ${matrix[i][j]} = ${sum}`, type: 'add' }
+                        ],
+                        stepInfo: `Adding tyre count from dealership (${i}, ${j})`,
+                        visited: visited.slice()
+                    });
+                }
+            }
+
+            steps.push({
+                type: 'complete',
+                row: -1,
+                col: -1,
+                sum: sum,
+                variables: { row: rows, col: 0, sum: sum, rows: rows, cols: cols },
+                conditions: [
+                    { text: `row < rows (${rows} < ${rows})`, result: false }
+                ],
+                operations: [],
+                stepInfo: 'Algorithm complete - all dealerships processed',
+                visited: []
+            });
+
+            totalSum = sum;
+        }
+
+        function createMatrix() {
+            const matrixEl = document.getElementById('matrix');
+            matrixEl.style.gridTemplateColumns = `repeat(${matrix[0].length}, 1fr)`;
+            matrixEl.innerHTML = '';
+
+            for (let i = 0; i < matrix.length; i++) {
+                for (let j = 0; j < matrix[i].length; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.id = `cell-${i}-${j}`;
+                    cell.textContent = matrix[i][j];
+                    matrixEl.appendChild(cell);
+                }
+            }
+        }
+
+        function updateDisplay() {
+            const step = steps[currentStep];
+            if (!step) return;
+
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.className = 'cell';
+            });
+
+            step.visited.forEach(([r, c]) => {
+                const cell = document.getElementById(`cell-${r}-${c}`);
+                if (cell) cell.classList.add('visited');
+            });
+
+            if (step.row >= 0 && step.col >= 0) {
+                const currentCell = document.getElementById(`cell-${step.row}-${step.col}`);
+                if (currentCell) currentCell.classList.add('current');
+            }
+
+            updatePointers(step);
+            updateVariables(step);
+            updateConditions(step);
+            updateOperations(step);
+            updateStepInfo(step);
+            updateResults(step);
+            updateButtons();
+        }
+
+        function updatePointers(step) {
+            document.querySelectorAll('.pointer').forEach(p => p.remove());
+
+            if (step.row >= 0 && step.col >= 0) {
+                const cell = document.getElementById(`cell-${step.row}-${step.col}`);
+                if (cell) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    pointer.textContent = 'C';
+                    pointer.style.top = '-10px';
+                    pointer.style.right = '-10px';
+                    cell.appendChild(pointer);
+                }
+            }
+        }
+
+        function updateVariables(step) {
+            const container = document.getElementById('variables');
+            container.innerHTML = '';
+
+            Object.entries(step.variables).forEach(([name, value]) => {
+                const variable = document.createElement('div');
+                variable.className = 'variable';
+                
+                if (name === 'row' && step.type === 'check' && step.row >= 0) {
+                    variable.classList.add('active');
+                } else if (name === 'col' && step.type === 'check' && step.col >= 0) {
+                    variable.classList.add('active');
+                } else if (name === 'sum' && step.type === 'add') {
+                    variable.classList.add('increment');
+                }
+
+                variable.textContent = `${name}: ${value}`;
+                container.appendChild(variable);
+            });
+        }
+
+        function updateConditions(step) {
+            const container = document.getElementById('conditions');
+            container.innerHTML = '';
+
+            if (step.conditions.length === 0) {
+                container.textContent = 'No conditions to evaluate';
+                return;
+            }
+
+            step.conditions.forEach(condition => {
+                const div = document.createElement('div');
+                div.className = `condition ${condition.result ? 'true' : 'false'}`;
+                div.textContent = `${condition.text} ${condition.result ? '✓' : '✗'}`;
+                container.appendChild(div);
+            });
+        }
+
+        function updateOperations(step) {
+            const container = document.getElementById('operations');
+            container.innerHTML = '';
+
+            if (step.operations.length === 0) {
+                container.textContent = 'No operations in this step';
+                return;
+            }
+
+            step.operations.forEach(operation => {
+                const div = document.createElement('div');
+                div.className = `operation ${operation.type}`;
+                div.textContent = operation.text;
+                container.appendChild(div);
+            });
+        }
+
+        function updateStepInfo(step) {
+            document.getElementById('stepInfo').textContent = step.stepInfo;
+        }
+
+        function updateResults(step) {
+            const container = document.getElementById('results');
+            container.innerHTML = '';
+
+            const stepCounter = document.createElement('div');
+            stepCounter.className = 'result-item';
+            stepCounter.textContent = `Step: ${currentStep + 1}/${steps.length}`;
+            container.appendChild(stepCounter);
+
+            const currentSum = document.createElement('div');
+            currentSum.className = 'result-item';
+            currentSum.textContent = `Current Sum: ${step.sum}`;
+            container.appendChild(currentSum);
+
+            if (currentStep === steps.length - 1) {
+                const final = document.createElement('div');
+                final.className = 'result-item';
+                final.style.background = 'lightgreen';
+                final.textContent = `Final Total: ${totalSum} tyres`;
+                container.appendChild(final);
+            }
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            updateDisplay();
+        }
+
+        function toggleCollapsible() {
+            const content = document.getElementById('theory');
+            const header = document.querySelector('.collapsible-header');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                header.textContent = '▼ Theory & Algorithm Details';
+            } else {
+                content.classList.add('open');
+                header.textContent = '▲ Theory & Algorithm Details';
+            }
+        }
+
+        generateSteps();
+        createMatrix();
+        updateDisplay();
+    </script>
+</body>
+</html>

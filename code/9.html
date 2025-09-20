@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Rotation Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            border-bottom: 1px solid black;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .question {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            background: white;
+            border: 2px solid black;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .variables {
+            font-size: 12px;
+        }
+        
+        .var-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            border-bottom: 1px solid #ccc;
+        }
+        
+        .var-highlight {
+            background: yellow;
+            animation: pulse 0.5s;
+        }
+        
+        .var-increment {
+            background: lightgreen;
+        }
+        
+        .var-decrement {
+            background: lightcoral;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .conditions {
+            font-size: 12px;
+        }
+        
+        .condition-true {
+            color: green;
+        }
+        
+        .condition-false {
+            color: red;
+        }
+        
+        .operations {
+            font-size: 12px;
+        }
+        
+        .op-increment {
+            color: green;
+        }
+        
+        .op-decrement {
+            color: red;
+        }
+        
+        .op-assign {
+            color: blue;
+        }
+        
+        .array-display {
+            text-align: center;
+        }
+        
+        .array-container {
+            display: flex;
+            justify-content: center;
+            gap: 2px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .array-cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            background: white;
+            position: relative;
+        }
+        
+        .array-cell.current {
+            background: #ffff99;
+        }
+        
+        .array-cell.modified {
+            background: #e6ffe6;
+        }
+        
+        .pointer {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            z-index: 10;
+        }
+        
+        .pointer.top {
+            border-bottom: 15px solid #ff69b4;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .pointer.bottom {
+            border-top: 15px solid #ffa500;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .pointer-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .pointer.top .pointer-label {
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff69b4;
+        }
+        
+        .pointer.bottom .pointer-label {
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffa500;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+            border: 1px solid black;
+        }
+        
+        .collapsible-header {
+            background: #f0f0f0;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid black;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .collapsible.open .collapsible-content {
+            display: block;
+        }
+        
+        .step-info {
+            font-size: 11px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="section">
+            <div class="section-title">Problem</div>
+            <div class="question">
+                Rotate an array to the right by k steps.<br>
+                Input: [1,2,3,4,5], k=2<br>
+                Output: [4,5,1,2,3]<br>
+                Example: Elements 4,5 move to front, others shift right.
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Variables</div>
+            <div class="variables" id="variables">
+                <div class="var-row">
+                    <span>n (array length):</span>
+                    <span id="var-n">5</span>
+                </div>
+                <div class="var-row">
+                    <span>k (rotation steps):</span>
+                    <span id="var-k">2</span>
+                </div>
+                <div class="var-row">
+                    <span>effective_k:</span>
+                    <span id="var-effective-k">2</span>
+                </div>
+                <div class="var-row">
+                    <span>left:</span>
+                    <span id="var-left">0</span>
+                </div>
+                <div class="var-right">
+                    <span>right:</span>
+                    <span id="var-right">4</span>
+                </div>
+                <div class="var-row">
+                    <span>temp:</span>
+                    <span id="var-temp">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Current Condition</div>
+            <div class="conditions" id="conditions">
+                Ready to start
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Current Operation</div>
+            <div class="operations" id="operations">
+                Click Next to begin
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Current Step</div>
+            <div id="step-description">
+                Initial state: Array ready for rotation
+            </div>
+            <div class="step-info">
+                Step: <span id="step-counter">0</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Result</div>
+            <div id="result-display">
+                Original: [1,2,3,4,5]<br>
+                Current:  [1,2,3,4,5]
+            </div>
+        </div>
+        
+        <div class="collapsible">
+            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                ▶ Theory & Algorithm Details
+            </div>
+            <div class="collapsible-content">
+                <strong>Algorithm: Three-Step Reversal Method</strong><br><br>
+                1. Reverse entire array<br>
+                2. Reverse first k elements<br>
+                3. Reverse remaining elements<br><br>
+                <strong>Time Complexity:</strong> O(n)<br>
+                <strong>Space Complexity:</strong> O(1)<br><br>
+                <strong>Edge Cases:</strong><br>
+                - k > n: Use k % n<br>
+                - k = 0: No rotation needed<br>
+                - Empty array: Return as is<br><br>
+                <strong>Why It Works:</strong><br>
+                Reversing transforms the relative positions systematically to achieve the desired rotation pattern.
+            </div>
+        </div>
+    </div>
+    
+    <div class="right-panel">
+        <div class="array-display">
+            <div class="array-container" id="arrayContainer">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const initialArray = [1, 2, 3, 4, 5];
+        const k = 2;
+        let currentArray = [...initialArray];
+        let step = 0;
+        let maxSteps = 0;
+        
+        const steps = [
+            {
+                description: "Initial state: Array ready for rotation",
+                array: [1, 2, 3, 4, 5],
+                vars: { n: 5, k: 2, effective_k: 2, left: 0, right: 4, temp: "-" },
+                condition: "Ready to start",
+                operation: "Click Next to begin",
+                pointers: []
+            },
+            {
+                description: "Step 1: Calculate effective k = k % n to handle k > n cases",
+                array: [1, 2, 3, 4, 5],
+                vars: { n: 5, k: 2, effective_k: 2, left: 0, right: 4, temp: "-" },
+                condition: "k < n (2 < 5) ✓",
+                operation: "effective_k = k % n = 2 % 5 = 2",
+                pointers: [],
+                highlights: { "var-effective-k": "var-highlight" }
+            },
+            {
+                description: "Step 2: Reverse entire array - Initialize pointers",
+                array: [1, 2, 3, 4, 5],
+                vars: { n: 5, k: 2, effective_k: 2, left: 0, right: 4, temp: "-" },
+                condition: "left < right (0 < 4) ✓",
+                operation: "Initialize left=0, right=4 for full array reversal",
+                pointers: [{ pos: 0, type: "top", label: "left" }, { pos: 4, type: "bottom", label: "right" }],
+                highlights: { "var-left": "var-highlight", "var-right": "var-highlight" },
+                currentCells: [0, 4]
+            },
+            {
+                description: "Step 3: Swap elements at left and right positions",
+                array: [5, 2, 3, 4, 1],
+                vars: { n: 5, k: 2, effective_k: 2, left: 1, right: 3, temp: 1 },
+                condition: "left < right (1 < 3) ✓",
+                operation: "Swap array[0]=1 with array[4]=5, then left++, right--",
+                pointers: [{ pos: 1, type: "top", label: "left" }, { pos: 3, type: "bottom", label: "right" }],
+                highlights: { "var-left": "var-increment", "var-right": "var-decrement", "var-temp": "var-highlight" },
+                currentCells: [1, 3],
+                modifiedCells: [0, 4]
+            },
+            {
+                description: "Step 4: Continue swapping - second pair",
+                array: [5, 4, 3, 2, 1],
+                vars: { n: 5, k: 2, effective_k: 2, left: 2, right: 2, temp: 2 },
+                condition: "left < right (2 < 2) ✗",
+                operation: "Swap array[1]=2 with array[3]=4, then left++, right--",
+                pointers: [],
+                highlights: { "var-left": "var-increment", "var-right": "var-decrement" },
+                modifiedCells: [1, 3]
+            },
+            {
+                description: "Step 5: First reversal complete - Setup for second reversal",
+                array: [5, 4, 3, 2, 1],
+                vars: { n: 5, k: 2, effective_k: 2, left: 0, right: 1, temp: "-" },
+                condition: "left < right (0 < 1) ✓",
+                operation: "Reverse first k=2 elements: Initialize left=0, right=1",
+                pointers: [{ pos: 0, type: "top", label: "left" }, { pos: 1, type: "bottom", label: "right" }],
+                highlights: { "var-left": "var-highlight", "var-right": "var-highlight" },
+                currentCells: [0, 1]
+            },
+            {
+                description: "Step 6: Swap first k elements",
+                array: [4, 5, 3, 2, 1],
+                vars: { n: 5, k: 2, effective_k: 2, left: 1, right: 0, temp: 5 },
+                condition: "left < right (1 < 0) ✗",
+                operation: "Swap array[0]=5 with array[1]=4, then left++, right--",
+                pointers: [],
+                highlights: { "var-left": "var-increment", "var-right": "var-decrement" },
+                modifiedCells: [0, 1]
+            },
+            {
+                description: "Step 7: Setup third reversal for remaining elements",
+                array: [4, 5, 3, 2, 1],
+                vars: { n: 5, k: 2, effective_k: 2, left: 2, right: 4, temp: "-" },
+                condition: "left < right (2 < 4) ✓",
+                operation: "Reverse remaining elements: Initialize left=2, right=4",
+                pointers: [{ pos: 2, type: "top", label: "left" }, { pos: 4, type: "bottom", label: "right" }],
+                highlights: { "var-left": "var-highlight", "var-right": "var-highlight" },
+                currentCells: [2, 4]
+            },
+            {
+                description: "Step 8: Final swap to complete rotation",
+                array: [4, 5, 1, 2, 3],
+                vars: { n: 5, k: 2, effective_k: 2, left: 3, right: 3, temp: 3 },
+                condition: "left < right (3 < 3) ✗",
+                operation: "Swap array[2]=3 with array[4]=1, then left++, right--",
+                pointers: [],
+                highlights: { "var-left": "var-increment", "var-right": "var-decrement" },
+                modifiedCells: [2, 4]
+            },
+            {
+                description: "Complete! Array rotated right by k=2 steps",
+                array: [4, 5, 1, 2, 3],
+                vars: { n: 5, k: 2, effective_k: 2, left: "-", right: "-", temp: "-" },
+                condition: "Algorithm finished",
+                operation: "Rotation complete - [4,5,1,2,3]",
+                pointers: []
+            }
+        ];
+        
+        maxSteps = steps.length - 1;
+        
+        function updateDisplay() {
+            const currentStep = steps[step];
+            
+            document.getElementById('step-counter').textContent = step;
+            document.getElementById('step-description').textContent = currentStep.description;
+            document.getElementById('conditions').innerHTML = currentStep.condition;
+            document.getElementById('operations').innerHTML = currentStep.operation;
+            
+            Object.keys(currentStep.vars).forEach(varName => {
+                const element = document.getElementById(`var-${varName.replace('_', '-')}`);
+                if (element) {
+                    element.textContent = currentStep.vars[varName];
+                }
+            });
+            
+            document.querySelectorAll('.var-row, .var-right').forEach(el => {
+                el.className = el.className.replace(/var-(highlight|increment|decrement)/g, '').trim();
+            });
+            
+            if (currentStep.highlights) {
+                Object.keys(currentStep.highlights).forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        const parent = element.closest('.var-row') || element.closest('.var-right');
+                        if (parent) {
+                            parent.classList.add(currentStep.highlights[id]);
+                        }
+                    }
+                });
+            }
+            
+            updateArrayDisplay(currentStep);
+            updateResultDisplay(currentStep.array);
+            updateButtons();
+        }
+        
+        function updateArrayDisplay(stepData) {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            
+            stepData.array.forEach((value, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = value;
+                
+                if (stepData.currentCells && stepData.currentCells.includes(index)) {
+                    cell.classList.add('current');
+                }
+                if (stepData.modifiedCells && stepData.modifiedCells.includes(index)) {
+                    cell.classList.add('modified');
+                }
+                
+                stepData.pointers.forEach(pointer => {
+                    if (pointer.pos === index) {
+                        const pointerEl = document.createElement('div');
+                        pointerEl.className = `pointer ${pointer.type}`;
+                        
+                        const label = document.createElement('div');
+                        label.className = 'pointer-label';
+                        label.textContent = pointer.label;
+                        pointerEl.appendChild(label);
+                        
+                        cell.appendChild(pointerEl);
+                    }
+                });
+                
+                container.appendChild(cell);
+            });
+        }
+        
+        function updateResultDisplay(array) {
+            document.getElementById('result-display').innerHTML = 
+                `Original: [${initialArray.join(',')}]<br>Current:  [${array.join(',')}]`;
+        }
+        
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = step === 0;
+            document.getElementById('nextBtn').disabled = step === maxSteps;
+        }
+        
+        function toggleCollapsible(header) {
+            const collapsible = header.parentElement;
+            collapsible.classList.toggle('open');
+            header.textContent = collapsible.classList.contains('open') ? 
+                '▼ Theory & Algorithm Details' : '▶ Theory & Algorithm Details';
+        }
+        
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (step < maxSteps) {
+                step++;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (step > 0) {
+                step--;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            step = 0;
+            updateDisplay();
+        });
+        
+        updateDisplay();
+    </script>
+</body>
+</html>

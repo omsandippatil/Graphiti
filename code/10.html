@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Two Sorted Arrays Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .left-panel {
+            width: 50%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        .right-panel {
+            width: 50%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            border-bottom: 1px solid black;
+            padding-bottom: 3px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 8px 15px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        button:hover {
+            background: black;
+            color: white;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .variables {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .variable {
+            padding: 5px;
+            border: 1px solid black;
+            display: flex;
+            justify-content: space-between;
+        }
+        .variable.active {
+            background: yellow;
+        }
+        .variable.increment {
+            background: lightgreen;
+        }
+        .variable.decrement {
+            background: lightcoral;
+        }
+        .arrays-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        .array-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .array-name {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .array {
+            display: flex;
+            gap: 2px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            position: relative;
+        }
+        .cell.current {
+            background: yellow;
+        }
+        .cell.processed {
+            background: #f0f0f0;
+        }
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            font-size: 14px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            z-index: 10;
+        }
+        .pointer.i {
+            background: #ff1493;
+            color: white;
+            top: -25px;
+        }
+        .pointer.j {
+            background: #00ff00;
+            color: black;
+            top: -45px;
+        }
+        .pointer.k {
+            background: #1e90ff;
+            color: white;
+            top: -25px;
+        }
+        .condition {
+            padding: 5px;
+            margin: 3px 0;
+            border: 1px solid black;
+        }
+        .condition.true {
+            background: lightgreen;
+        }
+        .condition.false {
+            background: lightcoral;
+        }
+        .operation {
+            padding: 5px;
+            margin: 3px 0;
+            border: 1px solid black;
+        }
+        .operation.increment {
+            background: lightgreen;
+        }
+        .operation.decrement {
+            background: lightcoral;
+        }
+        .operation.assign {
+            background: lightblue;
+        }
+        .collapsible {
+            margin-top: 20px;
+        }
+        .collapsible summary {
+            cursor: pointer;
+            padding: 8px;
+            border: 1px solid black;
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+        .collapsible-content {
+            padding: 10px;
+            border: 1px solid black;
+            border-top: none;
+            background: white;
+        }
+        .step-counter {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="section">
+            <div class="section-title">Problem</div>
+            <div>Merge two sorted arrays into one sorted array</div>
+            <div>Example: [1,3,5] + [2,4,6] → [1,2,3,4,5,6]</div>
+        </div>
+
+        <div class="controls">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="step-counter" id="stepCounter">Step 0 of 0</div>
+
+        <div class="section">
+            <div class="section-title">Variables</div>
+            <div class="variables" id="variables">
+                <div class="variable">
+                    <span>i (arr1 pointer):</span>
+                    <span id="var-i">0</span>
+                </div>
+                <div class="variable">
+                    <span>j (arr2 pointer):</span>
+                    <span id="var-j">0</span>
+                </div>
+                <div class="variable">
+                    <span>k (result pointer):</span>
+                    <span id="var-k">0</span>
+                </div>
+                <div class="variable">
+                    <span>arr1.length:</span>
+                    <span id="var-len1">3</span>
+                </div>
+                <div class="variable">
+                    <span>arr2.length:</span>
+                    <span id="var-len2">3</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Current Condition</div>
+            <div id="conditions"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Current Operation</div>
+            <div id="operations"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Current Step</div>
+            <div id="stepDescription"></div>
+        </div>
+
+        <details class="collapsible">
+            <summary>Algorithm Theory</summary>
+            <div class="collapsible-content">
+                <h4>Two-Pointer Technique</h4>
+                <p>Uses two pointers to traverse both arrays simultaneously, comparing elements and selecting the smaller one for the result array.</p>
+                
+                <h4>Time Complexity</h4>
+                <p>O(m + n) where m and n are the lengths of the input arrays.</p>
+                
+                <h4>Space Complexity</h4>
+                <p>O(m + n) for the result array.</p>
+                
+                <h4>Key Points</h4>
+                <ul>
+                    <li>Compare current elements from both arrays</li>
+                    <li>Add smaller element to result and advance its pointer</li>
+                    <li>Handle remaining elements after one array is exhausted</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <div class="right-panel">
+        <div class="arrays-container">
+            <div class="array-display">
+                <div class="array-name">Array 1</div>
+                <div class="array" id="array1">
+                    <div class="cell" data-index="0">1</div>
+                    <div class="cell" data-index="1">3</div>
+                    <div class="cell" data-index="2">5</div>
+                </div>
+            </div>
+
+            <div class="array-display">
+                <div class="array-name">Array 2</div>
+                <div class="array" id="array2">
+                    <div class="cell" data-index="0">2</div>
+                    <div class="cell" data-index="1">4</div>
+                    <div class="cell" data-index="2">6</div>
+                </div>
+            </div>
+
+            <div class="array-display">
+                <div class="array-name">Result</div>
+                <div class="array" id="result">
+                    <div class="cell" data-index="0">-</div>
+                    <div class="cell" data-index="1">-</div>
+                    <div class="cell" data-index="2">-</div>
+                    <div class="cell" data-index="3">-</div>
+                    <div class="cell" data-index="4">-</div>
+                    <div class="cell" data-index="5">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const arr1 = [1, 3, 5];
+        const arr2 = [2, 4, 6];
+        const result = [];
+        
+        let currentStep = 0;
+        const steps = [];
+        
+        function generateSteps() {
+            let i = 0, j = 0, k = 0;
+            const tempResult = [];
+            
+            steps.push({
+                i, j, k,
+                result: [...tempResult],
+                condition: "Initialize pointers",
+                operation: "Set i=0, j=0, k=0",
+                description: "Starting merge process with all pointers at beginning",
+                activeVars: [],
+                conditionResult: null
+            });
+            
+            while (i < arr1.length && j < arr2.length) {
+                const condition = `arr1[${i}] <= arr2[${j}] (${arr1[i]} <= ${arr2[j]})`;
+                const conditionResult = arr1[i] <= arr2[j];
+                
+                if (conditionResult) {
+                    tempResult[k] = arr1[i];
+                    steps.push({
+                        i, j, k,
+                        result: [...tempResult],
+                        condition: condition,
+                        operation: `result[${k}] = arr1[${i}] = ${arr1[i]}`,
+                        description: `arr1[${i}] (${arr1[i]}) is smaller, add to result`,
+                        activeVars: ['i', 'k'],
+                        conditionResult: true
+                    });
+                    
+                    i++;
+                    k++;
+                    steps.push({
+                        i, j, k,
+                        result: [...tempResult],
+                        condition: "",
+                        operation: `i++ (${i-1} → ${i}), k++ (${k-1} → ${k})`,
+                        description: "Advance arr1 pointer and result pointer",
+                        activeVars: ['i', 'k'],
+                        conditionResult: null
+                    });
+                } else {
+                    tempResult[k] = arr2[j];
+                    steps.push({
+                        i, j, k,
+                        result: [...tempResult],
+                        condition: condition,
+                        operation: `result[${k}] = arr2[${j}] = ${arr2[j]}`,
+                        description: `arr2[${j}] (${arr2[j]}) is smaller, add to result`,
+                        activeVars: ['j', 'k'],
+                        conditionResult: false
+                    });
+                    
+                    j++;
+                    k++;
+                    steps.push({
+                        i, j, k,
+                        result: [...tempResult],
+                        condition: "",
+                        operation: `j++ (${j-1} → ${j}), k++ (${k-1} → ${k})`,
+                        description: "Advance arr2 pointer and result pointer",
+                        activeVars: ['j', 'k'],
+                        conditionResult: null
+                    });
+                }
+            }
+            
+            while (i < arr1.length) {
+                tempResult[k] = arr1[i];
+                steps.push({
+                    i, j, k,
+                    result: [...tempResult],
+                    condition: `i < arr1.length (${i} < ${arr1.length})`,
+                    operation: `result[${k}] = arr1[${i}] = ${arr1[i]}`,
+                    description: "Copy remaining elements from arr1",
+                    activeVars: ['i', 'k'],
+                    conditionResult: true
+                });
+                i++;
+                k++;
+            }
+            
+            while (j < arr2.length) {
+                tempResult[k] = arr2[j];
+                steps.push({
+                    i, j, k,
+                    result: [...tempResult],
+                    condition: `j < arr2.length (${j} < ${arr2.length})`,
+                    operation: `result[${k}] = arr2[${j}] = ${arr2[j]}`,
+                    description: "Copy remaining elements from arr2",
+                    activeVars: ['j', 'k'],
+                    conditionResult: true
+                });
+                j++;
+                k++;
+            }
+            
+            steps.push({
+                i, j, k,
+                result: [...tempResult],
+                condition: "Merge complete",
+                operation: "Return result array",
+                description: "All elements merged successfully",
+                activeVars: [],
+                conditionResult: null
+            });
+        }
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            if (!step) return;
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep} of ${steps.length - 1}`;
+            document.getElementById('var-i').textContent = step.i;
+            document.getElementById('var-j').textContent = step.j;
+            document.getElementById('var-k').textContent = step.k;
+            
+            const variables = document.querySelectorAll('.variable');
+            variables.forEach(v => {
+                v.className = 'variable';
+                if (step.activeVars.includes('i') && v.textContent.includes('i (arr1')) {
+                    v.classList.add('active');
+                }
+                if (step.activeVars.includes('j') && v.textContent.includes('j (arr2')) {
+                    v.classList.add('active');
+                }
+                if (step.activeVars.includes('k') && v.textContent.includes('k (result')) {
+                    v.classList.add('active');
+                }
+            });
+            
+            const conditionsDiv = document.getElementById('conditions');
+            if (step.condition) {
+                conditionsDiv.innerHTML = `<div class="condition ${step.conditionResult === true ? 'true' : step.conditionResult === false ? 'false' : ''}">${step.condition} ${step.conditionResult === true ? '✓' : step.conditionResult === false ? '✗' : ''}</div>`;
+            } else {
+                conditionsDiv.innerHTML = '<div>No condition to evaluate</div>';
+            }
+            
+            const operationsDiv = document.getElementById('operations');
+            operationsDiv.innerHTML = `<div class="operation assign">${step.operation}</div>`;
+            
+            document.getElementById('stepDescription').textContent = step.description;
+            
+            document.querySelectorAll('#array1 .cell').forEach((cell, idx) => {
+                cell.className = 'cell';
+                if (idx < step.i) cell.classList.add('processed');
+                if (idx === step.i && step.i < arr1.length) cell.classList.add('current');
+                
+                const existingPointer = cell.querySelector('.pointer');
+                if (existingPointer) existingPointer.remove();
+                
+                if (idx === step.i && step.i < arr1.length) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer i';
+                    pointer.textContent = 'i';
+                    cell.appendChild(pointer);
+                }
+            });
+            
+            document.querySelectorAll('#array2 .cell').forEach((cell, idx) => {
+                cell.className = 'cell';
+                if (idx < step.j) cell.classList.add('processed');
+                if (idx === step.j && step.j < arr2.length) cell.classList.add('current');
+                
+                const existingPointer = cell.querySelector('.pointer');
+                if (existingPointer) existingPointer.remove();
+                
+                if (idx === step.j && step.j < arr2.length) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer j';
+                    pointer.textContent = 'j';
+                    cell.appendChild(pointer);
+                }
+            });
+            
+            document.querySelectorAll('#result .cell').forEach((cell, idx) => {
+                cell.className = 'cell';
+                if (idx < step.result.length) {
+                    cell.textContent = step.result[idx];
+                    cell.classList.add('processed');
+                } else {
+                    cell.textContent = '-';
+                }
+                
+                const existingPointer = cell.querySelector('.pointer');
+                if (existingPointer) existingPointer.remove();
+                
+                if (idx === step.k && step.k < 6) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer k';
+                    pointer.textContent = 'k';
+                    cell.appendChild(pointer);
+                }
+            });
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            currentStep = 0;
+            updateDisplay();
+        });
+        
+        generateSteps();
+        updateDisplay();
+    </script>
+</body>
+</html>

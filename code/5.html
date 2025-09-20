@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimum Discount Product Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .question-section {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            background: white;
+            border: 2px solid black;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: black;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .section {
+            border: 2px solid black;
+            margin-bottom: 15px;
+            padding: 10px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .variables-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .variable {
+            border: 1px solid black;
+            padding: 6px;
+            font-size: 12px;
+        }
+        
+        .variable.active {
+            background: yellow;
+        }
+        
+        .variable.increment {
+            background: #90EE90;
+        }
+        
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+        
+        .condition {
+            padding: 6px;
+            margin-bottom: 5px;
+            border: 1px solid black;
+        }
+        
+        .condition.true {
+            background: #90EE90;
+        }
+        
+        .condition.false {
+            background: #FFB6C1;
+        }
+        
+        .operation {
+            padding: 6px;
+            margin-bottom: 5px;
+            border: 1px solid black;
+        }
+        
+        .operation.increment {
+            background: #90EE90;
+        }
+        
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+        
+        .operation.add-result {
+            background: #ADD8E6;
+        }
+        
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .products-table th,
+        .products-table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        .products-table th {
+            background: black;
+            color: white;
+        }
+        
+        .product-row.current {
+            background: #FFD700;
+        }
+        
+        .product-row.processed {
+            background: #F0F0F0;
+        }
+        
+        .result-section {
+            border: 2px solid black;
+            padding: 10px;
+            background: #F8F8F8;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+        }
+        
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .collapsible-content {
+            display: none;
+            border: 2px solid black;
+            border-top: none;
+            padding: 15px;
+        }
+        
+        .collapsible-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="question-section">
+                <strong>Problem:</strong> Find product with minimum discount percentage<br>
+                <strong>Input:</strong> mobile,10000,20;shoe,5000,10<br>
+                <strong>Output:</strong> shoe (10% discount is minimum)
+            </div>
+            
+            <div class="controls">
+                <button id="nextBtn">Next</button>
+                <button id="prevBtn" disabled>Previous</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Variables</div>
+                <div class="variables-grid">
+                    <div class="variable" id="var-i">i: 0</div>
+                    <div class="variable" id="var-minDiscount">minDiscount: ∞</div>
+                    <div class="variable" id="var-minProduct">minProduct: ""</div>
+                    <div class="variable" id="var-currentProduct">currentProduct: ""</div>
+                    <div class="variable" id="var-currentDiscount">currentDiscount: 0</div>
+                    <div class="variable" id="var-stepCount">Step: 1/6</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Current Condition</div>
+                <div id="conditionDisplay">Starting algorithm...</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Current Operation</div>
+                <div id="operationDisplay">Initialize variables</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Result</div>
+                <div class="result-section" id="resultDisplay">
+                    Product with minimum discount: Not determined yet
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div>
+                <h3 style="margin-bottom: 20px; text-align: center;">Products Data</h3>
+                <table class="products-table" id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Index</th>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Discount %</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="product-row" id="row-0">
+                            <td>0</td>
+                            <td>mobile</td>
+                            <td>10000</td>
+                            <td>20</td>
+                            <td>Pending</td>
+                        </tr>
+                        <tr class="product-row" id="row-1">
+                            <td>1</td>
+                            <td>shoe</td>
+                            <td>5000</td>
+                            <td>10</td>
+                            <td>Pending</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div style="margin-top: 30px; text-align: center;">
+                    <div style="border: 2px solid black; padding: 15px; background: white;">
+                        <strong>Current Processing:</strong><br>
+                        <span id="currentProcessing">Ready to start</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="collapsible">
+        <button class="collapsible-header" onclick="toggleCollapsible()">
+            ▼ Algorithm Theory & Explanation
+        </button>
+        <div class="collapsible-content" id="theoryContent">
+            <h3>Algorithm Explanation</h3>
+            <p><strong>Concept:</strong> Linear search through products to find minimum discount percentage.</p>
+            
+            <h4>Algorithm Steps:</h4>
+            <ol>
+                <li>Initialize minDiscount to infinity and minProduct to empty string</li>
+                <li>Iterate through each product in the dataset</li>
+                <li>For each product, compare its discount percentage with current minimum</li>
+                <li>If current discount is smaller, update minimum values</li>
+                <li>Continue until all products are processed</li>
+                <li>Return the product with minimum discount</li>
+            </ol>
+            
+            <h4>Time Complexity:</h4>
+            <p>O(n) where n is the number of products</p>
+            
+            <h4>Space Complexity:</h4>
+            <p>O(1) - only using constant extra space for variables</p>
+            
+            <h4>Edge Cases:</h4>
+            <ul>
+                <li>Empty product list - should handle gracefully</li>
+                <li>All products have same discount - returns first one found</li>
+                <li>Negative discount values - algorithm still works correctly</li>
+            </ul>
+            
+            <h4>Key Variables:</h4>
+            <ul>
+                <li><strong>i:</strong> Current index being processed</li>
+                <li><strong>minDiscount:</strong> Tracks the smallest discount found so far</li>
+                <li><strong>minProduct:</strong> Name of product with minimum discount</li>
+                <li><strong>currentDiscount:</strong> Discount of product currently being examined</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { name: "mobile", price: 10000, discount: 20 },
+            { name: "shoe", price: 5000, discount: 10 }
+        ];
+        
+        let currentStep = 0;
+        const totalSteps = 6;
+        
+        let state = {
+            i: 0,
+            minDiscount: Infinity,
+            minProduct: "",
+            currentProduct: "",
+            currentDiscount: 0
+        };
+        
+        const steps = [
+            {
+                description: "Initialize variables",
+                condition: "Starting algorithm",
+                operation: "Set minDiscount = ∞, minProduct = '', i = 0",
+                state: { i: 0, minDiscount: Infinity, minProduct: "", currentProduct: "", currentDiscount: 0 },
+                activeVars: ["minDiscount", "minProduct", "i"],
+                processing: "Initializing algorithm variables"
+            },
+            {
+                description: "Check loop condition",
+                condition: "i < products.length (0 < 2) ✓",
+                operation: "Loop condition is true, proceed",
+                state: { i: 0, minDiscount: Infinity, minProduct: "", currentProduct: "mobile", currentDiscount: 20 },
+                activeVars: ["i"],
+                processing: "Checking if more products to process"
+            },
+            {
+                description: "Process first product",
+                condition: "currentDiscount < minDiscount (20 < ∞) ✓",
+                operation: "Update minDiscount = 20, minProduct = 'mobile'",
+                state: { i: 0, minDiscount: 20, minProduct: "mobile", currentProduct: "mobile", currentDiscount: 20 },
+                activeVars: ["minDiscount", "minProduct", "currentDiscount"],
+                processing: "Processing mobile: discount=20%"
+            },
+            {
+                description: "Increment counter",
+                condition: "Moving to next product",
+                operation: "i++ (0 → 1)",
+                state: { i: 1, minDiscount: 20, minProduct: "mobile", currentProduct: "", currentDiscount: 0 },
+                activeVars: ["i"],
+                processing: "Moving to next product",
+                incrementVar: "i"
+            },
+            {
+                description: "Process second product",
+                condition: "currentDiscount < minDiscount (10 < 20) ✓",
+                operation: "Update minDiscount = 10, minProduct = 'shoe'",
+                state: { i: 1, minDiscount: 10, minProduct: "shoe", currentProduct: "shoe", currentDiscount: 10 },
+                activeVars: ["minDiscount", "minProduct", "currentDiscount"],
+                processing: "Processing shoe: discount=10%"
+            },
+            {
+                description: "Algorithm complete",
+                condition: "i < products.length (2 < 2) ✗",
+                operation: "Loop ended, return minProduct = 'shoe'",
+                state: { i: 2, minDiscount: 10, minProduct: "shoe", currentProduct: "", currentDiscount: 0 },
+                activeVars: ["minProduct"],
+                processing: "Algorithm complete - found minimum"
+            }
+        ];
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            Object.keys(state).forEach(key => {
+                const element = document.getElementById(`var-${key}`);
+                if (element) {
+                    element.textContent = `${key}: ${state[key] === Infinity ? '∞' : state[key]}`;
+                    element.className = 'variable';
+                    
+                    if (step.activeVars && step.activeVars.includes(key)) {
+                        element.classList.add('active');
+                    }
+                    if (step.incrementVar === key) {
+                        element.classList.add('increment');
+                    }
+                }
+            });
+            
+            document.getElementById('var-stepCount').textContent = `Step: ${currentStep + 1}/${totalSteps}`;
+            
+            document.getElementById('conditionDisplay').innerHTML = 
+                `<div class="condition ${step.condition.includes('✓') ? 'true' : (step.condition.includes('✗') ? 'false' : '')}">${step.condition}</div>`;
+            
+            document.getElementById('operationDisplay').innerHTML = 
+                `<div class="operation ${step.incrementVar ? 'increment' : ''}">${step.operation}</div>`;
+            
+            document.getElementById('currentProcessing').textContent = step.processing;
+            
+            if (step.state) {
+                Object.assign(state, step.state);
+            }
+            
+            document.querySelectorAll('.product-row').forEach((row, index) => {
+                row.className = 'product-row';
+                const statusCell = row.cells[4];
+                
+                if (state.i > index) {
+                    row.classList.add('processed');
+                    statusCell.textContent = 'Processed';
+                } else if (state.i === index && state.currentProduct) {
+                    row.classList.add('current');
+                    statusCell.textContent = 'Processing';
+                } else {
+                    statusCell.textContent = 'Pending';
+                }
+            });
+            
+            const resultText = state.minProduct ? 
+                `Product with minimum discount: ${state.minProduct} (${state.minDiscount}%)` : 
+                'Product with minimum discount: Not determined yet';
+            document.getElementById('resultDisplay').textContent = resultText;
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === totalSteps - 1;
+        }
+        
+        function nextStep() {
+            if (currentStep < totalSteps - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+        
+        function reset() {
+            currentStep = 0;
+            state = {
+                i: 0,
+                minDiscount: Infinity,
+                minProduct: "",
+                currentProduct: "",
+                currentDiscount: 0
+            };
+            updateDisplay();
+        }
+        
+        function toggleCollapsible() {
+            const content = document.getElementById('theoryContent');
+            const header = document.querySelector('.collapsible-header');
+            
+            content.classList.toggle('active');
+            header.textContent = content.classList.contains('active') ? 
+                '▲ Algorithm Theory & Explanation' : '▼ Algorithm Theory & Explanation';
+        }
+        
+        document.getElementById('nextBtn').addEventListener('click', nextStep);
+        document.getElementById('prevBtn').addEventListener('click', prevStep);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+        
+        updateDisplay();
+    </script>
+</body>
+</html>

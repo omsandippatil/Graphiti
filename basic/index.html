@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Basic Topics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            background-color: white;
+            color: black;
+            padding: 40px;
+            line-height: 1.4;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-shrink: 0;
+        }
+
+        .back-button {
+            border: 3px solid black;
+            background-color: white;
+            color: black;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .back-button:hover {
+            background-color: black;
+            color: white;
+            transform: translateX(-3px);
+        }
+
+        .back-button::before {
+            content: "←";
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        h1 {
+            border: 3px solid black;
+            padding: 12px 30px;
+            background-color: white;
+            color: black;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            flex: 1;
+            text-align: center;
+            margin: 0 30px;
+        }
+
+        .spacer {
+            width: 120px;
+        }
+
+        .tree {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 20px;
+            height: 100%;
+            flex: 1;
+        }
+
+        .topic {
+            border: 3px solid black;
+            background-color: white;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .topic:hover {
+            background-color: black;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .topic-header {
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 1px;
+            padding: 20px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 1400px) {
+            .tree {
+                grid-template-columns: repeat(5, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+                gap: 18px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            body {
+                padding: 30px;
+            }
+            
+            .tree {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+                gap: 16px;
+            }
+            
+            .topic-header {
+                font-size: 14px;
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 16px;
+            }
+
+            .back-button {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                overflow: auto;
+                height: auto;
+            }
+            
+            .tree {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(7, 1fr);
+                height: auto;
+                min-height: 70vh;
+            }
+            
+            h1 {
+                font-size: 14px;
+                padding: 6px 16px;
+            }
+
+            .back-button {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-button">Back</a>
+            <h1>Java Basic Topics</h1>
+            <div class="spacer"></div>
+        </div>
+        
+        <div class="tree">
+            <!-- Topic 1: Data Types -->
+            <div class="topic" onclick="navigateToTopic(1)">
+                <div class="topic-header">01. Data Types</div>
+            </div>
+
+            <!-- Topic 2: Keywords -->
+            <div class="topic" onclick="navigateToTopic(2)">
+                <div class="topic-header">02. Keywords</div>
+            </div>
+
+            <!-- Topic 3: Operators & Control Flow -->
+            <div class="topic" onclick="navigateToTopic(3)">
+                <div class="topic-header">03. Operators</div>
+            </div>
+
+            <!-- Topic 4: Input and Output -->
+            <div class="topic" onclick="navigateToTopic(4)">
+                <div class="topic-header">04. I/O</div>
+            </div>
+
+            <!-- Topic 5: Strings -->
+            <div class="topic" onclick="navigateToTopic(5)">
+                <div class="topic-header">05. Strings</div>
+            </div>
+
+            <!-- Topic 6: Arrays -->
+            <div class="topic" onclick="navigateToTopic(6)">
+                <div class="topic-header">06. Arrays</div>
+            </div>
+
+            <!-- Topic 7: Collections Framework -->
+            <div class="topic" onclick="navigateToTopic(7)">
+                <div class="topic-header">07. Collections</div>
+            </div>
+
+            <!-- Topic 8: Math Utilities -->
+            <div class="topic" onclick="navigateToTopic(8)">
+                <div class="topic-header">08. Math</div>
+            </div>
+
+            <!-- Topic 9: Wrapper Classes -->
+            <div class="topic" onclick="navigateToTopic(9)">
+                <div class="topic-header">09. Wrappers</div>
+            </div>
+
+            <!-- Topic 10: Stacks, Queues, and Deques -->
+            <div class="topic" onclick="navigateToTopic(10)">
+                <div class="topic-header">10. Stack/Queue</div>
+            </div>
+
+            <!-- Topic 11: Searching & Sorting -->
+            <div class="topic" onclick="navigateToTopic(11)">
+                <div class="topic-header">11. Search/Sort</div>
+            </div>
+
+            <!-- Topic 12: Bit Manipulation -->
+            <div class="topic" onclick="navigateToTopic(12)">
+                <div class="topic-header">12. Bit Ops</div>
+            </div>
+
+            <!-- Topic 13: Graphs and Trees -->
+            <div class="topic" onclick="navigateToTopic(13)">
+                <div class="topic-header">13. Graphs/Trees</div>
+            </div>
+
+            <!-- Topic 14: Additional Utilities -->
+            <div class="topic" onclick="navigateToTopic(14)">
+                <div class="topic-header">14. Utils</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation function
+        function navigateToTopic(id) {
+            window.location.href = `/basic/${id}`;
+        }
+    </script>
+</body>
+</html>
