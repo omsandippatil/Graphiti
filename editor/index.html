@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Playground</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #fff;
+            color: #000;
+            height: 100vh;
+            display: flex;
+        }
+        
+        .container {
+            flex: 1;
+            display: flex;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            width: 35%;
+            background: #fff;
+            border-right: 2px solid #000;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 65%;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-section {
+            background: #fff;
+            color: #000;
+            padding: 15px;
+            border-bottom: 2px solid #000;
+            flex-shrink: 0;
+        }
+        
+        .input-section h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .input-type {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #000;
+            background: #fff;
+            color: #000;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .add-input-btn {
+            width: 100%;
+            padding: 10px;
+            background: #fff;
+            color: #000;
+            border: 2px solid #000;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 15px;
+            transition: background-color 0.2s;
+        }
+        
+        .add-input-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .inputs-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 15px;
+        }
+        
+        .input-item {
+            border: 2px solid #000;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #fafafa;
+        }
+        
+        .input-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .input-item-label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .remove-input-btn {
+            padding: 4px 10px;
+            background: #fff;
+            color: #000;
+            border: 1px solid #000;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+        
+        .remove-input-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .input-data {
+            width: 100%;
+            height: 60px;
+            padding: 8px;
+            border: 1px solid #000;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+            background: #fff;
+            color: #000;
+            font-size: 14px;
+        }
+        
+        .code-section {
+            height: 60%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .code-header {
+            background: #fff;
+            color: #000;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            border-bottom: 2px solid #000;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .code-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .code-btn {
+            padding: 8px 16px;
+            background: #fff;
+            color: #000;
+            border: 2px solid #000;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .code-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .output-section {
+            height: 40%;
+            display: flex;
+            flex-direction: column;
+            border-top: 2px solid #000;
+        }
+        
+        .output-header {
+            background: #fff;
+            color: #000;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            border-bottom: 1px solid #000;
+            flex-shrink: 0;
+        }
+        
+        .output-content {
+            flex: 1;
+            padding: 15px;
+            background: #fff;
+            color: #000;
+            font-family: 'Courier New', monospace;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .CodeMirror {
+            flex: 1;
+            background: #fff;
+            color: #000;
+            font-size: 16px;
+            border: none;
+            font-family: 'Courier New', monospace;
+            height: 100%;
+        }
+        
+        .CodeMirror-gutters {
+            background: #f8f8f8;
+            border-right: 1px solid #000;
+        }
+        
+        .CodeMirror-linenumber {
+            color: #666;
+        }
+        
+        .CodeMirror-cursor {
+            border-left: 2px solid #000;
+        }
+        
+        .cm-keyword {
+            color: #0000ff;
+            font-weight: bold;
+        }
+        
+        .cm-string {
+            color: #008000;
+        }
+        
+        .cm-comment {
+            color: #808080;
+        }
+        
+        .cm-number {
+            color: #ff0000;
+        }
+        
+        .cm-builtin {
+            color: #0000ff;
+        }
+        
+        .status-indicator {
+            padding: 8px 15px;
+            background: #e8e8e8;
+            border-bottom: 1px solid #ccc;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .loading {
+            color: #0066cc;
+        }
+        
+        .success {
+            color: #008000;
+        }
+        
+        .error {
+            color: #cc0000;
+        }
+
+        .empty-inputs {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="input-section">
+                <h3>Input Configuration</h3>
+                
+                <div class="input-group">
+                    <label class="input-label">Add Input Type:</label>
+                    <select class="input-type" id="inputTypeSelect">
+                        <option value="int">Integer</option>
+                        <option value="array">Array</option>
+                        <option value="string">String</option>
+                        <option value="stack">Stack</option>
+                        <option value="queue">Queue</option>
+                        <option value="linkedlist">Linked List</option>
+                        <option value="doublylinkedlist">Doubly Linked List</option>
+                        <option value="circularlinkedlist">Circular Linked List</option>
+                        <option value="hashmap">HashMap</option>
+                        <option value="hashset">HashSet</option>
+                        <option value="treemap">TreeMap</option>
+                        <option value="binarytree">Binary Tree</option>
+                        <option value="bst">Binary Search Tree</option>
+                        <option value="minheap">Min Heap</option>
+                        <option value="maxheap">Max Heap</option>
+                        <option value="graph">Graph</option>
+                        <option value="matrix">Matrix</option>
+                        <option value="trie">Trie</option>
+                        <option value="priorityqueue">Priority Queue</option>
+                    </select>
+                    <button class="add-input-btn" onclick="addInput()">Add Input</button>
+                </div>
+            </div>
+            
+            <div class="inputs-container">
+                <div id="inputsList">
+                    <div class="empty-inputs">No inputs configured. Add inputs above to test your code.</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="code-section">
+                <div class="code-header">
+                    <span>Code Editor</span>
+                    <div class="code-buttons">
+                        <button class="code-btn reset-btn" onclick="resetCode()">Reset Code</button>
+                        <button class="code-btn execute-btn" onclick="runCode()">Execute Code</button>
+                    </div>
+                </div>
+                <textarea id="codeEditor"></textarea>
+            </div>
+            
+            <div class="output-section">
+                <div class="output-header">Output</div>
+                <div class="status-indicator" id="statusIndicator">Ready to execute...</div>
+                <div class="output-content" id="output">Write your solution method and click Execute Code to run.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+            mode: 'text/x-java',
+            theme: 'default',
+            indentUnit: 4,
+            lineWrapping: true,
+            styleActiveLine: true,
+            matchBrackets: true,
+            autoCloseBrackets: true
+        });
+
+        const defaultTemplate = `public class Solution {
+    
+    public Object solution() {
+        
+        return null;
+    }
+}`;
+
+        editor.setValue(defaultTemplate);
+
+        let inputCounter = 0;
+        const inputs = [];
+
+        const inputExamples = {
+            'int': '42',
+            'array': '1,2,3,4,5',
+            'string': 'Hello World',
+            'stack': '1,2,3,4,5',
+            'queue': '1,2,3,4,5',
+            'linkedlist': '1,2,3,4,5',
+            'doublylinkedlist': '1,2,3,4,5',
+            'circularlinkedlist': '1,2,3,4,5',
+            'hashmap': 'key1:1,key2:2,key3:3',
+            'hashset': '1,2,3,4,5',
+            'treemap': 'a:1,b:2,c:3',
+            'binarytree': '1,2,3,4,5',
+            'bst': '1,2,3,4,5',
+            'minheap': '5,3,8,1,9',
+            'maxheap': '5,3,8,1,9',
+            'graph': '1,2,3,4,5',
+            'matrix': '1,2,3;4,5,6;7,8,9',
+            'trie': 'apple,app,application',
+            'priorityqueue': '5,3,8,1,9'
+        };
+
+        const typeToJava = {
+            'int': 'int',
+            'array': 'int[]',
+            'string': 'String',
+            'stack': 'Stack<Integer>',
+            'queue': 'Queue<Integer>',
+            'linkedlist': 'LinkedList<Integer>',
+            'doublylinkedlist': 'LinkedList<Integer>',
+            'circularlinkedlist': 'LinkedList<Integer>',
+            'hashmap': 'HashMap<String, Integer>',
+            'hashset': 'HashSet<Integer>',
+            'treemap': 'TreeMap<String, Integer>',
+            'binarytree': 'int[]',
+            'bst': 'int[]',
+            'minheap': 'PriorityQueue<Integer>',
+            'maxheap': 'PriorityQueue<Integer>',
+            'graph': 'int[]',
+            'matrix': 'int[][]',
+            'trie': 'String[]',
+            'priorityqueue': 'PriorityQueue<Integer>'
+        };
+
+        const typeToVarName = {
+            'int': 'num',
+            'array': 'arr',
+            'string': 'str',
+            'stack': 'stack',
+            'queue': 'queue',
+            'linkedlist': 'list',
+            'doublylinkedlist': 'dList',
+            'circularlinkedlist': 'cList',
+            'hashmap': 'map',
+            'hashset': 'set',
+            'treemap': 'treeMap',
+            'binarytree': 'tree',
+            'bst': 'bst',
+            'minheap': 'minHeap',
+            'maxheap': 'maxHeap',
+            'graph': 'graph',
+            'matrix': 'matrix',
+            'trie': 'words',
+            'priorityqueue': 'pq'
+        };
+
+        function setStatus(message, type = '') {
+            const statusDiv = document.getElementById('statusIndicator');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-indicator ${type}`;
+        }
+
+        function updateEmptyState() {
+            const inputsList = document.getElementById('inputsList');
+            if (inputs.length === 0) {
+                inputsList.innerHTML = '<div class="empty-inputs">No inputs configured. Add inputs above to test your code.</div>';
+            }
+        }
+
+        function addInput() {
+            const inputType = document.getElementById('inputTypeSelect').value;
+            const inputId = inputCounter++;
+            
+            const emptyMessage = document.querySelector('.empty-inputs');
+            if (emptyMessage) {
+                emptyMessage.remove();
+            }
+            
+            const baseVarName = typeToVarName[inputType];
+            const existingCount = inputs.filter(input => input.type === inputType).length;
+            const varName = existingCount === 0 ? baseVarName : `${baseVarName}${existingCount + 1}`;
+            
+            const inputItem = document.createElement('div');
+            inputItem.className = 'input-item';
+            inputItem.id = `input-${inputId}`;
+            
+            inputItem.innerHTML = `
+                <div class="input-item-header">
+                    <span class="input-item-label">${typeToJava[inputType]} ${varName}</span>
+                    <button class="remove-input-btn" onclick="removeInput(${inputId})">Remove</button>
+                </div>
+                <textarea class="input-data" placeholder="Example: ${inputExamples[inputType]}">${inputExamples[inputType]}</textarea>
+            `;
+            
+            document.getElementById('inputsList').appendChild(inputItem);
+            
+            inputs.push({
+                id: inputId,
+                type: inputType,
+                varName: varName
+            });
+
+            updateCodeTemplate();
+        }
+
+        function removeInput(inputId) {
+            const inputElement = document.getElementById(`input-${inputId}`);
+            inputElement.remove();
+            
+            const index = inputs.findIndex(input => input.id === inputId);
+            if (index > -1) {
+                inputs.splice(index, 1);
+            }
+
+            updateVariableNames();
+            updateCodeTemplate();
+            if (inputs.length === 0) {
+                updateEmptyState();
+            }
+        }
+
+        function updateVariableNames() {
+            const typeCounters = {};
+            
+            inputs.forEach((input, index) => {
+                const type = input.type;
+                const baseVarName = typeToVarName[type];
+                
+                if (!typeCounters[type]) {
+                    typeCounters[type] = 0;
+                }
+                
+                const newVarName = typeCounters[type] === 0 ? baseVarName : `${baseVarName}${typeCounters[type] + 1}`;
+                input.varName = newVarName;
+                typeCounters[type]++;
+                
+                const element = document.getElementById(`input-${input.id}`);
+                const label = element.querySelector('.input-item-label');
+                label.textContent = `${typeToJava[type]} ${newVarName}`;
+            });
+        }
+
+        function updateCodeTemplate() {
+            if (inputs.length === 0) {
+                return;
+            } else {
+                const parameters = inputs.map(input => 
+                    `${typeToJava[input.type]} ${input.varName}`
+                ).join(', ');
+                
+                const template = `public class Solution {
+    
+    public Object solution(${parameters}) {
+        
+        return null;
+    }
+}`;
+                
+                const currentCode = editor.getValue();
+                const hasUserCode = !currentCode.includes('return null;') || 
+                                  currentCode.split('\n').length > 8;
+                
+                if (!hasUserCode) {
+                    editor.setValue(template);
+                }
+            }
+        }
+
+        function resetCode() {
+            editor.setValue(defaultTemplate);
+            setStatus('Code reset to default template', 'success');
+        }
+
+        async function runCode() {
+            const userCode = editor.getValue().trim();
+            const outputDiv = document.getElementById('output');
+            
+            if (inputs.length === 0) {
+                setStatus('No inputs configured', 'error');
+                outputDiv.textContent = 'Please add at least one input to execute the code.';
+                return;
+            }
+            
+            setStatus('Compiling and executing...', 'loading');
+            outputDiv.textContent = 'Preparing execution...';
+
+            let variableDeclarations = inputs.map((input, index) => {
+                const varName = input.varName;
+                const javaType = typeToJava[input.type];
+                return `            ${javaType} ${varName} = (${javaType}) inputList.get(${index});`;
+            }).join('\n');
+            
+            const functionArgs = inputs.map(input => input.varName).join(', ');
+            
+            const solutionMethodRegex = /public\s+\w+\s+solution\s*\([^)]*\)\s*\{[\s\S]*?(?:\n    \}|\}$)/;
+            const solutionMatch = userCode.match(solutionMethodRegex);
+            let solutionMethod = 'public Object solution() {\n        return null;\n    }';
+            
+            if (solutionMatch) {
+                solutionMethod = solutionMatch[0];
+                if (!solutionMethod.trim().endsWith('}')) {
+                    solutionMethod += '\n    }';
+                }
+            }
+            
+            const fullJavaCode = `import java.util.*;
+import java.util.stream.*;
+
+public class Solution {
+    public static void main(String[] args) {
+        try {
+            Scanner sc = new Scanner(System.in);
+            Solution sol = new Solution();
+            
+            List<Object> inputList = new ArrayList<>();
+            int inputCount = Integer.parseInt(sc.nextLine());
+            
+            for(int i = 0; i < inputCount; i++) {
+                String inputType = sc.nextLine();
+                
+                switch(inputType) {
+                    case "int":
+                        int num = Integer.parseInt(sc.nextLine());
+                        inputList.add(num);
+                        break;
+                    case "array":
+                        int[] arr = Arrays.stream(sc.nextLine().split(","))
+                            .mapToInt(Integer::parseInt).toArray();
+                        inputList.add(arr);
+                        break;
+                    case "string":
+                        String str = sc.nextLine();
+                        inputList.add(str);
+                        break;
+                    case "stack":
+                        Stack<Integer> stack = new Stack<>();
+                        Arrays.stream(sc.nextLine().split(","))
+                            .mapToInt(Integer::parseInt)
+                            .forEach(stack::push);
+                        inputList.add(stack);
+                        break;
+                    case "queue":
+                        Queue<Integer> queue = new LinkedList<>();
+                        Arrays.stream(sc.nextLine().split(","))
+                            .mapToInt(Integer::parseInt)
+                            .forEach(queue::offer);
+                        inputList.add(queue);
+                        break;
+                    case "linkedlist":
+                    case "doublylinkedlist":
+                    case "circularlinkedlist":
+                        LinkedList<Integer> ll = new LinkedList<>();
+                        Arrays.stream(sc.nextLine().split(","))
+                            .mapToInt(Integer::parseInt)
+                            .forEach(ll::add);
+                        inputList.add(ll);
+                        break;
+                    case "hashmap":
+                        HashMap<String, Integer> hm = new HashMap<>();
+                        String[] pairs = sc.nextLine().split(",");
+                        for(String pair : pairs) {
+                            String[] kv = pair.split(":");
+                            hm.put(kv[0].trim(), Integer.parseInt(kv[1].trim()));
+                        }
+                        inputList.add(hm);
+                        break;
+                    case "hashset":
+                        HashSet<Integer> hs = new HashSet<>();
+                        Arrays.stream(sc.nextLine().split(","))
+                            .mapToInt(Integer::parseInt)
+                            .forEach(hs::add);
+                        inputList.add(hs);
+                        break;
+                    case "treemap":
+                        TreeMap<String, Integer> tm = new TreeMap<>();
+                        String[] tmPairs = sc.nextLine().split(",");
+                        for(String pair : tmPairs) {
+                            String[] kv = pair.split(":");
+                            tm.put(kv[0].trim(), Integer.parseInt(kv[1].trim()));
+                        }
+                        inputList.add(tm);
+                        break;
+                    case "binarytree":
+                    case "bst":
+                    case "graph":
+                        int[] btArr = Arrays.stream(sc.nextLine().split(","))
+                            .mapToInt(Integer::parseInt).toArray();
+                        inputList.add(btArr);
+                        break;
+                    case "minheap":
+                    case "priorityqueue":
+                        PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+                        Arrays.stream(sc.nextLine().split(","))
+                            .mapToInt(Integer::parseInt)
+                            .forEach(minHeap::offer);
+                        inputList.add(minHeap);
+                        break;
+                    case "maxheap":
+                        PriorityQueue<Integer> maxHeap = new PriorityQueue<>(Collections.reverseOrder());
+                        Arrays.stream(sc.nextLine().split(","))
+                            .mapToInt(Integer::parseInt)
+                            .forEach(maxHeap::offer);
+                        inputList.add(maxHeap);
+                        break;
+                    case "matrix":
+                        String[] rows = sc.nextLine().split(";");
+                        int[][] matrix = new int[rows.length][];
+                        for(int j = 0; j < rows.length; j++) {
+                            matrix[j] = Arrays.stream(rows[j].split(","))
+                                .mapToInt(Integer::parseInt).toArray();
+                        }
+                        inputList.add(matrix);
+                        break;
+                    case "trie":
+                        String[] words = sc.nextLine().split(",");
+                        inputList.add(words);
+                        break;
+                }
+            }
+            
+${variableDeclarations}
+            
+            Object result = sol.solution(${functionArgs});
+            
+            if(result instanceof int[]) {
+                System.out.println(Arrays.toString((int[])result));
+            } else if(result instanceof int[][]) {
+                System.out.println(Arrays.deepToString((int[][])result));
+            } else if(result instanceof Collection) {
+                System.out.println(result.toString());
+            } else {
+                System.out.println(result);
+            }
+            
+            sc.close();
+        } catch (Exception e) {
+            System.out.println("Runtime Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    ${solutionMethod}
+}`;
+            
+            let inputString = inputs.length + '\n';
+            
+            const inputElements = document.querySelectorAll('.input-item');
+            inputElements.forEach((element, index) => {
+                const type = inputs[index].type;
+                const data = element.querySelector('.input-data').value.trim();
+                inputString += type + '\n' + data + '\n';
+            });
+            
+            try {
+                const response = await fetch('https://emkc.org/api/v2/piston/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        language: 'java',
+                        version: '15.0.2',
+                        files: [{
+                            name: 'Solution.java',
+                            content: fullJavaCode
+                        }],
+                        stdin: inputString
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.run) {
+                    if (result.run.stderr && result.run.stderr.trim()) {
+                        setStatus('Compilation/Runtime Error', 'error');
+                        outputDiv.textContent = result.run.stderr;
+                    } else if (result.run.output && result.run.output.trim()) {
+                        setStatus('Execution completed successfully', 'success');
+                        outputDiv.textContent = result.run.output;
+                    } else {
+                        setStatus('No output produced', 'error');
+                        outputDiv.textContent = 'The program ran but produced no output.';
+                    }
+                } else {
+                    setStatus('Execution failed', 'error');
+                    outputDiv.textContent = 'Execution failed: ' + JSON.stringify(result);
+                }
+                
+            } catch (error) {
+                setStatus('Network error', 'error');
+                outputDiv.textContent = 'Network Error: ' + error.message + '\n\nPlease check your internet connection and try again.';
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === "'") {
+                e.preventDefault();
+                runCode();
+            }
+        });
+
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('paste', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('cut', function(e) {
+            e.preventDefault();
+        });
+
+        updateEmptyState();
+    </script>
+</body>
+</html>
