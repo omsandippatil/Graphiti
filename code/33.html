@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reverse Words Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+        }
+        
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .question {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: white;
+            border: 2px solid black;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .section {
+            border: 2px solid black;
+            margin-bottom: 10px;
+        }
+        
+        .section-header {
+            background: black;
+            color: white;
+            padding: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .section-content {
+            padding: 10px;
+            display: none;
+        }
+        
+        .section-content.visible {
+            display: block;
+        }
+        
+        .variables {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .variable {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px;
+            margin: 2px 0;
+        }
+        
+        .variable.active {
+            background: #ffff99;
+        }
+        
+        .variable.increment {
+            background: #90EE90;
+        }
+        
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+        
+        .conditions {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .condition {
+            padding: 4px;
+            margin: 2px 0;
+        }
+        
+        .condition.true {
+            background: #90EE90;
+        }
+        
+        .condition.false {
+            background: #FFB6C1;
+        }
+        
+        .operations {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .operation {
+            padding: 4px;
+            margin: 2px 0;
+        }
+        
+        .operation.increment {
+            background: #90EE90;
+        }
+        
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+        
+        .operation.add-result {
+            background: #ADD8E6;
+        }
+        
+        .result-display {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .visualization {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .input-display {
+            border: 2px solid black;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .words-array {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .word-cell {
+            border: 2px solid black;
+            padding: 10px 15px;
+            min-width: 80px;
+            text-align: center;
+            position: relative;
+            background: white;
+        }
+        
+        .word-cell.processing {
+            background: #ffff99;
+        }
+        
+        .word-cell.processed {
+            background: #f0f0f0;
+        }
+        
+        .stack-display {
+            border: 2px solid black;
+            padding: 15px;
+            min-width: 200px;
+        }
+        
+        .stack-item {
+            border: 1px solid black;
+            padding: 8px;
+            margin: 2px 0;
+            text-align: center;
+        }
+        
+        .stack-item.top {
+            background: #ADD8E6;
+        }
+        
+        .result-string {
+            border: 2px solid black;
+            padding: 10px;
+            min-width: 300px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .pointer {
+            position: absolute;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        
+        .pointer.current {
+            color: #FF1493;
+        }
+        
+        .pointer.processing {
+            color: #32CD32;
+        }
+        
+        .step-counter {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="question">
+                <h3>Problem: Reverse Words in a Sentence</h3>
+                <p><strong>Input:</strong> "the sky is blue"</p>
+                <p><strong>Output:</strong> "blue is sky the"</p>
+                <p><strong>Goal:</strong> Reverse the order of words in a string using a stack data structure.</p>
+            </div>
+            
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="step-counter" id="stepCounter">Step 0 of 0</div>
+            
+            <div class="variables">
+                <h4>Variables</h4>
+                <div id="variablesContent"></div>
+            </div>
+            
+            <div class="conditions">
+                <h4>Current Condition</h4>
+                <div id="conditionsContent">No condition being evaluated</div>
+            </div>
+            
+            <div class="operations">
+                <h4>Current Operation</h4>
+                <div id="operationsContent">Ready to start</div>
+            </div>
+            
+            <div class="result-display">
+                <h4>Result Progress</h4>
+                <div id="resultContent">result = ""</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('theory')">📖 Algorithm Theory</div>
+                <div class="section-content" id="theory">
+                    <p>The stack-based approach to reversing words leverages the Last-In-First-Out (LIFO) property of stacks. Words are pushed onto the stack in their original order, then popped off in reverse order to create the final result.</p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('explanation')">💡 Algorithm Explanation</div>
+                <div class="section-content" id="explanation">
+                    <ol>
+                        <li>Trim the input string and split by whitespace to get individual words</li>
+                        <li>Push each word onto a stack</li>
+                        <li>Pop words from the stack and append to result string</li>
+                        <li>Return the trimmed result</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('tricks')">🎯 Implementation Tricks</div>
+                <div class="section-content" id="tricks">
+                    <ul>
+                        <li>Use trim() to handle leading/trailing spaces</li>
+                        <li>Use "\\s+" regex to split on multiple consecutive spaces</li>
+                        <li>StringBuilder for efficient string concatenation</li>
+                        <li>Final trim() to remove trailing space</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('edge-cases')">⚠️ Edge Cases</div>
+                <div class="section-content" id="edge-cases">
+                    <ul>
+                        <li>Empty string or only spaces</li>
+                        <li>Single word</li>
+                        <li>Multiple consecutive spaces between words</li>
+                        <li>Leading/trailing whitespace</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="visualization">
+                <div class="input-display" id="inputDisplay">Input: "the sky is blue"</div>
+                
+                <div>
+                    <h4>Words Array:</h4>
+                    <div class="words-array" id="wordsArray"></div>
+                </div>
+                
+                <div>
+                    <h4>Stack:</h4>
+                    <div class="stack-display" id="stackDisplay">
+                        <div style="text-align: center; color: #666;">Empty</div>
+                    </div>
+                </div>
+                
+                <div class="result-string" id="resultString">Result: ""</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        let maxSteps = 0;
+        let words = [];
+        let stack = [];
+        let result = [];
+        let currentWordIndex = -1;
+        let isPopping = false;
+        
+        const steps = [
+            {
+                description: "Initialize: Trim input and split into words array",
+                variables: { words: '["the", "sky", "is", "blue"]', stack: "[]", result: '""', currentIndex: -1 },
+                condition: null,
+                operation: 'Split "the sky is blue" → ["the", "sky", "is", "blue"]',
+                wordIndex: -1,
+                stackState: [],
+                resultState: "",
+                isPopping: false
+            },
+            {
+                description: "Push word 'the' onto stack",
+                variables: { words: '["the", "sky", "is", "blue"]', stack: '["the"]', result: '""', currentIndex: 0 },
+                condition: null,
+                operation: 'stack.push("the")',
+                wordIndex: 0,
+                stackState: ["the"],
+                resultState: "",
+                isPopping: false
+            },
+            {
+                description: "Push word 'sky' onto stack",
+                variables: { words: '["the", "sky", "is", "blue"]', stack: '["the", "sky"]', result: '""', currentIndex: 1 },
+                condition: null,
+                operation: 'stack.push("sky")',
+                wordIndex: 1,
+                stackState: ["the", "sky"],
+                resultState: "",
+                isPopping: false
+            },
+            {
+                description: "Push word 'is' onto stack",
+                variables: { words: '["the", "sky", "is", "blue"]', stack: '["the", "sky", "is"]', result: '""', currentIndex: 2 },
+                condition: null,
+                operation: 'stack.push("is")',
+                wordIndex: 2,
+                stackState: ["the", "sky", "is"],
+                resultState: "",
+                isPopping: false
+            },
+            {
+                description: "Push word 'blue' onto stack",
+                variables: { words: '["the", "sky", "is", "blue"]', stack: '["the", "sky", "is", "blue"]', result: '""', currentIndex: 3 },
+                condition: null,
+                operation: 'stack.push("blue")',
+                wordIndex: 3,
+                stackState: ["the", "sky", "is", "blue"],
+                resultState: "",
+                isPopping: false
+            },
+            {
+                description: "Pop 'blue' and append to result",
+                variables: { words: '["the", "sky", "is", "blue"]', stack: '["the", "sky", "is"]', result: '"blue "', currentIndex: -1 },
+                condition: '!stack.isEmpty() (true)',
+                operation: 'result.append(stack.pop()).append(" ") → "blue "',
+                wordIndex: -1,
+                stackState: ["the", "sky", "is"],
+                resultState: "blue ",
+                isPopping: true
+            },
+            {
+                description: "Pop 'is' and append to result",
+                variables: { words: '["the", "sky", "is", "blue"]', stack: '["the", "sky"]', result: '"blue is "', currentIndex: -1 },
+                condition: '!stack.isEmpty() (true)',
+                operation: 'result.append(stack.pop()).append(" ") → "blue is "',
+                wordIndex: -1,
+                stackState: ["the", "sky"],
+                resultState: "blue is ",
+                isPopping: true
+            },
+            {
+                description: "Pop 'sky' and append to result",
+                variables: { words: '["the", "sky", "is", "blue"]', stack: '["the"]', result: '"blue is sky "', currentIndex: -1 },
+                condition: '!stack.isEmpty() (true)',
+                operation: 'result.append(stack.pop()).append(" ") → "blue is sky "',
+                wordIndex: -1,
+                stackState: ["the"],
+                resultState: "blue is sky ",
+                isPopping: true
+            },
+            {
+                description: "Pop 'the' and append to result",
+                variables: { words: '["the", "sky", "is", "blue"]', stack: '[]', result: '"blue is sky the "', currentIndex: -1 },
+                condition: '!stack.isEmpty() (true)',
+                operation: 'result.append(stack.pop()).append(" ") → "blue is sky the "',
+                wordIndex: -1,
+                stackState: [],
+                resultState: "blue is sky the ",
+                isPopping: true
+            },
+            {
+                description: "Trim final result and return",
+                variables: { words: '["the", "sky", "is", "blue"]', stack: '[]', result: '"blue is sky the"', currentIndex: -1 },
+                condition: 'stack.isEmpty() (true)',
+                operation: 'return result.toString().trim() → "blue is sky the"',
+                wordIndex: -1,
+                stackState: [],
+                resultState: "blue is sky the",
+                isPopping: false
+            }
+        ];
+        
+        function initializeVisualization() {
+            words = ["the", "sky", "is", "blue"];
+            maxSteps = steps.length - 1;
+            updateDisplay();
+        }
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep} of ${maxSteps}`;
+            
+            const variablesContent = document.getElementById('variablesContent');
+            variablesContent.innerHTML = Object.entries(step.variables)
+                .map(([key, value]) => `<div class="variable"><span>${key}:</span><span>${value}</span></div>`)
+                .join('');
+            
+            const conditionsContent = document.getElementById('conditionsContent');
+            if (step.condition) {
+                const isTrue = step.condition.includes('true');
+                conditionsContent.innerHTML = `<div class="condition ${isTrue ? 'true' : 'false'}">${step.condition} ${isTrue ? '✓' : '✗'}</div>`;
+            } else {
+                conditionsContent.textContent = 'No condition being evaluated';
+            }
+            
+            const operationsContent = document.getElementById('operationsContent');
+            operationsContent.innerHTML = `<div class="operation add-result">${step.operation}</div>`;
+            
+            const resultContent = document.getElementById('resultContent');
+            resultContent.textContent = `result = "${step.resultState}"`;
+            
+            updateVisualization(step);
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === maxSteps;
+        }
+        
+        function updateVisualization(step) {
+            const wordsArray = document.getElementById('wordsArray');
+            wordsArray.innerHTML = words.map((word, index) => {
+                let className = 'word-cell';
+                if (step.isPopping) {
+                    if (index < words.length) className += ' processed';
+                } else {
+                    if (index === step.wordIndex) className += ' processing';
+                    else if (index < step.wordIndex) className += ' processed';
+                }
+                return `<div class="${className}">${word}</div>`;
+            }).join('');
+            
+            const stackDisplay = document.getElementById('stackDisplay');
+            if (step.stackState.length === 0) {
+                stackDisplay.innerHTML = '<div style="text-align: center; color: #666;">Empty</div>';
+            } else {
+                const stackItems = step.stackState.slice().reverse().map((item, index) => {
+                    const isTop = index === 0;
+                    return `<div class="stack-item ${isTop ? 'top' : ''}">${item}</div>`;
+                }).join('');
+                stackDisplay.innerHTML = stackItems;
+            }
+            
+            const resultString = document.getElementById('resultString');
+            resultString.textContent = `Result: "${step.resultState}"`;
+        }
+        
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId);
+            content.classList.toggle('visible');
+        }
+        
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentStep < maxSteps) {
+                currentStep++;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            currentStep = 0;
+            updateDisplay();
+        });
+        
+        initializeVisualization();
+    </script>
+</body>
+</html>

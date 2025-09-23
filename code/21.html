@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maximum Product Subarray Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .left-panel {
+            width: 60%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 40%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+
+        .section h3 {
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid black;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .variables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .variable {
+            padding: 4px 8px;
+            border: 1px solid black;
+            background: white;
+        }
+
+        .variable.active {
+            background: yellow;
+        }
+
+        .variable.increment {
+            background: #90EE90;
+        }
+
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+
+        .array-display {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .array-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            position: relative;
+            background: white;
+        }
+
+        .array-cell.current {
+            background: #FFE4B5;
+            border-color: #FF1493;
+            border-width: 3px;
+        }
+
+        .array-cell.visited {
+            background: #F0F0F0;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -20px;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            z-index: 10;
+        }
+
+        .pointer.current {
+            background: #FF1493;
+            color: white;
+        }
+
+        .pointer.start {
+            background: #32CD32;
+            color: white;
+            top: -35px;
+        }
+
+        .pointer.end {
+            background: #1E90FF;
+            color: white;
+            top: -50px;
+        }
+
+        .condition {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border: 1px solid black;
+            font-size: 12px;
+        }
+
+        .condition.true {
+            background: #90EE90;
+        }
+
+        .condition.false {
+            background: #FFB6C1;
+        }
+
+        .operation {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border: 1px solid black;
+            font-size: 12px;
+        }
+
+        .operation.increment {
+            background: #90EE90;
+        }
+
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+
+        .operation.update {
+            background: #ADD8E6;
+        }
+
+        .operation.compare {
+            background: #DDA0DD;
+        }
+
+        .collapsible {
+            margin-top: 20px;
+        }
+
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            border: 1px solid black;
+            border-top: none;
+        }
+
+        .collapsible-content.active {
+            display: block;
+        }
+
+        .step-info {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="section">
+                <h3>Problem: Maximum Product Subarray</h3>
+                <p style="font-size: 12px; margin-bottom: 8px;">Find the contiguous subarray with the largest product.</p>
+                <p style="font-size: 12px;">Example: [2,3,-2,4] → 6 (subarray [2,3])</p>
+            </div>
+
+            <div class="section">
+                <h3>Navigation</h3>
+                <div class="controls">
+                    <button onclick="previousStep()">Previous</button>
+                    <button onclick="nextStep()">Next</button>
+                    <button onclick="resetVisualization()">Reset</button>
+                </div>
+                <p style="font-size: 12px; margin-top: 8px;">Step: <span id="stepCounter">1</span> / <span id="totalSteps">0</span></p>
+            </div>
+
+            <div class="section">
+                <h3>Variables</h3>
+                <div class="variables-grid">
+                    <div class="variable" id="var-i">i: <span id="val-i">0</span></div>
+                    <div class="variable" id="var-maxProduct">maxProduct: <span id="val-maxProduct">2</span></div>
+                    <div class="variable" id="var-minProduct">minProduct: <span id="val-minProduct">2</span></div>
+                    <div class="variable" id="var-currentMax">currentMax: <span id="val-currentMax">2</span></div>
+                    <div class="variable" id="var-currentMin">currentMin: <span id="val-currentMin">2</span></div>
+                    <div class="variable" id="var-result">result: <span id="val-result">2</span></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Current Conditions</h3>
+                <div id="conditions"></div>
+            </div>
+
+            <div class="section">
+                <h3>Current Operation</h3>
+                <div id="operations"></div>
+            </div>
+
+            <div class="section">
+                <h3>Current Step Details</h3>
+                <div id="stepDetails" class="step-info"></div>
+            </div>
+
+            <div class="collapsible">
+                <button class="collapsible-header" onclick="toggleCollapsible('theory')">Theory & Algorithm Explanation ▼</button>
+                <div class="collapsible-content" id="theory">
+                    <h4>Algorithm Overview</h4>
+                    <p>This uses Kadane's algorithm adapted for products. We track both maximum and minimum products at each position because a negative number can turn the minimum into maximum.</p>
+                    
+                    <h4>Key Insights</h4>
+                    <p>• Products can be very large or very small<br>
+                    • Negative numbers flip max/min values<br>
+                    • We need to track both positive and negative extremes</p>
+                    
+                    <h4>Time Complexity</h4>
+                    <p>O(n) - single pass through array</p>
+                    
+                    <h4>Space Complexity</h4>
+                    <p>O(1) - only using constant extra space</p>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <button class="collapsible-header" onclick="toggleCollapsible('edge-cases')">Edge Cases & Boundary Conditions ▼</button>
+                <div class="collapsible-content" id="edge-cases">
+                    <p>• Single element array<br>
+                    • All negative numbers<br>
+                    • Contains zeros (breaks subarray)<br>
+                    • Very large products (overflow)<br>
+                    • Empty array (not applicable here)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="section">
+                <h3>Array Visualization</h3>
+                <div class="array-display" id="arrayDisplay"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputArray = [2, 3, -2, 4];
+        let currentStep = 0;
+        let steps = [];
+
+        function generateSteps() {
+            steps = [];
+            let maxProduct = inputArray[0];
+            let minProduct = inputArray[0];
+            let result = inputArray[0];
+
+            steps.push({
+                i: 0,
+                maxProduct: maxProduct,
+                minProduct: minProduct,
+                currentMax: maxProduct,
+                currentMin: minProduct,
+                result: result,
+                conditions: [],
+                operations: [`Initialize: maxProduct = minProduct = result = arr[0] = ${inputArray[0]}`],
+                details: "Starting with first element as initial maximum, minimum, and result values.",
+                activeVars: ['maxProduct', 'minProduct', 'result'],
+                current: 0,
+                visited: [0]
+            });
+
+            for (let i = 1; i < inputArray.length; i++) {
+                let num = inputArray[i];
+                let tempMax = Math.max(num, maxProduct * num, minProduct * num);
+                let tempMin = Math.min(num, maxProduct * num, minProduct * num);
+                
+                steps.push({
+                    i: i,
+                    maxProduct: maxProduct,
+                    minProduct: minProduct,
+                    currentMax: tempMax,
+                    currentMin: tempMin,
+                    result: result,
+                    conditions: [
+                        `i < arr.length (${i} < ${inputArray.length}) ✓`
+                    ],
+                    operations: [
+                        `num = arr[${i}] = ${num}`,
+                        `tempMax = max(${num}, ${maxProduct} * ${num}, ${minProduct} * ${num}) = ${tempMax}`,
+                        `tempMin = min(${num}, ${maxProduct} * ${num}, ${minProduct} * ${num}) = ${tempMin}`
+                    ],
+                    details: `Processing element ${num} at index ${i}. Computing new max and min products considering current element alone and products with previous extremes.`,
+                    activeVars: ['i', 'currentMax', 'currentMin'],
+                    current: i,
+                    visited: Array.from({length: i + 1}, (_, idx) => idx)
+                });
+
+                maxProduct = tempMax;
+                minProduct = tempMin;
+                let newResult = Math.max(result, maxProduct);
+                
+                steps.push({
+                    i: i,
+                    maxProduct: maxProduct,
+                    minProduct: minProduct,
+                    currentMax: maxProduct,
+                    currentMin: minProduct,
+                    result: newResult,
+                    conditions: [
+                        `maxProduct > result (${maxProduct} > ${result}) ${maxProduct > result ? '✓' : '✗'}`
+                    ],
+                    operations: [
+                        `maxProduct = tempMax = ${maxProduct}`,
+                        `minProduct = tempMin = ${minProduct}`,
+                        `result = max(result, maxProduct) = max(${result}, ${maxProduct}) = ${newResult}`
+                    ],
+                    details: `Updated tracking variables. ${maxProduct > result ? 'Found new maximum result!' : 'Current result remains optimal.'}`,
+                    activeVars: ['maxProduct', 'minProduct', 'result'],
+                    current: i,
+                    visited: Array.from({length: i + 1}, (_, idx) => idx)
+                });
+
+                result = newResult;
+            }
+
+            steps.push({
+                i: inputArray.length,
+                maxProduct: maxProduct,
+                minProduct: minProduct,
+                currentMax: maxProduct,
+                currentMin: minProduct,
+                result: result,
+                conditions: [
+                    `i < arr.length (${inputArray.length} < ${inputArray.length}) ✗`
+                ],
+                operations: ['Algorithm complete'],
+                details: `Final result: ${result}. The maximum product subarray has been found.`,
+                activeVars: ['result'],
+                current: -1,
+                visited: Array.from({length: inputArray.length}, (_, idx) => idx)
+            });
+        }
+
+        function updateDisplay() {
+            if (currentStep >= steps.length) return;
+
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = currentStep + 1;
+            document.getElementById('totalSteps').textContent = steps.length;
+            
+            document.getElementById('val-i').textContent = step.i;
+            document.getElementById('val-maxProduct').textContent = step.maxProduct;
+            document.getElementById('val-minProduct').textContent = step.minProduct;
+            document.getElementById('val-currentMax').textContent = step.currentMax;
+            document.getElementById('val-currentMin').textContent = step.currentMin;
+            document.getElementById('val-result').textContent = step.result;
+
+            ['i', 'maxProduct', 'minProduct', 'currentMax', 'currentMin', 'result'].forEach(varName => {
+                const element = document.getElementById(`var-${varName}`);
+                element.className = 'variable';
+                if (step.activeVars.includes(varName)) {
+                    element.classList.add('active');
+                }
+            });
+
+            const conditionsDiv = document.getElementById('conditions');
+            conditionsDiv.innerHTML = '';
+            step.conditions.forEach(condition => {
+                const div = document.createElement('div');
+                div.className = `condition ${condition.includes('✓') ? 'true' : 'false'}`;
+                div.textContent = condition;
+                conditionsDiv.appendChild(div);
+            });
+
+            const operationsDiv = document.getElementById('operations');
+            operationsDiv.innerHTML = '';
+            step.operations.forEach(operation => {
+                const div = document.createElement('div');
+                div.className = 'operation';
+                if (operation.includes('max(') || operation.includes('min(')) {
+                    div.classList.add('compare');
+                } else if (operation.includes('=') && !operation.includes('max(') && !operation.includes('min(')) {
+                    div.classList.add('update');
+                }
+                div.textContent = operation;
+                operationsDiv.appendChild(div);
+            });
+
+            document.getElementById('stepDetails').textContent = step.details;
+
+            updateArrayDisplay(step);
+        }
+
+        function updateArrayDisplay(step) {
+            const arrayDiv = document.getElementById('arrayDisplay');
+            arrayDiv.innerHTML = '';
+
+            inputArray.forEach((value, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = value;
+
+                if (step.visited.includes(index)) {
+                    cell.classList.add('visited');
+                }
+                
+                if (index === step.current) {
+                    cell.classList.add('current');
+                    
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    pointer.textContent = 'i';
+                    cell.appendChild(pointer);
+                }
+
+                arrayDiv.appendChild(cell);
+            });
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+
+        function resetVisualization() {
+            currentStep = 0;
+            updateDisplay();
+        }
+
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const isActive = content.classList.contains('active');
+            content.classList.toggle('active', !isActive);
+            
+            const button = content.previousElementSibling;
+            button.textContent = button.textContent.replace(isActive ? '▲' : '▼', isActive ? '▼' : '▲');
+        }
+
+        generateSteps();
+        updateDisplay();
+    </script>
+</body>
+</html>

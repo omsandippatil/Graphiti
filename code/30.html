@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Count Non-Repeating Characters</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question-section {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .question-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid black;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .variables-section, .conditions-section, .operations-section, .result-section {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-decoration: underline;
+        }
+
+        .variable-row, .condition-row, .operation-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding: 3px;
+        }
+
+        .highlight-yellow {
+            background: yellow;
+        }
+
+        .highlight-green {
+            background: #90EE90;
+        }
+
+        .highlight-red {
+            background: #FFB6C1;
+        }
+
+        .condition-true {
+            color: green;
+            font-weight: bold;
+        }
+
+        .condition-false {
+            color: red;
+            font-weight: bold;
+        }
+
+        .operation-increment {
+            color: green;
+            font-weight: bold;
+        }
+
+        .operation-decrement {
+            color: red;
+            font-weight: bold;
+        }
+
+        .operation-add {
+            color: blue;
+            font-weight: bold;
+        }
+
+        .string-visualization {
+            display: flex;
+            gap: 5px;
+            margin: 20px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .char-cell {
+            width: 60px;
+            height: 60px;
+            border: 3px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            position: relative;
+            background: white;
+        }
+
+        .char-visited {
+            background: #f0f0f0;
+        }
+
+        .char-current {
+            background: #ffeb3b;
+            box-shadow: 0 0 10px #ffeb3b;
+        }
+
+        .pointer {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: white;
+            z-index: 10;
+        }
+
+        .pointer-current {
+            background: #e91e63;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .hash-table {
+            margin: 20px 0;
+            border: 2px solid black;
+            padding: 10px;
+        }
+
+        .hash-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            margin: 2px 0;
+            border: 1px solid black;
+        }
+
+        .hash-updated {
+            background: #90EE90;
+        }
+
+        .collapsible {
+            border: 2px solid black;
+            margin-top: 20px;
+        }
+
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+            background: white;
+        }
+
+        .collapsible-content.active {
+            display: block;
+        }
+
+        .step-counter {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="question-section">
+            <div class="question-title">Count Non-Repeating Characters</div>
+            <div>Problem: Count characters that appear exactly once in a string.</div>
+            <div>Example: "programming" → Output: 5 (p,o,a,i,n appear once each)</div>
+        </div>
+
+        <div class="controls">
+            <button onclick="prevStep()">Previous</button>
+            <button onclick="nextStep()">Next</button>
+            <button onclick="resetVisualization()">Reset</button>
+        </div>
+
+        <div class="variables-section">
+            <div class="section-title">Variables</div>
+            <div id="variables-content"></div>
+        </div>
+
+        <div class="conditions-section">
+            <div class="section-title">Current Condition</div>
+            <div id="conditions-content"></div>
+        </div>
+
+        <div class="operations-section">
+            <div class="section-title">Current Operation</div>
+            <div id="operations-content"></div>
+        </div>
+
+        <div class="result-section">
+            <div class="section-title">Result</div>
+            <div id="result-content"></div>
+        </div>
+
+        <div class="collapsible">
+            <div class="collapsible-header" onclick="toggleCollapsible('theory')">▼ Algorithm Theory & Explanation</div>
+            <div id="theory" class="collapsible-content">
+                <h3>Theory</h3>
+                <p>This algorithm uses a hash map approach to count character frequencies, then counts characters with frequency = 1.</p>
+                
+                <h3>Algorithm Steps</h3>
+                <p>1. Create a hash map to store character frequencies<br>
+                2. First pass: Count frequency of each character<br>
+                3. Second pass: Count characters with frequency = 1</p>
+                
+                <h3>Time Complexity</h3>
+                <p>O(n) where n is the length of the string</p>
+                
+                <h3>Space Complexity</h3>
+                <p>O(k) where k is the number of unique characters</p>
+                
+                <h3>Edge Cases</h3>
+                <p>- Empty string: return 0<br>
+                - Single character: return 1<br>
+                - All characters repeated: return 0<br>
+                - All characters unique: return string length</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="step-counter" id="step-counter">Step 1 of 1</div>
+        
+        <div class="string-visualization" id="string-viz"></div>
+        
+        <div class="hash-table">
+            <div class="section-title">Character Frequency Map</div>
+            <div id="hash-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const input = "programming";
+        let currentStep = 0;
+        let steps = [];
+        let charFreq = {};
+        let nonRepeatingCount = 0;
+
+        function generateSteps() {
+            steps = [];
+            charFreq = {};
+            
+            steps.push({
+                type: 'init',
+                description: 'Initialize variables',
+                currentChar: -1,
+                charFreq: {},
+                nonRepeatingCount: 0,
+                phase: 'init',
+                variables: {
+                    i: { value: 0, highlight: '' },
+                    charFreq: { value: '{}', highlight: '' },
+                    nonRepeatingCount: { value: 0, highlight: '' },
+                    currentChar: { value: 'null', highlight: '' }
+                },
+                condition: 'Starting algorithm',
+                operation: 'Initialize hash map and counter'
+            });
+
+            for (let i = 0; i < input.length; i++) {
+                const char = input[i];
+                const prevCount = charFreq[char] || 0;
+                charFreq[char] = prevCount + 1;
+                
+                steps.push({
+                    type: 'count',
+                    description: `Count frequency of '${char}'`,
+                    currentChar: i,
+                    charFreq: {...charFreq},
+                    nonRepeatingCount: 0,
+                    phase: 'counting',
+                    variables: {
+                        i: { value: i, highlight: 'yellow' },
+                        charFreq: { value: `{${Object.keys(charFreq).map(k => `${k}:${charFreq[k]}`).join(',')}}`, highlight: '' },
+                        nonRepeatingCount: { value: 0, highlight: '' },
+                        currentChar: { value: char, highlight: 'yellow' }
+                    },
+                    condition: `i < input.length (${i} < ${input.length}) ✓`,
+                    operation: `charFreq['${char}'] = ${prevCount} + 1 = ${charFreq[char]}`
+                });
+            }
+
+            steps.push({
+                type: 'transition',
+                description: 'First pass complete, start counting non-repeating',
+                currentChar: -1,
+                charFreq: {...charFreq},
+                nonRepeatingCount: 0,
+                phase: 'transition',
+                variables: {
+                    i: { value: 0, highlight: '' },
+                    charFreq: { value: `{${Object.keys(charFreq).map(k => `${k}:${charFreq[k]}`).join(',')}}`, highlight: '' },
+                    nonRepeatingCount: { value: 0, highlight: 'yellow' },
+                    currentChar: { value: 'null', highlight: '' }
+                },
+                condition: 'First pass complete',
+                operation: 'Begin second pass to count non-repeating characters'
+            });
+
+            for (const char in charFreq) {
+                if (charFreq[char] === 1) {
+                    nonRepeatingCount++;
+                    steps.push({
+                        type: 'check',
+                        description: `Check '${char}': frequency = 1, increment counter`,
+                        currentChar: -1,
+                        charFreq: {...charFreq},
+                        nonRepeatingCount: nonRepeatingCount,
+                        phase: 'checking',
+                        checkingChar: char,
+                        variables: {
+                            char: { value: char, highlight: 'yellow' },
+                            charFreq: { value: `{${Object.keys(charFreq).map(k => `${k}:${charFreq[k]}`).join(',')}}`, highlight: '' },
+                            nonRepeatingCount: { value: nonRepeatingCount, highlight: 'green' },
+                            frequency: { value: charFreq[char], highlight: 'yellow' }
+                        },
+                        condition: `charFreq['${char}'] === 1 (${charFreq[char]} === 1) ✓`,
+                        operation: `nonRepeatingCount++ (${nonRepeatingCount - 1} → ${nonRepeatingCount})`
+                    });
+                } else {
+                    steps.push({
+                        type: 'skip',
+                        description: `Check '${char}': frequency = ${charFreq[char]}, skip`,
+                        currentChar: -1,
+                        charFreq: {...charFreq},
+                        nonRepeatingCount: nonRepeatingCount,
+                        phase: 'checking',
+                        checkingChar: char,
+                        variables: {
+                            char: { value: char, highlight: 'yellow' },
+                            charFreq: { value: `{${Object.keys(charFreq).map(k => `${k}:${charFreq[k]}`).join(',')}}`, highlight: '' },
+                            nonRepeatingCount: { value: nonRepeatingCount, highlight: '' },
+                            frequency: { value: charFreq[char], highlight: 'yellow' }
+                        },
+                        condition: `charFreq['${char}'] === 1 (${charFreq[char]} === 1) ✗`,
+                        operation: 'No increment (character repeats)'
+                    });
+                }
+            }
+
+            steps.push({
+                type: 'complete',
+                description: 'Algorithm complete',
+                currentChar: -1,
+                charFreq: {...charFreq},
+                nonRepeatingCount: nonRepeatingCount,
+                phase: 'complete',
+                variables: {
+                    result: { value: nonRepeatingCount, highlight: 'green' },
+                    charFreq: { value: `{${Object.keys(charFreq).map(k => `${k}:${charFreq[k]}`).join(',')}}`, highlight: '' },
+                    nonRepeatingCount: { value: nonRepeatingCount, highlight: 'green' }
+                },
+                condition: 'Algorithm completed',
+                operation: `Return ${nonRepeatingCount}`
+            });
+        }
+
+        function renderStep() {
+            const step = steps[currentStep];
+            if (!step) return;
+
+            document.getElementById('step-counter').textContent = `Step ${currentStep + 1} of ${steps.length}`;
+
+            renderVariables(step.variables);
+            renderCondition(step.condition);
+            renderOperation(step.operation);
+            renderResult(step.nonRepeatingCount);
+            renderStringVisualization(step);
+            renderHashTable(step);
+        }
+
+        function renderVariables(variables) {
+            const content = document.getElementById('variables-content');
+            content.innerHTML = '';
+            
+            for (const [name, data] of Object.entries(variables)) {
+                const row = document.createElement('div');
+                row.className = `variable-row ${data.highlight ? 'highlight-' + data.highlight : ''}`;
+                row.innerHTML = `<span>${name}:</span><span>${data.value}</span>`;
+                content.appendChild(row);
+            }
+        }
+
+        function renderCondition(condition) {
+            const content = document.getElementById('conditions-content');
+            const isTrue = condition.includes('✓');
+            const isFalse = condition.includes('✗');
+            content.innerHTML = `<div class="${isTrue ? 'condition-true' : isFalse ? 'condition-false' : ''}">${condition}</div>`;
+        }
+
+        function renderOperation(operation) {
+            const content = document.getElementById('operations-content');
+            let className = '';
+            if (operation.includes('++') || operation.includes('increment')) className = 'operation-increment';
+            else if (operation.includes('--') || operation.includes('decrement')) className = 'operation-decrement';
+            else if (operation.includes('Return') || operation.includes('Add')) className = 'operation-add';
+            
+            content.innerHTML = `<div class="${className}">${operation}</div>`;
+        }
+
+        function renderResult(result) {
+            const content = document.getElementById('result-content');
+            content.innerHTML = `<div>Non-repeating count: <strong>${result}</strong></div>`;
+        }
+
+        function renderStringVisualization(step) {
+            const container = document.getElementById('string-viz');
+            container.innerHTML = '';
+
+            for (let i = 0; i < input.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'char-cell';
+                
+                if (step.phase === 'counting' && i < step.currentChar) {
+                    cell.classList.add('char-visited');
+                } else if (step.phase === 'counting' && i === step.currentChar) {
+                    cell.classList.add('char-current');
+                } else if (step.phase === 'checking' || step.phase === 'complete') {
+                    cell.classList.add('char-visited');
+                }
+
+                cell.textContent = input[i];
+                
+                if (step.phase === 'counting' && i === step.currentChar) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer pointer-current';
+                    pointer.textContent = 'CURRENT';
+                    cell.appendChild(pointer);
+                }
+
+                container.appendChild(cell);
+            }
+        }
+
+        function renderHashTable(step) {
+            const container = document.getElementById('hash-content');
+            container.innerHTML = '';
+
+            if (Object.keys(step.charFreq).length === 0) {
+                container.innerHTML = '<div>Empty</div>';
+                return;
+            }
+
+            for (const [char, freq] of Object.entries(step.charFreq)) {
+                const entry = document.createElement('div');
+                entry.className = 'hash-entry';
+                
+                if (step.type === 'count' && step.variables.currentChar.value === char) {
+                    entry.classList.add('hash-updated');
+                } else if (step.type === 'check' && step.checkingChar === char) {
+                    entry.classList.add('hash-updated');
+                }
+
+                entry.innerHTML = `<span>'${char}'</span><span>${freq}</span>`;
+                container.appendChild(entry);
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderStep();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+            }
+        }
+
+        function resetVisualization() {
+            currentStep = 0;
+            renderStep();
+        }
+
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const header = content.previousElementSibling;
+            
+            content.classList.toggle('active');
+            header.textContent = content.classList.contains('active') ? '▲ Algorithm Theory & Explanation' : '▼ Algorithm Theory & Explanation';
+        }
+
+        generateSteps();
+        renderStep();
+    </script>
+</body>
+</html>

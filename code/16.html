@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Heights Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            font-size: 12px;
+        }
+        
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            width: 60%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 40%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .question-section {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 2px solid black;
+        }
+        
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .info-section {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 2px solid black;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .variables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .variable {
+            padding: 4px 8px;
+            border: 1px solid black;
+            background: white;
+        }
+        
+        .variable.active {
+            background: yellow;
+        }
+        
+        .variable.increment {
+            background: #90EE90;
+        }
+        
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+        
+        .condition {
+            padding: 4px 8px;
+            border: 1px solid black;
+            margin-bottom: 4px;
+        }
+        
+        .condition.true {
+            background: #90EE90;
+        }
+        
+        .condition.false {
+            background: #FFB6C1;
+        }
+        
+        .operation {
+            padding: 4px 8px;
+            border: 1px solid black;
+            margin-bottom: 4px;
+        }
+        
+        .operation.increment {
+            background: #90EE90;
+        }
+        
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+        
+        .operation.add {
+            background: #ADD8E6;
+        }
+        
+        .visualization {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .buildings-container {
+            position: relative;
+            display: flex;
+            align-items: end;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .building {
+            width: 40px;
+            border: 2px solid black;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .building.current {
+            background: #FFE4E1;
+            border-color: #FF1493;
+        }
+        
+        .building.processed {
+            background: #F0F0F0;
+        }
+        
+        .building.visible {
+            background: #E6FFE6;
+        }
+        
+        .pointer {
+            position: absolute;
+            bottom: -25px;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border: 1px solid black;
+            border-radius: 3px;
+        }
+        
+        .pointer.current {
+            background: #FF1493;
+            color: white;
+        }
+        
+        .result-section {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .step-counter {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .result-display {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px;
+            border: 2px solid black;
+            background: white;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+        }
+        
+        .collapsible-header {
+            padding: 10px;
+            border: 2px solid black;
+            background: #f5f5f5;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            border: 2px solid black;
+            border-top: none;
+        }
+        
+        .collapsible.open .collapsible-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="question-section">
+                <div class="section-title">Problem: Count Visible Buildings</div>
+                <div>Given an array of building heights, count how many buildings are visible when looking from the left.</div>
+                <div style="margin-top: 8px;"><strong>Input:</strong> [7,4,8,2,9]</div>
+                <div><strong>Output:</strong> 3 (buildings at indices 0, 2, 4 are visible)</div>
+            </div>
+            
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="info-section">
+                <div class="section-title">Variables</div>
+                <div class="variables-grid">
+                    <div class="variable" id="var-i">i: <span id="val-i">0</span></div>
+                    <div class="variable" id="var-maxHeight">maxHeight: <span id="val-maxHeight">0</span></div>
+                    <div class="variable" id="var-visibleCount">visibleCount: <span id="val-visibleCount">0</span></div>
+                    <div class="variable" id="var-currentHeight">currentHeight: <span id="val-currentHeight">-</span></div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <div class="section-title">Current Condition</div>
+                <div id="conditionsContainer"></div>
+            </div>
+            
+            <div class="info-section">
+                <div class="section-title">Current Operation</div>
+                <div id="operationsContainer"></div>
+            </div>
+            
+            <div class="info-section">
+                <div class="section-title">Step Information</div>
+                <div id="stepInfo">Click Next to start the algorithm</div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="visualization">
+                <div class="buildings-container" id="buildingsContainer"></div>
+                <div class="result-section">
+                    <div class="step-counter" id="stepCounter">Step: 0</div>
+                    <div class="result-display">Visible Buildings: <span id="resultDisplay">0</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="collapsible" id="theorySection">
+        <div class="collapsible-header" onclick="toggleCollapsible()">
+            ▶ Algorithm Theory & Explanation
+        </div>
+        <div class="collapsible-content">
+            <h3>Algorithm Explanation</h3>
+            <p>This algorithm counts visible buildings when looking from the left. A building is visible if no taller building exists to its left.</p>
+            
+            <h3>Approach</h3>
+            <p>1. Iterate through the array from left to right</p>
+            <p>2. Keep track of the maximum height seen so far</p>
+            <p>3. If current building is taller than max, it's visible</p>
+            <p>4. Update the maximum height when a taller building is found</p>
+            
+            <h3>Time Complexity</h3>
+            <p>O(n) - Single pass through the array</p>
+            
+            <h3>Space Complexity</h3>
+            <p>O(1) - Only using constant extra space</p>
+            
+            <h3>Edge Cases</h3>
+            <p>- Empty array: return 0</p>
+            <p>- Single element: return 1</p>
+            <p>- Decreasing heights: all visible</p>
+            <p>- Increasing heights: only first visible</p>
+        </div>
+    </div>
+
+    <script>
+        const buildings = [7, 4, 8, 2, 9];
+        let currentStep = 0;
+        let maxSteps = 0;
+        
+        const steps = [
+            {
+                i: -1,
+                maxHeight: 0,
+                visibleCount: 0,
+                currentHeight: null,
+                info: "Initialize variables: i=-1, maxHeight=0, visibleCount=0",
+                condition: null,
+                operation: null,
+                activeVars: [],
+                processed: [],
+                visible: []
+            }
+        ];
+        
+        function generateSteps() {
+            let i = 0;
+            let maxHeight = 0;
+            let visibleCount = 0;
+            let processed = [];
+            let visible = [];
+            
+            while (i < buildings.length) {
+                const currentHeight = buildings[i];
+                
+                steps.push({
+                    i: i,
+                    maxHeight: maxHeight,
+                    visibleCount: visibleCount,
+                    currentHeight: currentHeight,
+                    info: `Examining building at index ${i} with height ${currentHeight}`,
+                    condition: `${currentHeight} > ${maxHeight} (${currentHeight > maxHeight ? 'true' : 'false'})`,
+                    operation: null,
+                    activeVars: ['var-i', 'var-currentHeight'],
+                    processed: [...processed],
+                    visible: [...visible]
+                });
+                
+                if (currentHeight > maxHeight) {
+                    visibleCount++;
+                    maxHeight = currentHeight;
+                    processed.push(i);
+                    visible.push(i);
+                    
+                    steps.push({
+                        i: i,
+                        maxHeight: maxHeight,
+                        visibleCount: visibleCount,
+                        currentHeight: currentHeight,
+                        info: `Building is visible! Increment count and update maxHeight`,
+                        condition: null,
+                        operation: `visibleCount++ (${visibleCount-1} → ${visibleCount}), maxHeight = ${maxHeight}`,
+                        activeVars: ['var-visibleCount', 'var-maxHeight'],
+                        processed: [...processed],
+                        visible: [...visible]
+                    });
+                } else {
+                    processed.push(i);
+                    
+                    steps.push({
+                        i: i,
+                        maxHeight: maxHeight,
+                        visibleCount: visibleCount,
+                        currentHeight: currentHeight,
+                        info: `Building is blocked by taller building(s) to the left`,
+                        condition: null,
+                        operation: `No operation - building is not visible`,
+                        activeVars: [],
+                        processed: [...processed],
+                        visible: [...visible]
+                    });
+                }
+                
+                i++;
+            }
+            
+            steps.push({
+                i: i,
+                maxHeight: maxHeight,
+                visibleCount: visibleCount,
+                currentHeight: null,
+                info: `Algorithm complete! Total visible buildings: ${visibleCount}`,
+                condition: null,
+                operation: null,
+                activeVars: [],
+                processed: [...processed],
+                visible: [...visible]
+            });
+            
+            maxSteps = steps.length - 1;
+        }
+        
+        function renderBuildings() {
+            const container = document.getElementById('buildingsContainer');
+            container.innerHTML = '';
+            
+            const step = steps[currentStep];
+            
+            buildings.forEach((height, index) => {
+                const building = document.createElement('div');
+                building.className = 'building';
+                building.style.height = `${height * 20}px`;
+                building.textContent = height;
+                
+                if (index === step.i) {
+                    building.classList.add('current');
+                }
+                
+                if (step.processed.includes(index)) {
+                    building.classList.add('processed');
+                }
+                
+                if (step.visible.includes(index)) {
+                    building.classList.add('visible');
+                }
+                
+                if (index === step.i) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    pointer.textContent = 'CURRENT';
+                    building.appendChild(pointer);
+                }
+                
+                container.appendChild(building);
+            });
+        }
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('val-i').textContent = step.i;
+            document.getElementById('val-maxHeight').textContent = step.maxHeight;
+            document.getElementById('val-visibleCount').textContent = step.visibleCount;
+            document.getElementById('val-currentHeight').textContent = step.currentHeight || '-';
+            
+            ['var-i', 'var-maxHeight', 'var-visibleCount', 'var-currentHeight'].forEach(id => {
+                const elem = document.getElementById(id);
+                elem.classList.remove('active', 'increment', 'decrement');
+                if (step.activeVars.includes(id)) {
+                    elem.classList.add('active');
+                }
+            });
+            
+            const conditionsContainer = document.getElementById('conditionsContainer');
+            conditionsContainer.innerHTML = '';
+            if (step.condition) {
+                const condDiv = document.createElement('div');
+                condDiv.className = `condition ${step.condition.includes('true') ? 'true' : 'false'}`;
+                condDiv.textContent = step.condition;
+                conditionsContainer.appendChild(condDiv);
+            }
+            
+            const operationsContainer = document.getElementById('operationsContainer');
+            operationsContainer.innerHTML = '';
+            if (step.operation) {
+                const opDiv = document.createElement('div');
+                opDiv.className = 'operation';
+                if (step.operation.includes('++')) {
+                    opDiv.classList.add('increment');
+                } else if (step.operation.includes('--')) {
+                    opDiv.classList.add('decrement');
+                } else if (step.operation.includes('No operation')) {
+                    opDiv.style.background = '#f0f0f0';
+                }
+                opDiv.textContent = step.operation;
+                operationsContainer.appendChild(opDiv);
+            }
+            
+            document.getElementById('stepInfo').textContent = step.info;
+            document.getElementById('stepCounter').textContent = `Step: ${currentStep}`;
+            document.getElementById('resultDisplay').textContent = step.visibleCount;
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === maxSteps;
+            
+            renderBuildings();
+        }
+        
+        function nextStep() {
+            if (currentStep < maxSteps) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+        
+        function reset() {
+            currentStep = 0;
+            updateDisplay();
+        }
+        
+        function toggleCollapsible() {
+            const section = document.getElementById('theorySection');
+            section.classList.toggle('open');
+            const header = section.querySelector('.collapsible-header');
+            header.textContent = section.classList.contains('open') ? 
+                '▼ Algorithm Theory & Explanation' : '▶ Algorithm Theory & Explanation';
+        }
+        
+        document.getElementById('nextBtn').addEventListener('click', nextStep);
+        document.getElementById('prevBtn').addEventListener('click', prevStep);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+        
+        generateSteps();
+        updateDisplay();
+    </script>
+</body>
+</html>

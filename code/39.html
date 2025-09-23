@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Window Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .section {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid black;
+        }
+
+        .section h3 {
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: white;
+            color: black;
+            border: 2px solid black;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .string-visual {
+            display: flex;
+            gap: 2px;
+            margin: 10px 0;
+            justify-content: center;
+            position: relative;
+        }
+
+        .char-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            position: relative;
+            background: white;
+        }
+
+        .char-cell.current {
+            background: yellow;
+        }
+
+        .char-cell.in-window {
+            background: #f0f0f0;
+        }
+
+        .pointer {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border: 1px solid black;
+            border-radius: 3px;
+            z-index: 10;
+        }
+
+        .pointer.left {
+            background: #ff1493;
+            color: white;
+            top: -25px;
+        }
+
+        .pointer.right {
+            background: #00ff00;
+            color: black;
+            top: -25px;
+        }
+
+        .pointer.current {
+            background: #1e90ff;
+            color: white;
+            bottom: -25px;
+        }
+
+        .variables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .variable {
+            padding: 4px 8px;
+            border: 1px solid black;
+            font-size: 12px;
+        }
+
+        .variable.active {
+            background: yellow;
+        }
+
+        .variable.increment {
+            background: #90EE90;
+        }
+
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+
+        .condition {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border: 1px solid black;
+            font-size: 12px;
+        }
+
+        .condition.true {
+            background: #90EE90;
+        }
+
+        .condition.false {
+            background: #FFB6C1;
+        }
+
+        .operation {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border: 1px solid black;
+            font-size: 12px;
+        }
+
+        .operation.increment {
+            background: #90EE90;
+        }
+
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+
+        .operation.update {
+            background: #ADD8E6;
+        }
+
+        .collapsible {
+            margin-top: 20px;
+            border: 1px solid black;
+        }
+
+        .collapsible-header {
+            padding: 10px;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .collapsible-content.show {
+            display: block;
+        }
+
+        .step-counter {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="section">
+                <h3>Problem: Smallest Window Containing All Characters</h3>
+                <p>Find the minimum window substring in string s that contains all characters from string t.</p>
+                <p><strong>Example:</strong> s="ADOBECODEBANC", t="ABC" → "BANC"</p>
+            </div>
+
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+
+            <div class="step-counter" id="stepCounter">Step 1 of 1</div>
+
+            <div class="section">
+                <h3>Variables</h3>
+                <div class="variables-grid" id="variables"></div>
+            </div>
+
+            <div class="section">
+                <h3>Current Conditions</h3>
+                <div id="conditions"></div>
+            </div>
+
+            <div class="section">
+                <h3>Current Operations</h3>
+                <div id="operations"></div>
+            </div>
+
+            <div class="section">
+                <h3>Result</h3>
+                <div id="result">Current best: ""</div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('theory')">
+                    Algorithm Theory & Explanation ▼
+                </div>
+                <div class="collapsible-content" id="theory">
+                    <h4>Sliding Window Technique</h4>
+                    <p>This problem uses the sliding window technique with two pointers. We expand the right pointer to include characters until we have a valid window containing all characters from t, then contract from the left to find the minimum window.</p>
+                    
+                    <h4>Key Concepts</h4>
+                    <p>• Use frequency maps to track character counts in target and current window</p>
+                    <p>• Expand window by moving right pointer until valid</p>
+                    <p>• Contract window by moving left pointer while maintaining validity</p>
+                    <p>• Track minimum valid window found so far</p>
+                    
+                    <h4>Time Complexity: O(|s| + |t|)</h4>
+                    <h4>Space Complexity: O(|s| + |t|)</h4>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('tricks')">
+                    Tricks & Optimizations ▼
+                </div>
+                <div class="collapsible-content" id="tricks">
+                    <p>• Use formed counter instead of checking all characters each time</p>
+                    <p>• Only update minimum when contracting (not expanding)</p>
+                    <p>• Filter string to only include relevant characters for large inputs</p>
+                    <p>• Use character frequency to avoid unnecessary window updates</p>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('edges')">
+                    Edge Cases & Boundary Conditions ▼
+                </div>
+                <div class="collapsible-content" id="edges">
+                    <p>• Empty string s or t</p>
+                    <p>• t longer than s</p>
+                    <p>• No valid window exists</p>
+                    <p>• Duplicate characters in t</p>
+                    <p>• Entire string s is the minimum window</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h3>String Visualization</h3>
+            <div class="string-visual" id="stringVisual"></div>
+            <div style="margin-top: 20px; font-size: 12px;">
+                <div>Target: "ABC"</div>
+                <div>String: "ADOBECODEBANC"</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const s = "ADOBECODEBANC";
+        const t = "ABC";
+        let currentStep = 0;
+        let steps = [];
+
+        function generateSteps() {
+            const steps = [];
+            const targetMap = {};
+            for (let char of t) {
+                targetMap[char] = (targetMap[char] || 0) + 1;
+            }
+            
+            let left = 0, right = 0;
+            let windowMap = {};
+            let formed = 0;
+            let required = Object.keys(targetMap).length;
+            let minLen = Infinity;
+            let minStart = 0;
+            
+            while (right < s.length) {
+                const char = s[right];
+                windowMap[char] = (windowMap[char] || 0) + 1;
+                
+                if (targetMap[char] && windowMap[char] === targetMap[char]) {
+                    formed++;
+                }
+                
+                steps.push({
+                    left, right, windowMap: {...windowMap}, formed, required,
+                    minLen, minStart, char,
+                    operation: `Add '${char}' to window`,
+                    condition: targetMap[char] ? `'${char}' needed: ${windowMap[char]} >= ${targetMap[char]} = ${windowMap[char] >= targetMap[char]}` : `'${char}' not in target`,
+                    variables: { left, right, formed, required, windowSize: right - left + 1 }
+                });
+                
+                while (left <= right && formed === required) {
+                    if (right - left + 1 < minLen) {
+                        minLen = right - left + 1;
+                        minStart = left;
+                    }
+                    
+                    const leftChar = s[left];
+                    windowMap[leftChar]--;
+                    
+                    if (targetMap[leftChar] && windowMap[leftChar] < targetMap[leftChar]) {
+                        formed--;
+                    }
+                    
+                    steps.push({
+                        left, right, windowMap: {...windowMap}, formed, required,
+                        minLen, minStart, char: leftChar,
+                        operation: `Remove '${leftChar}' from window`,
+                        condition: `Valid window: formed(${formed}) === required(${required}) = ${formed === required}`,
+                        variables: { left, right, formed, required, windowSize: right - left + 1 }
+                    });
+                    
+                    left++;
+                }
+                
+                right++;
+            }
+            
+            return steps;
+        }
+
+        function initVisualization() {
+            steps = generateSteps();
+            currentStep = 0;
+            updateVisualization();
+        }
+
+        function updateVisualization() {
+            if (steps.length === 0) return;
+            
+            const step = steps[currentStep];
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} of ${steps.length}`;
+            
+            updateStringVisual(step);
+            updateVariables(step);
+            updateConditions(step);
+            updateOperations(step);
+            updateResult(step);
+            updateButtons();
+        }
+
+        function updateStringVisual(step) {
+            const container = document.getElementById('stringVisual');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < s.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'char-cell';
+                cell.textContent = s[i];
+                
+                if (i >= step.left && i <= step.right) {
+                    cell.classList.add('in-window');
+                }
+                
+                if (i === step.right) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer right';
+                    pointer.textContent = 'R';
+                    cell.appendChild(pointer);
+                }
+                
+                if (i === step.left) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer left';
+                    pointer.textContent = 'L';
+                    cell.appendChild(pointer);
+                }
+                
+                container.appendChild(cell);
+            }
+        }
+
+        function updateVariables(step) {
+            const container = document.getElementById('variables');
+            const vars = [
+                { name: 'left', value: step.variables.left },
+                { name: 'right', value: step.variables.right },
+                { name: 'formed', value: step.variables.formed },
+                { name: 'required', value: step.variables.required },
+                { name: 'windowSize', value: step.variables.windowSize },
+                { name: 'minLen', value: step.minLen === Infinity ? '∞' : step.minLen }
+            ];
+            
+            container.innerHTML = '';
+            vars.forEach(variable => {
+                const div = document.createElement('div');
+                div.className = 'variable';
+                div.textContent = `${variable.name}: ${variable.value}`;
+                container.appendChild(div);
+            });
+        }
+
+        function updateConditions(step) {
+            const container = document.getElementById('conditions');
+            container.innerHTML = '';
+            
+            const conditionDiv = document.createElement('div');
+            conditionDiv.className = `condition ${step.condition.includes('true') || step.condition.includes(' = true') ? 'true' : 'false'}`;
+            conditionDiv.textContent = step.condition;
+            container.appendChild(conditionDiv);
+        }
+
+        function updateOperations(step) {
+            const container = document.getElementById('operations');
+            container.innerHTML = '';
+            
+            const opDiv = document.createElement('div');
+            opDiv.className = 'operation update';
+            opDiv.textContent = step.operation;
+            container.appendChild(opDiv);
+        }
+
+        function updateResult(step) {
+            const container = document.getElementById('result');
+            const result = step.minLen === Infinity ? '""' : `"${s.substring(step.minStart, step.minStart + step.minLen)}"`;
+            container.textContent = `Current best: ${result} (length: ${step.minLen === Infinity ? 0 : step.minLen})`;
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const header = content.previousElementSibling;
+            
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                header.textContent = header.textContent.replace('▲', '▼');
+            } else {
+                content.classList.add('show');
+                header.textContent = header.textContent.replace('▼', '▲');
+            }
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateVisualization();
+            }
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateVisualization();
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            currentStep = 0;
+            updateVisualization();
+        });
+
+        initVisualization();
+    </script>
+</body>
+</html>

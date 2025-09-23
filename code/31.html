@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimum Left Rotations Algorithm</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            flex: 1;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .question-section {
+            background: #f5f5f5;
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #f0f0f0;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .variables-section, .condition-section, .operation-section {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .variable {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 5px;
+            margin: 2px 0;
+        }
+
+        .variable.active {
+            background: yellow;
+        }
+
+        .variable.increment {
+            background: #90EE90;
+        }
+
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+
+        .condition {
+            padding: 5px;
+            margin: 2px 0;
+            border-radius: 3px;
+        }
+
+        .condition.true {
+            background: #90EE90;
+        }
+
+        .condition.false {
+            background: #FFB6C1;
+        }
+
+        .operation {
+            padding: 5px;
+            margin: 2px 0;
+            border-radius: 3px;
+        }
+
+        .operation.increment {
+            background: #90EE90;
+        }
+
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+
+        .operation.compare {
+            background: #ADD8E6;
+        }
+
+        .visualization {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .string-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .string-display {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 10px;
+        }
+
+        .char-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            position: relative;
+        }
+
+        .char-cell.current {
+            background: #FFE4B5;
+            border-color: #FF69B4;
+            border-width: 3px;
+        }
+
+        .char-cell.matched {
+            background: #90EE90;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .pointer.current { background: #FF69B4; }
+        .pointer.start { background: #32CD32; }
+        .pointer.comparison { background: #1E90FF; }
+        .pointer.split { background: #FFA500; }
+
+        .result-section {
+            margin-top: 15px;
+            padding: 10px;
+            border: 2px solid black;
+            text-align: center;
+        }
+
+        .collapsible {
+            border: 2px solid black;
+            margin-top: 15px;
+        }
+
+        .collapsible-header {
+            background: #f0f0f0;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            background: white;
+        }
+
+        .step-counter {
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="question-section">
+            <h3>Minimum Left Rotations to Match String</h3>
+            <p><strong>Problem:</strong> Find minimum left rotations needed to transform string s1 to s2.</p>
+            <p><strong>Example:</strong> s1="ABCD", s2="BCDA" → Output: 1</p>
+        </div>
+
+        <div class="navigation">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="step-counter" id="stepCounter">Step 1 of 8</div>
+
+        <div class="variables-section">
+            <h4>Variables</h4>
+            <div class="variable" id="var-rotations">
+                <span>rotations:</span>
+                <span id="rotations-value">0</span>
+            </div>
+            <div class="variable" id="var-temp">
+                <span>temp:</span>
+                <span id="temp-value">""</span>
+            </div>
+            <div class="variable" id="var-found">
+                <span>found:</span>
+                <span id="found-value">false</span>
+            </div>
+        </div>
+
+        <div class="condition-section">
+            <h4>Current Condition</h4>
+            <div id="conditionDisplay">Starting algorithm...</div>
+        </div>
+
+        <div class="operation-section">
+            <h4>Current Operation</h4>
+            <div id="operationDisplay">Initialize variables</div>
+        </div>
+
+        <div class="substring-section">
+            <h4>Substring Construction</h4>
+            <div id="substringDisplay">-</div>
+        </div>
+
+        <div class="result-section">
+            <h4>Result</h4>
+            <div id="resultDisplay">-</div>
+        </div>
+
+        <div class="collapsible">
+            <div class="collapsible-header" onclick="toggleSection('theory')">
+                Algorithm Theory & Explanation ▼
+            </div>
+            <div class="collapsible-content" id="theory">
+                <h4>Algorithm Explanation</h4>
+                <p>This algorithm finds the minimum number of left rotations needed to transform string s1 into string s2. A left rotation moves the first character to the end.</p>
+                
+                <h4>Approach</h4>
+                <p>1. Try each possible rotation (0 to n-1)</p>
+                <p>2. For each rotation, create rotated string</p>
+                <p>3. Compare with target string s2</p>
+                <p>4. Return the rotation count when match found</p>
+                
+                <h4>Edge Cases</h4>
+                <p>• Strings of different lengths</p>
+                <p>• No possible rotation match</p>
+                <p>• Empty strings</p>
+                
+                <h4>Time Complexity: O(n²)</h4>
+                <h4>Space Complexity: O(n)</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="visualization">
+            <div class="string-container">
+                <h4>Original String (s1)</h4>
+                <div class="string-display" id="s1Display"></div>
+            </div>
+            
+            <div class="string-container">
+                <h4>Current Rotation</h4>
+                <div class="string-display" id="tempDisplay"></div>
+            </div>
+            
+            <div class="string-container">
+                <h4>Target String (s2)</h4>
+                <div class="string-display" id="s2Display"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const s1 = "ABCD";
+        const s2 = "BCDA";
+        let currentStep = 0;
+        
+        const steps = [
+            {
+                rotations: 0,
+                temp: "",
+                found: false,
+                condition: "Initialize variables",
+                operation: "rotations = 0, temp = \"\", found = false",
+                result: "-",
+                activeVars: [],
+                pointers: [],
+                substringParts: { left: "", right: "" }
+            },
+            {
+                rotations: 0,
+                temp: "ABCD",
+                found: false,
+                condition: "rotations < s1.length (0 < 4) ✓",
+                operation: "temp = s1.substring(0) + s1.substring(0, 0) = \"ABCD\" + \"\" = \"ABCD\"",
+                result: "-",
+                activeVars: ["rotations", "temp"],
+                pointers: [{ type: "start", pos: 0 }],
+                substringParts: { left: "ABCD", right: "" }
+            },
+            {
+                rotations: 0,
+                temp: "ABCD",
+                found: false,
+                condition: "temp == s2 (\"ABCD\" == \"BCDA\") ✗",
+                operation: "Compare current rotation with target string",
+                result: "-",
+                activeVars: ["temp", "found"],
+                pointers: [{ type: "comparison", pos: 0 }],
+                substringParts: { left: "ABCD", right: "" }
+            },
+            {
+                rotations: 1,
+                temp: "ABCD",
+                found: false,
+                condition: "rotations < s1.length (1 < 4) ✓",
+                operation: "rotations++ (0 → 1), continue to next rotation",
+                result: "-",
+                activeVars: ["rotations"],
+                pointers: [],
+                substringParts: { left: "", right: "" }
+            },
+            {
+                rotations: 1,
+                temp: "BCDA",
+                found: false,
+                condition: "Creating rotation 1",
+                operation: "temp = s1.substring(1) + s1.substring(0, 1) = \"BCD\" + \"A\" = \"BCDA\"",
+                result: "-",
+                activeVars: ["rotations", "temp"],
+                pointers: [{ type: "start", pos: 1 }, { type: "split", pos: 1 }],
+                substringParts: { left: "BCD", right: "A" }
+            },
+            {
+                rotations: 1,
+                temp: "BCDA",
+                found: true,
+                condition: "temp == s2 (\"BCDA\" == \"BCDA\") ✓",
+                operation: "Match found! Set found = true",
+                result: "-",
+                activeVars: ["temp", "found"],
+                pointers: [{ type: "comparison", pos: 1 }],
+                substringParts: { left: "BCD", right: "A" }
+            },
+            {
+                rotations: 1,
+                temp: "BCDA",
+                found: true,
+                condition: "found == true ✓",
+                operation: "Break from loop, prepare to return result",
+                result: "1",
+                activeVars: ["found"],
+                pointers: [],
+                substringParts: { left: "", right: "" }
+            },
+            {
+                rotations: 1,
+                temp: "BCDA",
+                found: true,
+                condition: "Algorithm complete",
+                operation: "Return minimum rotations = 1",
+                result: "1",
+                activeVars: [],
+                pointers: [],
+                substringParts: { left: "", right: "" }
+            }
+        ];
+
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} of ${steps.length}`;
+            
+            document.getElementById('rotations-value').textContent = step.rotations;
+            document.getElementById('temp-value').textContent = step.temp || '""';
+            document.getElementById('found-value').textContent = step.found;
+            
+            document.querySelectorAll('.variable').forEach(v => {
+                v.classList.remove('active', 'increment', 'decrement');
+            });
+            
+            step.activeVars.forEach(varName => {
+                const element = document.getElementById(`var-${varName}`);
+                if (element) {
+                    element.classList.add('active');
+                    if (step.operation.includes(`${varName}++`)) {
+                        element.classList.add('increment');
+                    } else if (step.operation.includes(`${varName}--`)) {
+                        element.classList.add('decrement');
+                    }
+                }
+            });
+            
+            const conditionEl = document.getElementById('conditionDisplay');
+            conditionEl.textContent = step.condition;
+            conditionEl.className = 'condition';
+            if (step.condition.includes('✓')) {
+                conditionEl.classList.add('true');
+            } else if (step.condition.includes('✗')) {
+                conditionEl.classList.add('false');
+            }
+            
+            const operationEl = document.getElementById('operationDisplay');
+            operationEl.textContent = step.operation;
+            operationEl.className = 'operation';
+            if (step.operation.includes('++')) {
+                operationEl.classList.add('increment');
+            } else if (step.operation.includes('--')) {
+                operationEl.classList.add('decrement');
+            } else if (step.operation.includes('Compare')) {
+                operationEl.classList.add('compare');
+            }
+            
+            document.getElementById('resultDisplay').textContent = step.result;
+            
+            updateSubstringDisplay(step);
+            updateVisualization(step);
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+
+        function updateSubstringDisplay(step) {
+            const substringEl = document.getElementById('substringDisplay');
+            
+            if (step.substringParts.left === "" && step.substringParts.right === "") {
+                substringEl.textContent = "-";
+                return;
+            }
+            
+            substringEl.innerHTML = '';
+            
+            const display = document.createElement('div');
+            display.className = 'substring-display';
+            
+            if (step.substringParts.left) {
+                const leftPart = document.createElement('div');
+                leftPart.className = 'substring-part left';
+                leftPart.textContent = `"${step.substringParts.left}"`;
+                display.appendChild(leftPart);
+                
+                const plus = document.createElement('span');
+                plus.className = 'plus-sign';
+                plus.textContent = '+';
+                display.appendChild(plus);
+            }
+            
+            if (step.substringParts.right) {
+                const rightPart = document.createElement('div');
+                rightPart.className = 'substring-part right';
+                rightPart.textContent = `"${step.substringParts.right}"`;
+                display.appendChild(rightPart);
+            } else if (step.substringParts.left) {
+                const emptyPart = document.createElement('div');
+                emptyPart.className = 'substring-part right';
+                emptyPart.textContent = '""';
+                display.appendChild(emptyPart);
+            }
+            
+            if (step.substringParts.left || step.substringParts.right) {
+                const equals = document.createElement('span');
+                equals.className = 'equals-sign';
+                equals.textContent = '=';
+                display.appendChild(equals);
+                
+                const result = document.createElement('div');
+                result.className = 'substring-part';
+                result.style.background = '#F0F8FF';
+                result.style.fontWeight = 'bold';
+                result.textContent = `"${step.temp}"`;
+                display.appendChild(result);
+            }
+            
+            substringEl.appendChild(display);
+        }
+
+        function updateVisualization(step) {
+            const s1Display = document.getElementById('s1Display');
+            const tempDisplay = document.getElementById('tempDisplay');
+            const s2Display = document.getElementById('s2Display');
+            
+            s1Display.innerHTML = '';
+            tempDisplay.innerHTML = '';
+            s2Display.innerHTML = '';
+            
+            for (let i = 0; i < s1.length; i++) {
+                const cell1 = document.createElement('div');
+                cell1.className = 'char-cell';
+                cell1.textContent = s1[i];
+                s1Display.appendChild(cell1);
+                
+                const cellTemp = document.createElement('div');
+                cellTemp.className = 'char-cell';
+                cellTemp.textContent = step.temp[i] || '';
+                if (step.temp && step.temp === s2) {
+                    cellTemp.classList.add('matched');
+                }
+                tempDisplay.appendChild(cellTemp);
+                
+                const cell2 = document.createElement('div');
+                cell2.className = 'char-cell';
+                cell2.textContent = s2[i];
+                s2Display.appendChild(cell2);
+            }
+            
+            step.pointers.forEach(pointer => {
+                const targetDisplay = pointer.type === 'start' ? s1Display : 
+                                    pointer.type === 'comparison' ? tempDisplay : s1Display;
+                const cell = targetDisplay.children[pointer.pos];
+                if (cell) {
+                    cell.classList.add('current');
+                    const pointerEl = document.createElement('div');
+                    pointerEl.className = `pointer ${pointer.type}`;
+                    pointerEl.textContent = pointer.type === 'start' ? 'START' : 
+                                          pointer.type === 'comparison' ? 'CMP' : 
+                                          pointer.type === 'split' ? 'SPLIT' : 'PTR';
+                    cell.appendChild(pointerEl);
+                }
+            });
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            updateDisplay();
+        }
+
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId);
+            const header = content.previousElementSibling;
+            if (content.style.display === 'none' || !content.style.display) {
+                content.style.display = 'block';
+                header.textContent = header.textContent.replace('▼', '▲');
+            } else {
+                content.style.display = 'none';
+                header.textContent = header.textContent.replace('▲', '▼');
+            }
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', nextStep);
+        document.getElementById('prevBtn').addEventListener('click', prevStep);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        updateDisplay();
+    </script>
+</body>
+</html>

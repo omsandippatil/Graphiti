@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longest Substring Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .problem-section {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid black;
+        }
+
+        .problem-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .problem-example {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .navigation {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: white;
+            color: black;
+            border: 2px solid black;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: black;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .variables-section, .conditions-section, .operations-section {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid black;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .variable {
+            margin: 3px 0;
+            padding: 2px 4px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .var-active { background: yellow; }
+        .var-increment { background: #90EE90; }
+        .var-decrement { background: #FFB6C1; }
+
+        .condition {
+            margin: 3px 0;
+            padding: 2px 4px;
+        }
+
+        .condition-true { background: #90EE90; }
+        .condition-false { background: #FFB6C1; }
+
+        .operation {
+            margin: 3px 0;
+            padding: 2px 4px;
+        }
+
+        .op-increment { background: #90EE90; }
+        .op-decrement { background: #FFB6C1; }
+        .op-update { background: #ADD8E6; }
+
+        .result-section {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid black;
+        }
+
+        .string-visualization {
+            display: flex;
+            gap: 2px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .char-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .char-visited {
+            background: #f0f0f0;
+        }
+
+        .char-current {
+            background: yellow;
+        }
+
+        .char-window {
+            background: #e6f3ff;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -25px;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: white;
+        }
+
+        .pointer-left { background: #ff1493; left: -5px; }
+        .pointer-right { background: #32cd32; right: -5px; }
+        .pointer-current { background: #1e90ff; left: 50%; transform: translateX(-50%); top: -35px; }
+
+        .step-counter {
+            margin: 10px 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .collapsible {
+            margin-top: 30px;
+            border-top: 2px solid black;
+            padding-top: 15px;
+        }
+
+        .collapsible-header {
+            background: white;
+            border: 2px solid black;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .collapsible-header:hover {
+            background: black;
+            color: white;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid black;
+            border-top: none;
+        }
+
+        .collapsible.active .collapsible-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="problem-section">
+            <div class="problem-title">Longest Substring Without Repeating Characters</div>
+            <div class="problem-example">Input: "abcabcbb" → Output: 3</div>
+            <div class="problem-example">Find length of longest substring with unique characters</div>
+        </div>
+
+        <div class="navigation">
+            <button class="btn" id="prevBtn">Previous</button>
+            <button class="btn" id="nextBtn">Next</button>
+            <button class="btn" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="step-counter" id="stepCounter">Step: 0 / 0</div>
+
+        <div class="variables-section">
+            <div class="section-title">Variables</div>
+            <div id="variablesDisplay"></div>
+        </div>
+
+        <div class="conditions-section">
+            <div class="section-title">Current Condition</div>
+            <div id="conditionsDisplay"></div>
+        </div>
+
+        <div class="operations-section">
+            <div class="section-title">Current Operation</div>
+            <div id="operationsDisplay"></div>
+        </div>
+
+        <div class="result-section">
+            <div class="section-title">Result</div>
+            <div id="resultDisplay"></div>
+        </div>
+
+        <div class="collapsible" id="theorySection">
+            <div class="collapsible-header">📖 Algorithm Theory & Explanation</div>
+            <div class="collapsible-content">
+                <h3>Sliding Window Approach</h3>
+                <p>Uses two pointers (left and right) to maintain a window of unique characters. When a duplicate is found, shrink the window from the left until all characters are unique again.</p>
+                
+                <h3>Time Complexity: O(n)</h3>
+                <p>Each character is visited at most twice (once by right pointer, once by left pointer).</p>
+                
+                <h3>Space Complexity: O(min(m,n))</h3>
+                <p>Where m is the size of the character set and n is the length of the string.</p>
+                
+                <h3>Key Insights</h3>
+                <ul>
+                    <li>Use a Set to track characters in current window</li>
+                    <li>Expand window by moving right pointer</li>
+                    <li>Contract window by moving left pointer when duplicates found</li>
+                    <li>Track maximum window size seen so far</li>
+                </ul>
+
+                <h3>Edge Cases</h3>
+                <ul>
+                    <li>Empty string → return 0</li>
+                    <li>Single character → return 1</li>
+                    <li>All unique characters → return string length</li>
+                    <li>All same characters → return 1</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="string-visualization" id="stringVisualization"></div>
+    </div>
+
+    <script>
+        class LongestSubstringVisualizer {
+            constructor() {
+                this.input = "abcabcbb";
+                this.steps = [];
+                this.currentStep = 0;
+                this.generateSteps();
+                this.setupEventListeners();
+                this.render();
+            }
+
+            generateSteps() {
+                const s = this.input;
+                const steps = [];
+                const charSet = new Set();
+                let left = 0, right = 0, maxLength = 0;
+
+                steps.push({
+                    left, right, maxLength, charSet: new Set(charSet),
+                    condition: "Initialize pointers and variables",
+                    operation: "left = 0, right = 0, maxLength = 0",
+                    description: "Starting algorithm with two pointers"
+                });
+
+                while (right < s.length) {
+                    const currentChar = s[right];
+                    
+                    if (!charSet.has(currentChar)) {
+                        charSet.add(currentChar);
+                        maxLength = Math.max(maxLength, right - left + 1);
+                        steps.push({
+                            left, right, maxLength, charSet: new Set(charSet),
+                            condition: `!charSet.has('${currentChar}') → true`,
+                            operation: `Add '${currentChar}' to set, update maxLength = ${maxLength}`,
+                            description: `Character '${currentChar}' not in window, expand window`
+                        });
+                        right++;
+                        if (right < s.length) {
+                            steps.push({
+                                left, right, maxLength, charSet: new Set(charSet),
+                                condition: `right < s.length (${right} < ${s.length}) → true`,
+                                operation: `right++ (${right-1} → ${right})`,
+                                description: "Move right pointer to next position"
+                            });
+                        }
+                    } else {
+                        steps.push({
+                            left, right, maxLength, charSet: new Set(charSet),
+                            condition: `charSet.has('${currentChar}') → true`,
+                            operation: `Duplicate '${currentChar}' found, need to shrink window`,
+                            description: `Character '${currentChar}' already in window`
+                        });
+                        
+                        while (charSet.has(currentChar)) {
+                            charSet.delete(s[left]);
+                            steps.push({
+                                left, right, maxLength, charSet: new Set(charSet),
+                                condition: `charSet.has('${currentChar}') → ${charSet.has(currentChar)}`,
+                                operation: `Remove '${s[left]}' from set, left++ (${left} → ${left+1})`,
+                                description: `Shrink window from left until '${currentChar}' is removed`
+                            });
+                            left++;
+                        }
+                    }
+                }
+
+                steps.push({
+                    left, right, maxLength, charSet: new Set(charSet),
+                    condition: `right >= s.length (${right} >= ${s.length}) → true`,
+                    operation: `Algorithm complete, return ${maxLength}`,
+                    description: "Reached end of string, algorithm finished"
+                });
+
+                this.steps = steps;
+            }
+
+            setupEventListeners() {
+                document.getElementById('prevBtn').addEventListener('click', () => this.previousStep());
+                document.getElementById('nextBtn').addEventListener('click', () => this.nextStep());
+                document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+                
+                document.getElementById('theorySection').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('collapsible-header')) {
+                        e.target.parentElement.classList.toggle('active');
+                    }
+                });
+            }
+
+            previousStep() {
+                if (this.currentStep > 0) {
+                    this.currentStep--;
+                    this.render();
+                }
+            }
+
+            nextStep() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.currentStep++;
+                    this.render();
+                }
+            }
+
+            reset() {
+                this.currentStep = 0;
+                this.render();
+            }
+
+            render() {
+                this.updateControls();
+                this.updateStepCounter();
+                this.updateVariables();
+                this.updateConditions();
+                this.updateOperations();
+                this.updateResult();
+                this.updateVisualization();
+            }
+
+            updateControls() {
+                const prevBtn = document.getElementById('prevBtn');
+                const nextBtn = document.getElementById('nextBtn');
+                
+                prevBtn.disabled = this.currentStep === 0;
+                nextBtn.disabled = this.currentStep === this.steps.length - 1;
+            }
+
+            updateStepCounter() {
+                document.getElementById('stepCounter').textContent = 
+                    `Step: ${this.currentStep + 1} / ${this.steps.length}`;
+            }
+
+            updateVariables() {
+                const step = this.steps[this.currentStep];
+                const display = document.getElementById('variablesDisplay');
+                
+                display.innerHTML = `
+                    <div class="variable">left = ${step.left}</div>
+                    <div class="variable">right = ${step.right}</div>
+                    <div class="variable">maxLength = ${step.maxLength}</div>
+                    <div class="variable">charSet = {${Array.from(step.charSet).join(', ')}}</div>
+                `;
+            }
+
+            updateConditions() {
+                const step = this.steps[this.currentStep];
+                const display = document.getElementById('conditionsDisplay');
+                
+                const isTrue = step.condition.includes('→ true');
+                const conditionClass = isTrue ? 'condition-true' : 'condition-false';
+                
+                display.innerHTML = `<div class="condition ${conditionClass}">${step.condition}</div>`;
+            }
+
+            updateOperations() {
+                const step = this.steps[this.currentStep];
+                const display = document.getElementById('operationsDisplay');
+                
+                let opClass = 'operation';
+                if (step.operation.includes('++')) opClass += ' op-increment';
+                else if (step.operation.includes('Add') || step.operation.includes('update')) opClass += ' op-update';
+                else if (step.operation.includes('Remove')) opClass += ' op-decrement';
+                
+                display.innerHTML = `<div class="${opClass}">${step.operation}</div>`;
+            }
+
+            updateResult() {
+                const step = this.steps[this.currentStep];
+                document.getElementById('resultDisplay').textContent = 
+                    `Current max length: ${step.maxLength}`;
+            }
+
+            updateVisualization() {
+                const step = this.steps[this.currentStep];
+                const container = document.getElementById('stringVisualization');
+                container.innerHTML = '';
+
+                for (let i = 0; i < this.input.length; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'char-cell';
+                    cell.textContent = this.input[i];
+
+                    if (i >= step.left && i < step.right && step.charSet.has(this.input[i])) {
+                        cell.classList.add('char-window');
+                    }
+                    
+                    if (i === step.right && step.right < this.input.length) {
+                        cell.classList.add('char-current');
+                    }
+
+                    if (i === step.left) {
+                        const leftPointer = document.createElement('div');
+                        leftPointer.className = 'pointer pointer-left';
+                        leftPointer.textContent = 'L';
+                        cell.appendChild(leftPointer);
+                    }
+
+                    if (i === step.right && step.right < this.input.length) {
+                        const rightPointer = document.createElement('div');
+                        rightPointer.className = 'pointer pointer-right';
+                        rightPointer.textContent = 'R';
+                        cell.appendChild(rightPointer);
+                    }
+
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        new LongestSubstringVisualizer();
+    </script>
+</body>
+</html>

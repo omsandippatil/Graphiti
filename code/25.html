@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Peak Element Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .question {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid black;
+        }
+
+        .question h2 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .question p {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button:disabled:hover {
+            background: white;
+            color: black;
+        }
+
+        .variables {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid black;
+        }
+
+        .variables h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .variable-item {
+            padding: 5px;
+            margin: 3px 0;
+            font-size: 14px;
+        }
+
+        .variable-active {
+            background: yellow;
+        }
+
+        .variable-increment {
+            background: #90EE90;
+        }
+
+        .conditions {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid black;
+        }
+
+        .conditions h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .condition-item {
+            padding: 5px;
+            margin: 3px 0;
+            font-size: 14px;
+        }
+
+        .condition-true {
+            background: #90EE90;
+        }
+
+        .condition-false {
+            background: #FFB6C1;
+        }
+
+        .operations {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid black;
+        }
+
+        .operations h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .operation-item {
+            padding: 5px;
+            margin: 3px 0;
+            font-size: 14px;
+        }
+
+        .operation-increment {
+            background: #90EE90;
+        }
+
+        .operation-compare {
+            background: #ADD8E6;
+        }
+
+        .step-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid black;
+        }
+
+        .step-info h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .array-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .array-visual {
+            display: flex;
+            gap: 5px;
+            position: relative;
+        }
+
+        .array-cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            background: white;
+        }
+
+        .array-cell.current {
+            background: #E0E0E0;
+        }
+
+        .pointer {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border: 1px solid black;
+            border-radius: 3px;
+            color: white;
+        }
+
+        .pointer-i {
+            background: #FF1493;
+            top: -30px;
+        }
+
+        .pointer-max {
+            background: #32CD32;
+            top: -50px;
+        }
+
+        .collapsible {
+            margin-top: 20px;
+        }
+
+        .collapsible-header {
+            padding: 10px;
+            border: 1px solid black;
+            background: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .collapsible-header:hover {
+            background: #f0f0f0;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid black;
+            border-top: none;
+        }
+
+        .collapsible-content.open {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="question">
+                <h2>Find Peak Element</h2>
+                <p><strong>Problem:</strong> Find the maximum element in an array using simple iteration.</p>
+                <p><strong>Input:</strong> [1,2,7,8,9,3,10]</p>
+                <p><strong>Output:</strong> 10</p>
+            </div>
+
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+
+            <div class="variables">
+                <h3>Variables</h3>
+                <div id="variablesContent"></div>
+            </div>
+
+            <div class="conditions">
+                <h3>Current Condition</h3>
+                <div id="conditionsContent"></div>
+            </div>
+
+            <div class="operations">
+                <h3>Current Operation</h3>
+                <div id="operationsContent"></div>
+            </div>
+
+            <div class="step-info">
+                <h3>Step Information</h3>
+                <div id="stepInfoContent"></div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('theory')">
+                    Theory & Algorithm Explanation ▼
+                </div>
+                <div class="collapsible-content" id="theory">
+                    <h4>Algorithm Theory:</h4>
+                    <p>This algorithm finds the maximum element in an array using a simple linear scan approach.</p>
+                    <p>We iterate through each element, comparing it with our current maximum and updating when we find a larger value.</p>
+                    <p>Time Complexity: O(n), Space Complexity: O(1)</p>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('tricks')">
+                    Tricks & Optimizations ▼
+                </div>
+                <div class="collapsible-content" id="tricks">
+                    <p>• Initialize max with the first element to handle negative numbers correctly</p>
+                    <p>• Single pass through the array is sufficient</p>
+                    <p>• Keep track of both value and index if position is needed</p>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('edges')">
+                    Edge Cases & Caveats ▼
+                </div>
+                <div class="collapsible-content" id="edges">
+                    <p>• Empty array handling</p>
+                    <p>• Single element array</p>
+                    <p>• All elements are the same</p>
+                    <p>• Negative numbers in the array</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="array-container">
+                <h3>Array Visualization</h3>
+                <div class="array-visual" id="arrayVisual"></div>
+                <div><strong>Step:</strong> <span id="stepCounter">0</span></div>
+                <div><strong>Current Max:</strong> <span id="currentMax">-</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const array = [1, 2, 7, 8, 9, 3, 10];
+        let currentStep = 0;
+        let i = 0;
+        let max = array[0];
+        let maxIndex = 0;
+
+        const steps = [
+            {
+                step: 0,
+                i: -1,
+                max: null,
+                maxIndex: -1,
+                description: "Initialize: Set max to first element, start iteration",
+                condition: "",
+                operation: "Initialize max = array[0] = 1, i = 0",
+                variables: { i: 0, max: 1, maxIndex: 0 }
+            }
+        ];
+
+        for (let idx = 0; idx < array.length; idx++) {
+            const isNewMax = array[idx] > (idx === 0 ? array[0] : steps[steps.length - 1].max);
+            steps.push({
+                step: steps.length,
+                i: idx,
+                max: isNewMax ? array[idx] : (idx === 0 ? array[0] : steps[steps.length - 1].max),
+                maxIndex: isNewMax ? idx : (idx === 0 ? 0 : steps[steps.length - 1].maxIndex),
+                description: idx === 0 ? "Start with first element" : (isNewMax ? `Found new maximum: ${array[idx]}` : `${array[idx]} is not greater than current max`),
+                condition: idx === 0 ? "" : `array[${idx}] > max (${array[idx]} > ${steps[steps.length - 1].max})`,
+                operation: idx === 0 ? `Set initial max = ${array[idx]}` : (isNewMax ? `Update max = ${array[idx]}, maxIndex = ${idx}` : `Keep current max = ${steps[steps.length - 1].max}`),
+                variables: { 
+                    i: idx, 
+                    max: isNewMax ? array[idx] : (idx === 0 ? array[0] : steps[steps.length - 1].max), 
+                    maxIndex: isNewMax ? idx : (idx === 0 ? 0 : steps[steps.length - 1].maxIndex)
+                }
+            });
+        }
+
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = currentStep;
+            document.getElementById('currentMax').textContent = step.max !== null ? step.max : '-';
+            
+            updateVariables(step);
+            updateConditions(step);
+            updateOperations(step);
+            updateStepInfo(step);
+            updateArrayVisual(step);
+            updateButtons();
+        }
+
+        function updateVariables(step) {
+            const content = document.getElementById('variablesContent');
+            content.innerHTML = '';
+            
+            const vars = step.variables;
+            for (const [key, value] of Object.entries(vars)) {
+                const div = document.createElement('div');
+                div.className = 'variable-item';
+                if (key === 'i' && step.i >= 0) div.classList.add('variable-active');
+                if (key === 'max' && currentStep > 0 && steps[currentStep - 1] && step.max !== steps[currentStep - 1].max) {
+                    div.classList.add('variable-increment');
+                }
+                div.textContent = `${key} = ${value}`;
+                content.appendChild(div);
+            }
+        }
+
+        function updateConditions(step) {
+            const content = document.getElementById('conditionsContent');
+            content.innerHTML = '';
+            
+            if (step.condition) {
+                const div = document.createElement('div');
+                div.className = 'condition-item';
+                const isTrue = step.i > 0 && array[step.i] > steps[currentStep - 1].max;
+                div.classList.add(isTrue ? 'condition-true' : 'condition-false');
+                div.textContent = step.condition + (isTrue ? ' ✓' : ' ✗');
+                content.appendChild(div);
+            }
+        }
+
+        function updateOperations(step) {
+            const content = document.getElementById('operationsContent');
+            content.innerHTML = '';
+            
+            const div = document.createElement('div');
+            div.className = 'operation-item';
+            if (step.operation.includes('Update max')) {
+                div.classList.add('operation-increment');
+            } else if (step.operation.includes('array[')) {
+                div.classList.add('operation-compare');
+            }
+            div.textContent = step.operation;
+            content.appendChild(div);
+        }
+
+        function updateStepInfo(step) {
+            const content = document.getElementById('stepInfoContent');
+            content.textContent = step.description;
+        }
+
+        function updateArrayVisual(step) {
+            const container = document.getElementById('arrayVisual');
+            container.innerHTML = '';
+            
+            array.forEach((value, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = value;
+                
+                if (index === step.i) {
+                    cell.classList.add('current');
+                }
+                
+                container.appendChild(cell);
+                
+                if (index === step.i && step.i >= 0) {
+                    const iPointer = document.createElement('div');
+                    iPointer.className = 'pointer pointer-i';
+                    iPointer.textContent = 'i';
+                    iPointer.style.left = (index * 65) + 'px';
+                    container.appendChild(iPointer);
+                }
+                
+                if (index === step.maxIndex && step.maxIndex >= 0) {
+                    const maxPointer = document.createElement('div');
+                    maxPointer.className = 'pointer pointer-max';
+                    maxPointer.textContent = 'max';
+                    maxPointer.style.left = (index * 65) + 'px';
+                    container.appendChild(maxPointer);
+                }
+            });
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            updateDisplay();
+        }
+
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            content.classList.toggle('open');
+            const header = content.previousElementSibling;
+            header.textContent = header.textContent.replace(/[▼▲]/, content.classList.contains('open') ? '▲' : '▼');
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', nextStep);
+        document.getElementById('prevBtn').addEventListener('click', prevStep);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        updateDisplay();
+    </script>
+</body>
+</html>

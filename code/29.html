@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Move Hash to Front</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: white;
+            color: black;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .left-panel {
+            width: 60%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 40%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            background: white;
+            color: black;
+            border: 2px solid black;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: black;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .variable-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .variable {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 8px;
+            border: 1px solid black;
+            background: white;
+        }
+        
+        .variable.active {
+            background: #FFFF99;
+        }
+        
+        .variable.increment {
+            background: #90EE90;
+        }
+        
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+        
+        .conditions {
+            margin-bottom: 10px;
+        }
+        
+        .condition {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border: 1px solid black;
+        }
+        
+        .condition.true {
+            background: #90EE90;
+        }
+        
+        .condition.false {
+            background: #FFB6C1;
+        }
+        
+        .operations {
+            margin-bottom: 10px;
+        }
+        
+        .operation {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border: 1px solid black;
+        }
+        
+        .operation.increment {
+            background: #90EE90;
+        }
+        
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+        
+        .operation.add {
+            background: #ADD8E6;
+        }
+        
+        .string-display {
+            font-size: 24px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .char-box {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            margin: 2px;
+            text-align: center;
+            line-height: 36px;
+            background: white;
+            position: relative;
+        }
+        
+        .char-box.processed {
+            background: #F0F0F0;
+        }
+        
+        .char-box.current {
+            background: #FFFF99;
+            border-color: #FF1493;
+            border-width: 3px;
+        }
+        
+        .pointer {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            z-index: 10;
+        }
+        
+        .pointer.current {
+            background: #FF1493;
+            color: white;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .pointer.write {
+            background: #32CD32;
+            color: white;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .result-display {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .result-array {
+            font-size: 18px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 2px solid black;
+            background: #F8F8F8;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+        }
+        
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid black;
+            border-top: none;
+        }
+        
+        .collapsible.open .collapsible-content {
+            display: block;
+        }
+        
+        .step-counter {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="section">
+                <div class="section-title">Problem</div>
+                <div>Move all hash (#) characters to the front of the string while maintaining the relative order of other characters.</div>
+                <div style="margin-top: 8px;"><strong>Example:</strong> "Move#Hash#to#Front" → "###MoveHashtoFront"</div>
+            </div>
+
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Step Counter</div>
+                <div class="step-counter" id="stepCounter">Step 1 / 20</div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Variables</div>
+                <div class="variable-grid">
+                    <div class="variable" id="var-i">
+                        <span>i (read)</span>
+                        <span id="val-i">0</span>
+                    </div>
+                    <div class="variable" id="var-j">
+                        <span>j (write)</span>
+                        <span id="val-j">0</span>
+                    </div>
+                    <div class="variable" id="var-hashCount">
+                        <span>hashCount</span>
+                        <span id="val-hashCount">0</span>
+                    </div>
+                    <div class="variable" id="var-currentChar">
+                        <span>currentChar</span>
+                        <span id="val-currentChar">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Current Conditions</div>
+                <div class="conditions" id="conditions">
+                    <div>Starting first pass...</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Current Operations</div>
+                <div class="operations" id="operations">
+                    <div>Initialize variables</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Current Step Info</div>
+                <div id="stepInfo">Beginning algorithm execution. First pass will count hash characters.</div>
+            </div>
+
+            <div class="collapsible" id="theorySection">
+                <div class="collapsible-header">▼ Algorithm Theory & Explanation</div>
+                <div class="collapsible-content">
+                    <h3>Two-Pass Algorithm</h3>
+                    <p>This algorithm uses a two-pass approach:</p>
+                    <p><strong>Pass 1:</strong> Count the number of hash (#) characters in the string.</p>
+                    <p><strong>Pass 2:</strong> Fill the result - place all hash characters at the beginning, then add non-hash characters maintaining their relative order.</p>
+                    
+                    <h3>Time Complexity</h3>
+                    <p>O(n) where n is the length of the string - we traverse the string twice.</p>
+                    
+                    <h3>Space Complexity</h3>
+                    <p>O(n) for the result array/string.</p>
+                    
+                    <h3>Edge Cases</h3>
+                    <ul>
+                        <li>String with no hash characters</li>
+                        <li>String with all hash characters</li>
+                        <li>Empty string</li>
+                        <li>Single character string</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="section-title">String Visualization</div>
+            <div class="string-display" id="stringDisplay"></div>
+            
+            <div class="result-display">
+                <div class="section-title">Result</div>
+                <div class="result-array" id="resultArray">[]</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const input = "Move#Hash#to#Front";
+        let currentStep = 0;
+        let steps = [];
+        
+        function initializeSteps() {
+            steps = [];
+            let i = 0, j = 0, hashCount = 0;
+            let result = new Array(input.length);
+            
+            steps.push({
+                step: 1,
+                phase: "initialize",
+                i: 0, j: 0, hashCount: 0,
+                currentChar: "-",
+                conditions: ["Starting first pass..."],
+                operations: ["Initialize variables"],
+                info: "Beginning algorithm execution. First pass will count hash characters.",
+                result: [],
+                activeVars: []
+            });
+            
+            for (let pass1i = 0; pass1i < input.length; pass1i++) {
+                const char = input[pass1i];
+                const isHash = char === '#';
+                
+                steps.push({
+                    step: steps.length + 1,
+                    phase: "count",
+                    i: pass1i, j: 0, hashCount: hashCount,
+                    currentChar: char,
+                    conditions: [`i < input.length (${pass1i} < ${input.length}) ✓`, `currentChar === '#' ${isHash ? '✓' : '✗'}`],
+                    operations: isHash ? [`Found hash character at position ${pass1i}`] : [`Non-hash character '${char}' at position ${pass1i}`],
+                    info: `First pass: examining character '${char}' at position ${pass1i}. ${isHash ? 'This is a hash character.' : 'This is not a hash character.'}`,
+                    result: [],
+                    activeVars: ['i', 'currentChar']
+                });
+                
+                if (isHash) {
+                    hashCount++;
+                    steps.push({
+                        step: steps.length + 1,
+                        phase: "count",
+                        i: pass1i, j: 0, hashCount: hashCount,
+                        currentChar: char,
+                        conditions: [`Incrementing hashCount`],
+                        operations: [`hashCount++ (${hashCount-1} → ${hashCount})`],
+                        info: `Incremented hash count. Total hash characters found so far: ${hashCount}`,
+                        result: [],
+                        activeVars: ['hashCount']
+                    });
+                }
+            }
+            
+            steps.push({
+                step: steps.length + 1,
+                phase: "transition",
+                i: 0, j: 0, hashCount: hashCount,
+                currentChar: "-",
+                conditions: [`First pass complete. Found ${hashCount} hash characters.`],
+                operations: [`Starting second pass - filling result array`],
+                info: `First pass complete. Found ${hashCount} hash characters. Now starting second pass to build result.`,
+                result: new Array(hashCount).fill('#').concat(new Array(input.length - hashCount).fill('')),
+                activeVars: []
+            });
+            
+            let resultIndex = 0;
+            for (let k = 0; k < hashCount; k++) {
+                result[resultIndex++] = '#';
+            }
+            
+            for (let pass2i = 0; pass2i < input.length; pass2i++) {
+                const char = input[pass2i];
+                const isHash = char === '#';
+                
+                steps.push({
+                    step: steps.length + 1,
+                    phase: "build",
+                    i: pass2i, j: resultIndex, hashCount: hashCount,
+                    currentChar: char,
+                    conditions: [`i < input.length (${pass2i} < ${input.length}) ✓`, `currentChar === '#' ${isHash ? '✓' : '✗'}`],
+                    operations: isHash ? [`Skip hash character (already placed)`] : [`Add '${char}' to result at position ${resultIndex}`],
+                    info: `Second pass: examining character '${char}' at position ${pass2i}. ${isHash ? 'Skip hash characters as they are already placed at the front.' : `Adding non-hash character to result at position ${resultIndex}.`}`,
+                    result: [...result],
+                    activeVars: ['i', 'currentChar']
+                });
+                
+                if (!isHash) {
+                    result[resultIndex] = char;
+                    resultIndex++;
+                    steps.push({
+                        step: steps.length + 1,
+                        phase: "build",
+                        i: pass2i, j: resultIndex, hashCount: hashCount,
+                        currentChar: char,
+                        conditions: [`Character added to result`],
+                        operations: [`j++ (${resultIndex-1} → ${resultIndex})`],
+                        info: `Added '${char}' to result. Write position advanced to ${resultIndex}.`,
+                        result: [...result],
+                        activeVars: ['j']
+                    });
+                }
+            }
+            
+            steps.push({
+                step: steps.length + 1,
+                phase: "complete",
+                i: input.length, j: resultIndex, hashCount: hashCount,
+                currentChar: "-",
+                conditions: [`Algorithm complete`],
+                operations: [`Result: "${result.join('')}"`],
+                info: `Algorithm complete! All hash characters moved to front while preserving relative order of other characters.`,
+                result: [...result],
+                activeVars: []
+            });
+        }
+        
+        function renderStep() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${steps.length}`;
+            
+            document.getElementById('val-i').textContent = step.i;
+            document.getElementById('val-j').textContent = step.j;
+            document.getElementById('val-hashCount').textContent = step.hashCount;
+            document.getElementById('val-currentChar').textContent = step.currentChar;
+            
+            document.querySelectorAll('.variable').forEach(el => {
+                el.classList.remove('active', 'increment', 'decrement');
+            });
+            
+            step.activeVars.forEach(varName => {
+                const el = document.getElementById(`var-${varName}`);
+                if (el) el.classList.add('active');
+            });
+            
+            const conditionsEl = document.getElementById('conditions');
+            conditionsEl.innerHTML = '';
+            step.conditions.forEach(condition => {
+                const div = document.createElement('div');
+                div.className = 'condition';
+                div.textContent = condition;
+                if (condition.includes('✓')) div.classList.add('true');
+                else if (condition.includes('✗')) div.classList.add('false');
+                conditionsEl.appendChild(div);
+            });
+            
+            const operationsEl = document.getElementById('operations');
+            operationsEl.innerHTML = '';
+            step.operations.forEach(operation => {
+                const div = document.createElement('div');
+                div.className = 'operation';
+                div.textContent = operation;
+                if (operation.includes('++')) div.classList.add('increment');
+                else if (operation.includes('--')) div.classList.add('decrement');
+                else if (operation.includes('Add')) div.classList.add('add');
+                operationsEl.appendChild(div);
+            });
+            
+            document.getElementById('stepInfo').textContent = step.info;
+            
+            const stringEl = document.getElementById('stringDisplay');
+            stringEl.innerHTML = '';
+            for (let i = 0; i < input.length; i++) {
+                const charBox = document.createElement('div');
+                charBox.className = 'char-box';
+                charBox.textContent = input[i];
+                
+                if (step.phase === 'count' || step.phase === 'build') {
+                    if (i < step.i) charBox.classList.add('processed');
+                    if (i === step.i) charBox.classList.add('current');
+                }
+                
+                if (i === step.i && step.currentChar !== '-') {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    pointer.textContent = 'READ';
+                    charBox.appendChild(pointer);
+                }
+                
+                stringEl.appendChild(charBox);
+            }
+            
+            const resultEl = document.getElementById('resultArray');
+            if (step.result.length > 0) {
+                resultEl.textContent = `"${step.result.join('')}"`;
+            } else {
+                resultEl.textContent = '[]';
+            }
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+            }
+        });
+        
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderStep();
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            currentStep = 0;
+            renderStep();
+        });
+        
+        document.getElementById('theorySection').addEventListener('click', function() {
+            this.classList.toggle('open');
+        });
+        
+        initializeSteps();
+        renderStep();
+    </script>
+</body>
+</html>

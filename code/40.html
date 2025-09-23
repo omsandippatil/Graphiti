@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        
+        .question {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .example {
+            background: #f5f5f5;
+            padding: 8px;
+            border: 1px solid black;
+            margin-bottom: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background: black;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .variables {
+            background: #f9f9f9;
+        }
+        
+        .variable {
+            padding: 3px;
+            margin: 2px 0;
+        }
+        
+        .var-active {
+            background: yellow;
+        }
+        
+        .var-increment {
+            background: #90EE90;
+        }
+        
+        .var-decrement {
+            background: #FFB6C1;
+        }
+        
+        .conditions {
+            background: #f9f9f9;
+        }
+        
+        .condition {
+            padding: 3px;
+            margin: 2px 0;
+        }
+        
+        .condition-true {
+            background: #90EE90;
+        }
+        
+        .condition-false {
+            background: #FFB6C1;
+        }
+        
+        .operations {
+            background: #f9f9f9;
+        }
+        
+        .operation {
+            padding: 3px;
+            margin: 2px 0;
+        }
+        
+        .op-increment {
+            background: #90EE90;
+        }
+        
+        .op-decrement {
+            background: #FFB6C1;
+        }
+        
+        .op-add {
+            background: #ADD8E6;
+        }
+        
+        .visualization {
+            position: relative;
+        }
+        
+        .matrix {
+            display: grid;
+            gap: 2px;
+            position: relative;
+        }
+        
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background: white;
+            position: relative;
+        }
+        
+        .cell-visited {
+            background: #f0f0f0;
+        }
+        
+        .cell-current {
+            background: yellow;
+        }
+        
+        .pointer {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            z-index: 10;
+        }
+        
+        .pointer-current {
+            background: #FF1493;
+        }
+        
+        .pointer-top {
+            background: #32CD32;
+        }
+        
+        .pointer-right {
+            background: #4169E1;
+        }
+        
+        .pointer-bottom {
+            background: #FF8C00;
+        }
+        
+        .pointer-left {
+            background: #9370DB;
+        }
+        
+        .pointer-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+            border: 1px solid black;
+        }
+        
+        .collapsible-header {
+            padding: 10px;
+            background: #f0f0f0;
+            cursor: pointer;
+            border-bottom: 1px solid black;
+        }
+        
+        .collapsible-content {
+            padding: 10px;
+            display: none;
+        }
+        
+        .result-array {
+            background: #f9f9f9;
+            padding: 8px;
+            font-family: monospace;
+        }
+        
+        .step-counter {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="section">
+                <div class="question">
+                    Check Character Match at Indices
+                </div>
+                <div class="example">
+                    Given string s = "abccba" and indices i=1, j=4, check if s[i] == s[j]
+                    <br>Example: s[1] = 'b', s[4] = 'b' → Match found
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="prev-btn">Previous</button>
+                <button id="next-btn">Next</button>
+                <button id="reset-btn">Reset</button>
+            </div>
+            
+            <div class="section step-counter">
+                Step <span id="step-display">1</span> of <span id="total-steps">6</span>
+            </div>
+            
+            <div class="section variables">
+                <strong>Variables:</strong>
+                <div id="variables-list"></div>
+            </div>
+            
+            <div class="section conditions">
+                <strong>Current Conditions:</strong>
+                <div id="conditions-list"></div>
+            </div>
+            
+            <div class="section operations">
+                <strong>Current Operation:</strong>
+                <div id="operations-list"></div>
+            </div>
+            
+            <div class="section result-array">
+                <strong>Result:</strong>
+                <div id="result-display"></div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('theory')">
+                    ▶ Algorithm Theory & Explanation
+                </div>
+                <div class="collapsible-content" id="theory">
+                    <p><strong>Character Matching Algorithm:</strong></p>
+                    <p>This algorithm demonstrates basic string indexing and character comparison. It's fundamental for palindrome checking, pattern matching, and string validation.</p>
+                    <br>
+                    <p><strong>Key Concepts:</strong></p>
+                    <p>• String indexing: Access characters at specific positions</p>
+                    <p>• Character comparison: Compare ASCII values or Unicode points</p>
+                    <p>• Boundary validation: Ensure indices are within string bounds</p>
+                </div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('tricks')">
+                    ▶ Optimization Tricks & Tips
+                </div>
+                <div class="collapsible-content" id="tricks">
+                    <p><strong>Performance Optimizations:</strong></p>
+                    <p>• Early bounds checking prevents array access errors</p>
+                    <p>• Case-insensitive comparison using toLowerCase()</p>
+                    <p>• Unicode normalization for international characters</p>
+                    <br>
+                    <p><strong>Common Use Cases:</strong></p>
+                    <p>• Palindrome validation</p>
+                    <p>• Mirror pattern detection</p>
+                    <p>• Symmetric string verification</p>
+                </div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible('edge-cases')">
+                    ▶ Edge Cases & Boundary Logic
+                </div>
+                <div class="collapsible-content" id="edge-cases">
+                    <p><strong>Critical Edge Cases:</strong></p>
+                    <p>• Empty string (length = 0)</p>
+                    <p>• Single character string</p>
+                    <p>• Negative indices</p>
+                    <p>• Indices beyond string length</p>
+                    <p>• Same index comparison (i == j)</p>
+                    <br>
+                    <p><strong>Boundary Conditions:</strong></p>
+                    <p>• i, j must be >= 0</p>
+                    <p>• i, j must be < string.length</p>
+                    <p>• Handle null or undefined strings</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="visualization">
+                <div id="string-display" class="matrix"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const data = {
+            string: "abccba",
+            i: 1,
+            j: 4
+        };
+        
+        const steps = [
+            {
+                step: 1,
+                variables: { i: 1, j: 4, s: "abccba", length: 6 },
+                activeVars: ["i", "j"],
+                conditions: [],
+                operations: ["Initialize variables i=1, j=4 for string 'abccba'"],
+                result: "Starting comparison...",
+                currentPos: [],
+                description: "Initialize index pointers"
+            },
+            {
+                step: 2,
+                variables: { i: 1, j: 4, s: "abccba", length: 6 },
+                activeVars: ["i", "length"],
+                conditions: ["i >= 0 && i < length (1 >= 0 && 1 < 6) ✓"],
+                operations: ["Validate index i bounds"],
+                result: "Index i is valid",
+                currentPos: [1],
+                description: "Check i boundary conditions"
+            },
+            {
+                step: 3,
+                variables: { i: 1, j: 4, s: "abccba", length: 6 },
+                activeVars: ["j", "length"],
+                conditions: ["j >= 0 && j < length (4 >= 0 && 4 < 6) ✓"],
+                operations: ["Validate index j bounds"],
+                result: "Index j is valid",
+                currentPos: [1, 4],
+                description: "Check j boundary conditions"
+            },
+            {
+                step: 4,
+                variables: { i: 1, j: 4, s: "abccba", length: 6, charI: "b" },
+                activeVars: ["i", "charI"],
+                conditions: [],
+                operations: ["Access s[i]: s[1] = 'b'"],
+                result: "Retrieved character at i",
+                currentPos: [1, 4],
+                description: "Get character at index i"
+            },
+            {
+                step: 5,
+                variables: { i: 1, j: 4, s: "abccba", length: 6, charI: "b", charJ: "b" },
+                activeVars: ["j", "charJ"],
+                conditions: [],
+                operations: ["Access s[j]: s[4] = 'b'"],
+                result: "Retrieved character at j",
+                currentPos: [1, 4],
+                description: "Get character at index j"
+            },
+            {
+                step: 6,
+                variables: { i: 1, j: 4, s: "abccba", length: 6, charI: "b", charJ: "b", match: true },
+                activeVars: ["charI", "charJ", "match"],
+                conditions: ["s[i] == s[j] ('b' == 'b') ✓"],
+                operations: ["Compare characters: 'b' == 'b' → true"],
+                result: "Match found: true",
+                currentPos: [1, 4],
+                description: "Compare characters and return result"
+            }
+        ];
+        
+        let currentStep = 0;
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('step-display').textContent = step.step;
+            document.getElementById('total-steps').textContent = steps.length;
+            
+            const variablesList = document.getElementById('variables-list');
+            variablesList.innerHTML = '';
+            Object.entries(step.variables).forEach(([key, value]) => {
+                const div = document.createElement('div');
+                div.className = 'variable';
+                if (step.activeVars.includes(key)) {
+                    div.classList.add('var-active');
+                }
+                div.textContent = `${key}: ${typeof value === 'string' ? `"${value}"` : value}`;
+                variablesList.appendChild(div);
+            });
+            
+            const conditionsList = document.getElementById('conditions-list');
+            conditionsList.innerHTML = '';
+            step.conditions.forEach(condition => {
+                const div = document.createElement('div');
+                div.className = 'condition';
+                if (condition.includes('✓')) {
+                    div.classList.add('condition-true');
+                } else if (condition.includes('✗')) {
+                    div.classList.add('condition-false');
+                }
+                div.textContent = condition;
+                conditionsList.appendChild(div);
+            });
+            
+            const operationsList = document.getElementById('operations-list');
+            operationsList.innerHTML = '';
+            step.operations.forEach(operation => {
+                const div = document.createElement('div');
+                div.className = 'operation';
+                if (operation.includes('→')) {
+                    div.classList.add('op-increment');
+                } else if (operation.includes('Compare') || operation.includes('Access')) {
+                    div.classList.add('op-add');
+                }
+                div.textContent = operation;
+                operationsList.appendChild(div);
+            });
+            
+            document.getElementById('result-display').textContent = step.result;
+            
+            updateVisualization(step);
+            updateButtons();
+        }
+        
+        function updateVisualization(step) {
+            const container = document.getElementById('string-display');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${data.string.length}, 52px)`;
+            
+            for (let idx = 0; idx < data.string.length; idx++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.textContent = data.string[idx];
+                
+                if (step.currentPos.includes(idx)) {
+                    cell.classList.add('cell-current');
+                }
+                
+                cell.style.position = 'relative';
+                container.appendChild(cell);
+                
+                if (idx === data.i && step.currentPos.includes(idx)) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer pointer-current';
+                    pointer.style.top = '-8px';
+                    pointer.style.left = '20px';
+                    cell.appendChild(pointer);
+                    
+                    const label = document.createElement('div');
+                    label.className = 'pointer-label';
+                    label.textContent = 'i';
+                    label.style.top = '-25px';
+                    label.style.left = '18px';
+                    cell.appendChild(label);
+                }
+                
+                if (idx === data.j && step.currentPos.includes(idx)) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer pointer-bottom';
+                    pointer.style.bottom = '-8px';
+                    pointer.style.left = '20px';
+                    cell.appendChild(pointer);
+                    
+                    const label = document.createElement('div');
+                    label.className = 'pointer-label';
+                    label.textContent = 'j';
+                    label.style.bottom = '-25px';
+                    label.style.left = '18px';
+                    cell.appendChild(label);
+                }
+            }
+        }
+        
+        function updateButtons() {
+            document.getElementById('prev-btn').disabled = currentStep === 0;
+            document.getElementById('next-btn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+        
+        function resetVisualization() {
+            currentStep = 0;
+            updateDisplay();
+        }
+        
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const header = content.previousElementSibling;
+            
+            if (content.style.display === 'none' || !content.style.display) {
+                content.style.display = 'block';
+                header.innerHTML = header.innerHTML.replace('▶', '▼');
+            } else {
+                content.style.display = 'none';
+                header.innerHTML = header.innerHTML.replace('▼', '▶');
+            }
+        }
+        
+        document.getElementById('next-btn').addEventListener('click', nextStep);
+        document.getElementById('prev-btn').addEventListener('click', prevStep);
+        document.getElementById('reset-btn').addEventListener('click', resetVisualization);
+        
+        updateDisplay();
+    </script>
+</body>
+</html>

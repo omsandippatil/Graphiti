@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pair with Target Sum Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+        }
+        
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .problem-section {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid black;
+        }
+        
+        .controls {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .btn {
+            background: white;
+            border: 2px solid black;
+            padding: 8px 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            background: black;
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .info-section {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid black;
+        }
+        
+        .variables {
+            background: #f8f8f8;
+        }
+        
+        .variable-item {
+            padding: 3px 5px;
+            margin: 2px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .var-active { background: yellow; }
+        .var-increment { background: #90EE90; }
+        .var-decrement { background: #FFB6C1; }
+        
+        .condition-true { color: green; font-weight: bold; }
+        .condition-false { color: red; font-weight: bold; }
+        
+        .operation-add { color: blue; font-weight: bold; }
+        .operation-increment { color: green; font-weight: bold; }
+        .operation-decrement { color: red; font-weight: bold; }
+        
+        .array-visualization {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .array-container {
+            display: flex;
+            gap: 5px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .array-cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            position: relative;
+            background: white;
+        }
+        
+        .cell-visited {
+            background: #f0f0f0;
+        }
+        
+        .cell-current {
+            background: #ffff99;
+            border-color: #ff6600;
+            border-width: 3px;
+        }
+        
+        .pointer {
+            position: absolute;
+            width: 0;
+            height: 0;
+            z-index: 10;
+        }
+        
+        .pointer-left {
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            border-right: 20px solid #ff69b4;
+            top: -42px;
+            left: 10px;
+        }
+        
+        .pointer-right {
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            border-left: 20px solid #32cd32;
+            top: 75px;
+            left: 20px;
+        }
+        
+        .pointer-label {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .pointer-left .pointer-label {
+            top: -8px;
+            right: 25px;
+            color: #ff69b4;
+        }
+        
+        .pointer-right .pointer-label {
+            top: -8px;
+            left: 25px;
+            color: #32cd32;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+            border: 1px solid black;
+        }
+        
+        .collapsible-header {
+            background: #f0f0f0;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid black;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .collapsible-header:hover {
+            background: #e0e0e0;
+        }
+        
+        .collapsible-content {
+            padding: 15px;
+            display: none;
+            line-height: 1.6;
+        }
+        
+        .collapsible-content.active {
+            display: block;
+        }
+        
+        .step-counter {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .hash-table {
+            margin-top: 15px;
+            border: 1px solid black;
+            padding: 10px;
+            background: #fafafa;
+        }
+        
+        .hash-entry {
+            padding: 2px 5px;
+            margin: 1px 0;
+            font-size: 12px;
+        }
+        
+        .hash-highlight {
+            background: #ffff99;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="problem-section">
+                <h3>Pair with Target Sum</h3>
+                <p><strong>Problem:</strong> Find indices of two numbers that add up to target</p>
+                <p><strong>Input:</strong> [3,2,4,6,8,1,9,7,5], Target = 10</p>
+                <p><strong>Expected:</strong> Indices of pair that sums to 10</p>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" id="prevBtn">Previous</button>
+                <button class="btn" id="nextBtn">Next</button>
+                <button class="btn" id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="step-counter" id="stepCounter">Step 1 of 15</div>
+            
+            <div class="info-section variables">
+                <h4>Variables</h4>
+                <div id="variablesContent"></div>
+            </div>
+            
+            <div class="info-section">
+                <h4>Current Condition</h4>
+                <div id="conditionContent">Initialize hash table and start iteration</div>
+            </div>
+            
+            <div class="info-section">
+                <h4>Current Operation</h4>
+                <div id="operationContent">Begin processing array elements</div>
+            </div>
+            
+            <div class="info-section">
+                <h4>Result</h4>
+                <div id="resultContent">Not found yet</div>
+            </div>
+            
+            <div class="info-section hash-table">
+                <h4>Hash Table</h4>
+                <div id="hashContent">{}</div>
+            </div>
+            
+            <div class="collapsible">
+                <div class="collapsible-header" onclick="toggleCollapsible()">
+                    ▼ Show Theory & Algorithm Details
+                </div>
+                <div class="collapsible-content" id="theoryContent">
+                    <h4>Algorithm: Two-Pass Hash Table</h4>
+                    <p><strong>Time Complexity:</strong> O(n)</p>
+                    <p><strong>Space Complexity:</strong> O(n)</p>
+                    
+                    <h4>Approach:</h4>
+                    <p>Use a hash table to store each number and its index. For each element, check if the complement (target - current) exists in the hash table.</p>
+                    
+                    <h4>Steps:</h4>
+                    <ol>
+                        <li>Create empty hash table</li>
+                        <li>Iterate through array</li>
+                        <li>Calculate complement = target - current_number</li>
+                        <li>Check if complement exists in hash table</li>
+                        <li>If yes, return [hash_table[complement], current_index]</li>
+                        <li>If no, store current number and index in hash table</li>
+                        <li>Continue until pair found</li>
+                    </ol>
+                    
+                    <h4>Edge Cases:</h4>
+                    <ul>
+                        <li>No solution exists</li>
+                        <li>Multiple valid pairs (return first found)</li>
+                        <li>Same number used twice</li>
+                        <li>Array with less than 2 elements</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="array-visualization">
+                <div class="array-container" id="arrayContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const array = [3, 2, 4, 6, 8, 1, 9, 7, 5];
+        const target = 10;
+        let currentStep = 0;
+        let hashTable = {};
+        
+        const steps = [
+            { i: -1, action: "init", description: "Initialize hash table and start iteration", condition: "Setup phase", operation: "Create empty hash table", hashTable: {}, current: null, complement: null },
+            { i: 0, action: "check", description: "Check if complement of 3 exists", condition: "complement = 10 - 3 = 7", operation: "Search for 7 in hash table", hashTable: {}, current: 3, complement: 7 },
+            { i: 0, action: "store", description: "Store 3 at index 0", condition: "7 not found in hash table", operation: "hashTable[3] = 0", hashTable: {3: 0}, current: 3, complement: 7 },
+            { i: 1, action: "check", description: "Check if complement of 2 exists", condition: "complement = 10 - 2 = 8", operation: "Search for 8 in hash table", hashTable: {3: 0}, current: 2, complement: 8 },
+            { i: 1, action: "store", description: "Store 2 at index 1", condition: "8 not found in hash table", operation: "hashTable[2] = 1", hashTable: {3: 0, 2: 1}, current: 2, complement: 8 },
+            { i: 2, action: "check", description: "Check if complement of 4 exists", condition: "complement = 10 - 4 = 6", operation: "Search for 6 in hash table", hashTable: {3: 0, 2: 1}, current: 4, complement: 6 },
+            { i: 2, action: "store", description: "Store 4 at index 2", condition: "6 not found in hash table", operation: "hashTable[4] = 2", hashTable: {3: 0, 2: 1, 4: 2}, current: 4, complement: 6 },
+            { i: 3, action: "check", description: "Check if complement of 6 exists", condition: "complement = 10 - 6 = 4", operation: "Search for 4 in hash table", hashTable: {3: 0, 2: 1, 4: 2}, current: 6, complement: 4 },
+            { i: 3, action: "found", description: "Found complement! 4 exists at index 2", condition: "4 found in hash table ✓", operation: "Return [2, 3]", hashTable: {3: 0, 2: 1, 4: 2}, current: 6, complement: 4, result: [2, 3] },
+            { i: 4, action: "check", description: "Check if complement of 8 exists", condition: "complement = 10 - 8 = 2", operation: "Search for 2 in hash table", hashTable: {3: 0, 2: 1, 4: 2, 6: 3}, current: 8, complement: 2 },
+            { i: 4, action: "found", description: "Found complement! 2 exists at index 1", condition: "2 found in hash table ✓", operation: "Alternative pair [1, 4]", hashTable: {3: 0, 2: 1, 4: 2, 6: 3}, current: 8, complement: 2, result: [1, 4] },
+            { i: 5, action: "check", description: "Check if complement of 1 exists", condition: "complement = 10 - 1 = 9", operation: "Search for 9 in hash table", hashTable: {3: 0, 2: 1, 4: 2, 6: 3, 8: 4}, current: 1, complement: 9 },
+            { i: 5, action: "store", description: "Store 1 at index 5", condition: "9 not found in hash table", operation: "hashTable[1] = 5", hashTable: {3: 0, 2: 1, 4: 2, 6: 3, 8: 4, 1: 5}, current: 1, complement: 9 },
+            { i: 6, action: "check", description: "Check if complement of 9 exists", condition: "complement = 10 - 9 = 1", operation: "Search for 1 in hash table", hashTable: {3: 0, 2: 1, 4: 2, 6: 3, 8: 4, 1: 5}, current: 9, complement: 1 },
+            { i: 6, action: "found", description: "Found complement! 1 exists at index 5", condition: "1 found in hash table ✓", operation: "Another pair [5, 6]", hashTable: {3: 0, 2: 1, 4: 2, 6: 3, 8: 4, 1: 5}, current: 9, complement: 1, result: [5, 6] }
+        ];
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            const stepCounter = document.getElementById('stepCounter');
+            stepCounter.textContent = `Step ${currentStep + 1} of ${steps.length}`;
+            
+            updateVariables(step);
+            updateCondition(step);
+            updateOperation(step);
+            updateResult(step);
+            updateHashTable(step);
+            updateVisualization(step);
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function updateVariables(step) {
+            const content = document.getElementById('variablesContent');
+            let html = '';
+            
+            if (step.i >= 0) {
+                html += `<div class="variable-item var-active"><span>i:</span><span>${step.i}</span></div>`;
+                html += `<div class="variable-item"><span>array[i]:</span><span>${array[step.i]}</span></div>`;
+            }
+            if (step.current !== null) {
+                html += `<div class="variable-item var-active"><span>current:</span><span>${step.current}</span></div>`;
+            }
+            if (step.complement !== null) {
+                html += `<div class="variable-item var-active"><span>complement:</span><span>${step.complement}</span></div>`;
+            }
+            html += `<div class="variable-item"><span>target:</span><span>${target}</span></div>`;
+            
+            content.innerHTML = html;
+        }
+        
+        function updateCondition(step) {
+            const content = document.getElementById('conditionContent');
+            if (step.action === 'found' && step.result) {
+                content.innerHTML = `<span class="condition-true">${step.condition}</span>`;
+            } else if (step.action === 'check') {
+                content.innerHTML = `<span class="condition-false">${step.condition}</span>`;
+            } else {
+                content.innerHTML = step.condition;
+            }
+        }
+        
+        function updateOperation(step) {
+            const content = document.getElementById('operationContent');
+            if (step.action === 'found') {
+                content.innerHTML = `<span class="operation-add">${step.operation}</span>`;
+            } else if (step.action === 'store') {
+                content.innerHTML = `<span class="operation-increment">${step.operation}</span>`;
+            } else {
+                content.innerHTML = step.operation;
+            }
+        }
+        
+        function updateResult(step) {
+            const content = document.getElementById('resultContent');
+            if (step.result) {
+                content.innerHTML = `<strong>Found pair at indices: [${step.result.join(', ')}]</strong><br>Values: [${array[step.result[0]]}, ${array[step.result[1]]}] = ${array[step.result[0]] + array[step.result[1]]}`;
+            } else {
+                content.textContent = 'Searching...';
+            }
+        }
+        
+        function updateHashTable(step) {
+            const content = document.getElementById('hashContent');
+            const entries = Object.entries(step.hashTable);
+            if (entries.length === 0) {
+                content.innerHTML = '{}';
+                return;
+            }
+            
+            let html = '{<br>';
+            entries.forEach(([key, value], index) => {
+                const isHighlight = step.complement && key == step.complement;
+                const className = isHighlight ? 'hash-highlight' : '';
+                html += `<div class="hash-entry ${className}">  ${key}: ${value}${index < entries.length - 1 ? ',' : ''}</div>`;
+            });
+            html += '}';
+            content.innerHTML = html;
+        }
+        
+        function updateVisualization(step) {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            
+            array.forEach((value, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = value;
+                
+                if (step.i >= 0 && index <= step.i) {
+                    cell.classList.add('cell-visited');
+                }
+                
+                if (index === step.i) {
+                    cell.classList.add('cell-current');
+                    
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer pointer-left';
+                    const label = document.createElement('div');
+                    label.className = 'pointer-label';
+                    label.textContent = `i=${index}`;
+                    pointer.appendChild(label);
+                    cell.appendChild(pointer);
+                }
+                
+                if (step.result && step.result.includes(index)) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer pointer-right';
+                    const label = document.createElement('div');
+                    label.className = 'pointer-label';
+                    label.textContent = 'RESULT';
+                    pointer.appendChild(label);
+                    cell.appendChild(pointer);
+                    cell.style.borderColor = '#ff6600';
+                    cell.style.borderWidth = '3px';
+                    cell.style.background = '#90EE90';
+                }
+                
+                container.appendChild(cell);
+            });
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+        
+        function resetAlgorithm() {
+            currentStep = 0;
+            updateDisplay();
+        }
+        
+        function toggleCollapsible() {
+            const content = document.getElementById('theoryContent');
+            const header = document.querySelector('.collapsible-header');
+            
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                header.textContent = '▼ Show Theory & Algorithm Details';
+            } else {
+                content.classList.add('active');
+                header.textContent = '▲ Hide Theory & Algorithm Details';
+            }
+        }
+        
+        document.getElementById('nextBtn').addEventListener('click', nextStep);
+        document.getElementById('prevBtn').addEventListener('click', prevStep);
+        document.getElementById('resetBtn').addEventListener('click', resetAlgorithm);
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextStep();
+            if (e.key === 'ArrowLeft') prevStep();
+            if (e.key === 'r' || e.key === 'R') resetAlgorithm();
+        });
+        
+        updateDisplay();
+    </script>
+</body>
+</html>

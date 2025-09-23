@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Adjacent Duplicates - Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 50%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question-section {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .question-section h2 {
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .question-section p {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .controls {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .controls button {
+            background: white;
+            border: 2px solid black;
+            color: black;
+            padding: 8px 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .controls button:hover {
+            background: black;
+            color: white;
+        }
+
+        .controls button:disabled {
+            background: #f0f0f0;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .section {
+            border: 2px solid black;
+            margin-bottom: 10px;
+        }
+
+        .section-header {
+            background: black;
+            color: white;
+            padding: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .section-content {
+            padding: 10px;
+            display: none;
+            font-size: 13px;
+        }
+
+        .section-content.show {
+            display: block;
+        }
+
+        .variables-section {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .variables-section h3 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .variable {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border: 1px solid black;
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 13px;
+        }
+
+        .variable.active {
+            background: yellow;
+        }
+
+        .variable.increment {
+            background: #90EE90;
+        }
+
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+
+        .conditions-section {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .conditions-section h3 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .condition {
+            padding: 5px;
+            margin: 3px 0;
+            font-size: 13px;
+        }
+
+        .condition.true {
+            background: #90EE90;
+        }
+
+        .condition.false {
+            background: #FFB6C1;
+        }
+
+        .operations-section {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .operations-section h3 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .operation {
+            padding: 5px;
+            margin: 3px 0;
+            font-size: 13px;
+        }
+
+        .operation.increment {
+            background: #90EE90;
+        }
+
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+
+        .operation.add {
+            background: #ADD8E6;
+        }
+
+        .result-section {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .result-section h3 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .step-counter {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .string-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .string-char {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            text-align: center;
+            line-height: 36px;
+            margin-right: 2px;
+            font-size: 16px;
+            font-weight: bold;
+            background: white;
+            position: relative;
+        }
+
+        .string-char.current {
+            background: #FFFACD;
+        }
+
+        .string-char.processed {
+            background: #F0F0F0;
+        }
+
+        .stack-container {
+            margin: 30px 0;
+        }
+
+        .stack-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stack {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            min-height: 50px;
+        }
+
+        .stack-item {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            text-align: center;
+            line-height: 36px;
+            margin-bottom: 2px;
+            font-size: 16px;
+            font-weight: bold;
+            background: white;
+        }
+
+        .stack-item.top {
+            background: #FFE4E1;
+        }
+
+        .pointer {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border: 1px solid black;
+            border-radius: 3px;
+            z-index: 10;
+        }
+
+        .pointer.current {
+            background: #FF69B4;
+            color: white;
+        }
+
+        .final-result {
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px solid black;
+            text-align: center;
+        }
+
+        .final-result h4 {
+            margin-bottom: 5px;
+        }
+
+        .final-string {
+            font-size: 18px;
+            font-weight: bold;
+            color: #006400;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="question-section">
+            <h2>Remove Adjacent Duplicates</h2>
+            <p><strong>Problem:</strong> Remove all adjacent duplicate characters from a string.</p>
+            <p><strong>Example:</strong> Input: "abbaca" → Output: "ca"</p>
+        </div>
+
+        <div class="controls">
+            <button onclick="prevStep()" id="prevBtn">Previous</button>
+            <button onclick="nextStep()" id="nextBtn">Next</button>
+            <button onclick="reset()" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="step-counter" id="stepCounter">Step 1 of 1</div>
+
+        <div class="variables-section">
+            <h3>Variables</h3>
+            <div id="variablesDisplay"></div>
+        </div>
+
+        <div class="conditions-section">
+            <h3>Current Conditions</h3>
+            <div id="conditionsDisplay">No conditions to evaluate</div>
+        </div>
+
+        <div class="operations-section">
+            <h3>Live Operations</h3>
+            <div id="operationsDisplay">Initialize algorithm</div>
+        </div>
+
+        <div class="result-section">
+            <h3>Stack State</h3>
+            <div id="stackDisplay"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('theory')">Theory & Background</div>
+            <div class="section-content" id="theory">
+                <p>The Remove Adjacent Duplicates problem can be efficiently solved using a stack data structure. The key insight is that when we encounter a character that matches the top of the stack, we have found an adjacent duplicate pair that needs to be removed.</p>
+                <p>This approach works because the stack maintains the characters we've seen so far, and when we find a match with the top element, we know we have adjacent duplicates (the top of stack and current character).</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('algorithm')">Algorithm Explanation</div>
+            <div class="section-content" id="algorithm">
+                <p><strong>Algorithm Steps:</strong></p>
+                <p>1. Initialize an empty stack</p>
+                <p>2. For each character in the input string:</p>
+                <p>   - If stack is empty or current char ≠ top of stack: push current char</p>
+                <p>   - If current char = top of stack: pop from stack (remove duplicate pair)</p>
+                <p>3. Convert remaining stack contents to string</p>
+                <p><strong>Time Complexity:</strong> O(n) where n is the length of the string</p>
+                <p><strong>Space Complexity:</strong> O(n) for the stack storage</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('tricks')">Optimization Tricks</div>
+            <div class="section-content" id="tricks">
+                <p>• Use the result string itself as a stack by treating it as a mutable character array</p>
+                <p>• Instead of using an actual stack data structure, use a pointer to track the "top" of our result</p>
+                <p>• In languages like C++, can modify the input string in-place to save space</p>
+                <p>• StringBuilder/StringBuffer can be used for better string concatenation performance</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('edges')">Edge Cases & Boundary Logic</div>
+            <div class="section-content" id="edges">
+                <p><strong>Edge Cases:</strong></p>
+                <p>• Empty string → return empty string</p>
+                <p>• Single character → return the character</p>
+                <p>• All characters are duplicates → return empty string</p>
+                <p>• No adjacent duplicates → return original string</p>
+                <p>• Nested duplicates like "aabbbaaa" → require multiple passes</p>
+                <p><strong>Boundary Conditions:</strong></p>
+                <p>• Stack empty check before accessing top element</p>
+                <p>• Proper handling of string indices</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('caveats')">Implementation Caveats</div>
+            <div class="section-content" id="caveats">
+                <p>• Be careful with string mutability in different languages</p>
+                <p>• Stack overflow possible with very long strings in recursive implementations</p>
+                <p>• Consider using deque/list instead of stack for languages without built-in stack</p>
+                <p>• Memory management important for languages like C/C++</p>
+                <p>• Unicode handling may require special consideration for multi-byte characters</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="string-container" id="stringContainer">
+            <div id="stringDisplay"></div>
+            <div id="pointersDisplay"></div>
+        </div>
+        
+        <div class="stack-container">
+            <div class="stack-title">Stack Contents</div>
+            <div class="stack" id="stackVisualization"></div>
+        </div>
+
+        <div class="final-result" id="finalResult" style="display: none;">
+            <h4>Final Result:</h4>
+            <div class="final-string" id="finalString"></div>
+        </div>
+    </div>
+
+    <script>
+        const inputString = "abbaca";
+        let currentStep = 0;
+        let steps = [];
+        let stack = [];
+
+        function generateSteps() {
+            steps = [];
+            let tempStack = [];
+            
+            steps.push({
+                step: 0,
+                i: -1,
+                char: '',
+                stack: [...tempStack],
+                operation: 'Initialize empty stack',
+                condition: '',
+                variables: { i: -1, currentChar: '', stackSize: 0 }
+            });
+
+            for (let i = 0; i < inputString.length; i++) {
+                const char = inputString[i];
+                
+                if (tempStack.length === 0 || tempStack[tempStack.length - 1] !== char) {
+                    tempStack.push(char);
+                    steps.push({
+                        step: steps.length,
+                        i: i,
+                        char: char,
+                        stack: [...tempStack],
+                        operation: `Push '${char}' to stack`,
+                        condition: tempStack.length === 1 ? 'Stack is empty' : `'${char}' ≠ '${tempStack[tempStack.length - 2]}' (top of stack)`,
+                        variables: { i: i, currentChar: char, stackSize: tempStack.length }
+                    });
+                } else {
+                    const popped = tempStack.pop();
+                    steps.push({
+                        step: steps.length,
+                        i: i,
+                        char: char,
+                        stack: [...tempStack],
+                        operation: `Pop '${popped}' from stack (found duplicate)`,
+                        condition: `'${char}' = '${popped}' (top of stack)`,
+                        variables: { i: i, currentChar: char, stackSize: tempStack.length }
+                    });
+                }
+            }
+
+            const result = tempStack.join('');
+            steps.push({
+                step: steps.length,
+                i: inputString.length,
+                char: '',
+                stack: [...tempStack],
+                operation: `Algorithm complete. Result: "${result}"`,
+                condition: 'Finished processing all characters',
+                variables: { i: inputString.length, currentChar: 'N/A', stackSize: tempStack.length }
+            });
+        }
+
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} of ${steps.length}`;
+            
+            updateVariables(step.variables);
+            updateConditions(step.condition);
+            updateOperations(step.operation);
+            updateStringDisplay(step.i, step.char);
+            updateStackDisplay(step.stack);
+            updateButtons();
+
+            if (step.i >= inputString.length && step.stack.length >= 0) {
+                const finalResult = document.getElementById('finalResult');
+                const finalString = document.getElementById('finalString');
+                finalResult.style.display = 'block';
+                finalString.textContent = step.stack.join('') || '(empty string)';
+            } else {
+                document.getElementById('finalResult').style.display = 'none';
+            }
+        }
+
+        function updateVariables(vars) {
+            const display = document.getElementById('variablesDisplay');
+            display.innerHTML = '';
+            
+            Object.entries(vars).forEach(([key, value]) => {
+                const varDiv = document.createElement('div');
+                varDiv.className = 'variable';
+                if (key === 'currentChar' && value !== '' && value !== 'N/A') {
+                    varDiv.classList.add('active');
+                }
+                varDiv.textContent = `${key}: ${value}`;
+                display.appendChild(varDiv);
+            });
+        }
+
+        function updateConditions(condition) {
+            const display = document.getElementById('conditionsDisplay');
+            if (condition) {
+                display.innerHTML = `<div class="condition true">${condition}</div>`;
+            } else {
+                display.innerHTML = 'No conditions to evaluate';
+            }
+        }
+
+        function updateOperations(operation) {
+            const display = document.getElementById('operationsDisplay');
+            const opDiv = document.createElement('div');
+            opDiv.className = 'operation';
+            
+            if (operation.includes('Push')) {
+                opDiv.classList.add('add');
+            } else if (operation.includes('Pop')) {
+                opDiv.classList.add('decrement');
+            }
+            
+            opDiv.textContent = operation;
+            display.innerHTML = '';
+            display.appendChild(opDiv);
+        }
+
+        function updateStringDisplay(currentIndex, currentChar) {
+            const container = document.getElementById('stringDisplay');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < inputString.length; i++) {
+                const charDiv = document.createElement('div');
+                charDiv.className = 'string-char';
+                charDiv.textContent = inputString[i];
+                
+                if (i === currentIndex) {
+                    charDiv.classList.add('current');
+                } else if (i < currentIndex) {
+                    charDiv.classList.add('processed');
+                }
+                
+                container.appendChild(charDiv);
+            }
+
+            const pointersContainer = document.getElementById('pointersDisplay');
+            pointersContainer.innerHTML = '';
+            
+            if (currentIndex >= 0 && currentIndex < inputString.length) {
+                const pointer = document.createElement('div');
+                pointer.className = 'pointer current';
+                pointer.textContent = 'i';
+                pointer.style.left = `${currentIndex * 42 + 15}px`;
+                pointer.style.top = '45px';
+                pointersContainer.appendChild(pointer);
+            }
+        }
+
+        function updateStackDisplay(stackContents) {
+            const container = document.getElementById('stackVisualization');
+            container.innerHTML = '';
+            
+            if (stackContents.length === 0) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.textContent = '(empty)';
+                emptyDiv.style.color = '#999';
+                emptyDiv.style.fontStyle = 'italic';
+                container.appendChild(emptyDiv);
+            } else {
+                stackContents.forEach((char, index) => {
+                    const stackItem = document.createElement('div');
+                    stackItem.className = 'stack-item';
+                    if (index === stackContents.length - 1) {
+                        stackItem.classList.add('top');
+                    }
+                    stackItem.textContent = char;
+                    container.appendChild(stackItem);
+                });
+            }
+
+            const stackDisplay = document.getElementById('stackDisplay');
+            stackDisplay.innerHTML = `Stack: [${stackContents.join(', ')}] (size: ${stackContents.length})`;
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            updateDisplay();
+        }
+
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId);
+            content.classList.toggle('show');
+        }
+
+        generateSteps();
+        updateDisplay();
+    </script>
+</body>
+</html>

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Substrings Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question-section {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 2px solid black;
+        }
+
+        .question-section h2 {
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid black;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .section {
+            margin-bottom: 15px;
+            border: 2px solid black;
+            padding: 15px;
+        }
+
+        .section h3 {
+            margin-bottom: 10px;
+            background: black;
+            color: white;
+            padding: 5px;
+            margin: -15px -15px 10px -15px;
+        }
+
+        .variables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .variable {
+            padding: 8px;
+            border: 1px solid black;
+            background: white;
+        }
+
+        .variable.active {
+            background: yellow;
+        }
+
+        .variable.increment {
+            background: #90EE90;
+        }
+
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+
+        .condition {
+            padding: 8px;
+            border: 1px solid black;
+            margin: 5px 0;
+        }
+
+        .condition.true {
+            background: #90EE90;
+        }
+
+        .condition.false {
+            background: #FFB6C1;
+        }
+
+        .operation {
+            padding: 8px;
+            border: 1px solid black;
+            margin: 5px 0;
+        }
+
+        .operation.increment {
+            background: #90EE90;
+        }
+
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+
+        .operation.add {
+            background: #ADD8E6;
+        }
+
+        .visualization {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .string-display {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .char-box {
+            width: 60px;
+            height: 60px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            background: white;
+            position: relative;
+        }
+
+        .char-box.current {
+            background: #FFFF99;
+        }
+
+        .char-box.in-substring {
+            background: #E6E6FA;
+        }
+
+        .pointer {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: white;
+            text-align: center;
+            min-width: 20px;
+        }
+
+        .pointer.start {
+            background: #FF69B4;
+            top: -25px;
+        }
+
+        .pointer.end {
+            background: #32CD32;
+            bottom: -25px;
+        }
+
+        .result-section {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .result-array {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 10px;
+            border: 2px solid black;
+            min-height: 100px;
+        }
+
+        .result-item {
+            padding: 5px 10px;
+            border: 1px solid black;
+            background: white;
+        }
+
+        .result-item.current {
+            background: #ADD8E6;
+        }
+
+        .collapsible {
+            margin-top: 20px;
+            border: 2px solid black;
+        }
+
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+        }
+
+        .collapsible.open .collapsible-content {
+            display: block;
+        }
+
+        .step-counter {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="question-section">
+                <h2>Find All Substrings</h2>
+                <p><strong>Problem:</strong> Given a string, find all possible substrings.</p>
+                <p><strong>Example:</strong> Input: "abc" → Output: ["a", "b", "c", "ab", "bc", "abc"]</p>
+            </div>
+
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+
+            <div class="step-counter" id="stepCounter">Step 1 of 1</div>
+
+            <div class="section">
+                <h3>Variables</h3>
+                <div class="variables-grid" id="variablesGrid"></div>
+            </div>
+
+            <div class="section">
+                <h3>Current Condition</h3>
+                <div id="conditionDisplay">Starting algorithm...</div>
+            </div>
+
+            <div class="section">
+                <h3>Current Operation</h3>
+                <div id="operationDisplay">Initialize variables</div>
+            </div>
+
+            <div class="section">
+                <h3>Result Array</h3>
+                <div class="result-array" id="resultArray"></div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Theory & Algorithm Explanation</div>
+                <div class="collapsible-content">
+                    <h4>Algorithm Overview:</h4>
+                    <p>The algorithm uses nested loops to generate all possible substrings. The outer loop sets the starting position, and the inner loop extends the substring length.</p>
+                    
+                    <h4>Time Complexity:</h4>
+                    <p>O(n³) - O(n²) for generating substrings and O(n) for each substring extraction</p>
+                    
+                    <h4>Space Complexity:</h4>
+                    <p>O(n²) - storing all possible substrings</p>
+                    
+                    <h4>Key Points:</h4>
+                    <ul>
+                        <li>Two nested loops generate all start-end combinations</li>
+                        <li>Substring extraction for each valid combination</li>
+                        <li>Result array stores all found substrings</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="visualization">
+                <div class="string-display" id="stringDisplay"></div>
+                <div class="result-section">
+                    <h3>Generated Substrings</h3>
+                    <div class="result-array" id="visualResult"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SubstringVisualizer {
+            constructor() {
+                this.input = "abc";
+                this.steps = [];
+                this.currentStep = 0;
+                this.generateSteps();
+                this.initializeElements();
+                this.render();
+            }
+
+            generateSteps() {
+                const str = this.input;
+                const n = str.length;
+                let result = [];
+                
+                this.steps = [];
+                
+                this.steps.push({
+                    start: -1,
+                    end: -1,
+                    variables: { start: 0, end: 0, n: n, currentSubstring: "" },
+                    condition: "Initialize: start = 0, end = 0",
+                    operation: "Begin algorithm with empty result",
+                    result: [...result],
+                    description: "Starting the algorithm"
+                });
+
+                for (let start = 0; start < n; start++) {
+                    this.steps.push({
+                        start: start,
+                        end: -1,
+                        variables: { start: start, end: start, n: n, currentSubstring: "" },
+                        condition: `start < n (${start} < ${n}) ✓`,
+                        operation: `Set start = ${start}`,
+                        result: [...result],
+                        description: `Setting starting position to ${start}`
+                    });
+
+                    for (let end = start; end < n; end++) {
+                        const substring = str.slice(start, end + 1);
+                        
+                        this.steps.push({
+                            start: start,
+                            end: end,
+                            variables: { start: start, end: end, n: n, currentSubstring: substring },
+                            condition: `end < n (${end} < ${n}) ✓`,
+                            operation: `Extract substring: "${substring}"`,
+                            result: [...result],
+                            description: `Extracting substring from position ${start} to ${end}`
+                        });
+
+                        result.push(substring);
+                        
+                        this.steps.push({
+                            start: start,
+                            end: end,
+                            variables: { start: start, end: end, n: n, currentSubstring: substring },
+                            condition: "Add to result array",
+                            operation: `Add "${substring}" to result`,
+                            result: [...result],
+                            description: `Added "${substring}" to result array`
+                        });
+                    }
+                }
+
+                this.steps.push({
+                    start: -1,
+                    end: -1,
+                    variables: { start: n, end: n, n: n, currentSubstring: "" },
+                    condition: `start >= n (${n} >= ${n}) ✓`,
+                    operation: "Algorithm complete",
+                    result: [...result],
+                    description: "Algorithm finished"
+                });
+            }
+
+            initializeElements() {
+                this.prevBtn = document.getElementById('prevBtn');
+                this.nextBtn = document.getElementById('nextBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.stepCounter = document.getElementById('stepCounter');
+                this.variablesGrid = document.getElementById('variablesGrid');
+                this.conditionDisplay = document.getElementById('conditionDisplay');
+                this.operationDisplay = document.getElementById('operationDisplay');
+                this.resultArray = document.getElementById('resultArray');
+                this.stringDisplay = document.getElementById('stringDisplay');
+                this.visualResult = document.getElementById('visualResult');
+
+                this.prevBtn.addEventListener('click', () => this.previousStep());
+                this.nextBtn.addEventListener('click', () => this.nextStep());
+                this.resetBtn.addEventListener('click', () => this.reset());
+
+                document.querySelector('.collapsible-header').addEventListener('click', function() {
+                    this.parentElement.classList.toggle('open');
+                });
+            }
+
+            previousStep() {
+                if (this.currentStep > 0) {
+                    this.currentStep--;
+                    this.render();
+                }
+            }
+
+            nextStep() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.currentStep++;
+                    this.render();
+                }
+            }
+
+            reset() {
+                this.currentStep = 0;
+                this.render();
+            }
+
+            render() {
+                const step = this.steps[this.currentStep];
+                
+                this.updateStepCounter();
+                this.updateVariables(step);
+                this.updateCondition(step);
+                this.updateOperation(step);
+                this.updateResult(step);
+                this.updateVisualization(step);
+                this.updateButtons();
+            }
+
+            updateStepCounter() {
+                this.stepCounter.textContent = `Step ${this.currentStep + 1} of ${this.steps.length}`;
+            }
+
+            updateVariables(step) {
+                this.variablesGrid.innerHTML = '';
+                
+                Object.entries(step.variables).forEach(([key, value]) => {
+                    const div = document.createElement('div');
+                    div.className = 'variable';
+                    div.innerHTML = `<strong>${key}:</strong> ${value}`;
+                    
+                    if (key === 'start' && step.start >= 0) {
+                        div.classList.add('active');
+                    }
+                    if (key === 'end' && step.end >= 0) {
+                        div.classList.add('active');
+                    }
+                    
+                    this.variablesGrid.appendChild(div);
+                });
+            }
+
+            updateCondition(step) {
+                this.conditionDisplay.innerHTML = '';
+                const div = document.createElement('div');
+                div.className = 'condition';
+                
+                if (step.condition.includes('✓')) {
+                    div.classList.add('true');
+                } else if (step.condition.includes('✗')) {
+                    div.classList.add('false');
+                }
+                
+                div.textContent = step.condition;
+                this.conditionDisplay.appendChild(div);
+            }
+
+            updateOperation(step) {
+                this.operationDisplay.innerHTML = '';
+                const div = document.createElement('div');
+                div.className = 'operation';
+                
+                if (step.operation.includes('Add')) {
+                    div.classList.add('add');
+                } else if (step.operation.includes('Set')) {
+                    div.classList.add('increment');
+                }
+                
+                div.textContent = step.operation;
+                this.operationDisplay.appendChild(div);
+            }
+
+            updateResult(step) {
+                this.resultArray.innerHTML = '';
+                this.visualResult.innerHTML = '';
+                
+                step.result.forEach((item, index) => {
+                    const div1 = document.createElement('div');
+                    div1.className = 'result-item';
+                    div1.textContent = `"${item}"`;
+                    
+                    const div2 = document.createElement('div');
+                    div2.className = 'result-item';
+                    div2.textContent = `"${item}"`;
+                    
+                    if (item === step.variables.currentSubstring && step.variables.currentSubstring !== "") {
+                        div1.classList.add('current');
+                        div2.classList.add('current');
+                    }
+                    
+                    this.resultArray.appendChild(div1);
+                    this.visualResult.appendChild(div2);
+                });
+            }
+
+            updateVisualization(step) {
+                this.stringDisplay.innerHTML = '';
+                
+                [...this.input].forEach((char, index) => {
+                    const charBox = document.createElement('div');
+                    charBox.className = 'char-box';
+                    charBox.textContent = char;
+                    
+                    if (step.start >= 0 && step.end >= 0) {
+                        if (index >= step.start && index <= step.end) {
+                            charBox.classList.add('in-substring');
+                        }
+                        if (index === step.start || index === step.end) {
+                            charBox.classList.add('current');
+                        }
+                    }
+                    
+                    this.stringDisplay.appendChild(charBox);
+                });
+
+                if (step.start >= 0) {
+                    const startPointer = document.createElement('div');
+                    startPointer.className = 'pointer start';
+                    startPointer.textContent = 'START';
+                    startPointer.style.left = `${step.start * 65}px`;
+                    this.stringDisplay.appendChild(startPointer);
+                }
+
+                if (step.end >= 0) {
+                    const endPointer = document.createElement('div');
+                    endPointer.className = 'pointer end';
+                    endPointer.textContent = 'END';
+                    endPointer.style.left = `${step.end * 65}px`;
+                    this.stringDisplay.appendChild(endPointer);
+                }
+            }
+
+            updateButtons() {
+                this.prevBtn.disabled = this.currentStep === 0;
+                this.nextBtn.disabled = this.currentStep === this.steps.length - 1;
+            }
+        }
+
+        new SubstringVisualizer();
+    </script>
+</body>
+</html>

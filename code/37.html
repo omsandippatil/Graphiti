@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Count Vowels and Consonants</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 10px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .section {
+            margin-bottom: 15px;
+            padding: 8px;
+            border: 1px solid black;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            border-bottom: 1px solid black;
+            padding-bottom: 2px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            padding: 5px 10px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .variables {
+            font-size: 12px;
+        }
+        
+        .variable {
+            margin: 2px 0;
+            padding: 2px 4px;
+        }
+        
+        .variable.active {
+            background: yellow;
+        }
+        
+        .variable.increment {
+            background: #90EE90;
+        }
+        
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+        
+        .condition {
+            margin: 2px 0;
+            padding: 2px 4px;
+            font-size: 12px;
+        }
+        
+        .condition.true {
+            background: #90EE90;
+        }
+        
+        .condition.false {
+            background: #FFB6C1;
+        }
+        
+        .operation {
+            margin: 2px 0;
+            padding: 2px 4px;
+            font-size: 12px;
+        }
+        
+        .operation.increment {
+            background: #90EE90;
+        }
+        
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+        
+        .operation.check {
+            background: #ADD8E6;
+        }
+        
+        .string-display {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .char-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            background: white;
+            position: relative;
+        }
+        
+        .char-cell.current {
+            background: #FFD700;
+            border-color: #FF1493;
+            border-width: 3px;
+        }
+        
+        .char-cell.visited {
+            background: #F0F0F0;
+        }
+        
+        .char-cell.vowel {
+            color: #FF1493;
+        }
+        
+        .char-cell.consonant {
+            color: #1E90FF;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+            padding: 1px 3px;
+            border-radius: 3px;
+            z-index: 10;
+        }
+        
+        .pointer.current {
+            background: #FF1493;
+            color: white;
+        }
+        
+        .result-display {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+        }
+        
+        .collapsible-header {
+            background: #f0f0f0;
+            border: 1px solid black;
+            padding: 5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .collapsible-content {
+            display: none;
+            border: 1px solid black;
+            border-top: none;
+            padding: 10px;
+            font-size: 12px;
+        }
+        
+        .collapsible-content.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="section">
+            <div class="section-title">Problem Statement</div>
+            <div>Count vowels and consonants in a string using indexOf for vowel detection.</div>
+            <div style="margin-top: 5px;"><strong>Example:</strong> "hello" → 2 vowels, 3 consonants</div>
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Step Counter</div>
+            <div id="stepCounter">Step 1 of 6</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Variables</div>
+            <div class="variables" id="variables">
+                <div class="variable" id="var-i">i = 0</div>
+                <div class="variable" id="var-char">char = 'h'</div>
+                <div class="variable" id="var-vowels">vowels = "aeiouAEIOU"</div>
+                <div class="variable" id="var-vowelCount">vowelCount = 0</div>
+                <div class="variable" id="var-consonantCount">consonantCount = 0</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Current Condition</div>
+            <div id="conditions"></div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Current Operation</div>
+            <div id="operations"></div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Result</div>
+            <div id="result">vowelCount: 0, consonantCount: 0</div>
+        </div>
+        
+        <div class="collapsible">
+            <div class="collapsible-header" onclick="toggleCollapsible('theory')">
+                ▶ Algorithm Theory & Explanation
+            </div>
+            <div class="collapsible-content" id="theory">
+                <strong>Algorithm Overview:</strong><br>
+                This algorithm iterates through each character in the input string and uses the indexOf method to check if the character exists in a predefined vowels string. If indexOf returns -1, the character is not a vowel, otherwise it is.<br><br>
+                
+                <strong>Key Concepts:</strong><br>
+                • indexOf() returns the first index where the character is found, or -1 if not found<br>
+                • We define vowels as "aeiouAEIOU" to handle both cases<br>
+                • Characters are classified as either vowels or consonants (ignoring non-alphabetic)<br><br>
+                
+                <strong>Time Complexity:</strong> O(n) where n is the length of the string<br>
+                <strong>Space Complexity:</strong> O(1) for the variables used
+            </div>
+        </div>
+        
+        <div class="collapsible">
+            <div class="collapsible-header" onclick="toggleCollapsible('edge')">
+                ▶ Edge Cases & Boundary Conditions
+            </div>
+            <div class="collapsible-content" id="edge">
+                <strong>Edge Cases:</strong><br>
+                • Empty string: returns 0 vowels, 0 consonants<br>
+                • String with only vowels: consonantCount remains 0<br>
+                • String with only consonants: vowelCount remains 0<br>
+                • Mixed case letters: handled by including both cases in vowels string<br>
+                • Non-alphabetic characters: treated as consonants in this implementation<br><br>
+                
+                <strong>Boundary Conditions:</strong><br>
+                • First character (i = 0)<br>
+                • Last character (i = string.length - 1)<br>
+                • Single character string
+            </div>
+        </div>
+        
+        <div class="collapsible">
+            <div class="collapsible-header" onclick="toggleCollapsible('tricks')">
+                ▶ Implementation Tricks & Optimizations
+            </div>
+            <div class="collapsible-content" id="tricks">
+                <strong>IndexOf Technique:</strong><br>
+                • Using indexOf is more readable than multiple if conditions<br>
+                • Returns -1 when character not found, any other value means found<br>
+                • Single comparison: vowels.indexOf(char) !== -1<br><br>
+                
+                <strong>Alternative Approaches:</strong><br>
+                • Using includes(): vowels.includes(char)<br>
+                • Using Set for O(1) lookup: vowelSet.has(char)<br>
+                • Using regular expressions: /[aeiouAEIOU]/.test(char)<br><br>
+                
+                <strong>Performance Notes:</strong><br>
+                • indexOf has O(k) complexity where k is vowels string length (10)<br>
+                • For large strings, Set-based approach would be faster<br>
+                • Current approach is fine for typical string lengths
+            </div>
+        </div>
+    </div>
+    
+    <div class="right-panel">
+        <div style="text-align: center; margin-bottom: 10px; font-weight: bold;">
+            Input String: "hello"
+        </div>
+        <div class="string-display" id="stringDisplay"></div>
+        <div class="result-display">
+            <div style="font-weight: bold; margin-bottom: 5px;">Final Result:</div>
+            <div id="finalResult">Vowels: 0, Consonants: 0</div>
+        </div>
+    </div>
+
+    <script>
+        const input = "hello";
+        const vowels = "aeiouAEIOU";
+        let currentStep = 0;
+        let vowelCount = 0;
+        let consonantCount = 0;
+        let i = 0;
+        
+        const steps = [
+            {
+                i: 0, char: 'h', vowelCount: 0, consonantCount: 0,
+                condition: `vowels.indexOf('h') !== -1 (${vowels.indexOf('h')} !== -1)`,
+                conditionResult: false,
+                operation: "consonantCount++ (0 → 1)",
+                operationType: "increment",
+                description: "Check if 'h' is a vowel using indexOf. Result is -1, so it's a consonant."
+            },
+            {
+                i: 1, char: 'e', vowelCount: 0, consonantCount: 1,
+                condition: `vowels.indexOf('e') !== -1 (${vowels.indexOf('e')} !== -1)`,
+                conditionResult: true,
+                operation: "vowelCount++ (0 → 1)",
+                operationType: "increment",
+                description: "Check if 'e' is a vowel using indexOf. Result is 1, so it's a vowel."
+            },
+            {
+                i: 2, char: 'l', vowelCount: 1, consonantCount: 1,
+                condition: `vowels.indexOf('l') !== -1 (${vowels.indexOf('l')} !== -1)`,
+                conditionResult: false,
+                operation: "consonantCount++ (1 → 2)",
+                operationType: "increment",
+                description: "Check if 'l' is a vowel using indexOf. Result is -1, so it's a consonant."
+            },
+            {
+                i: 3, char: 'l', vowelCount: 1, consonantCount: 2,
+                condition: `vowels.indexOf('l') !== -1 (${vowels.indexOf('l')} !== -1)`,
+                conditionResult: false,
+                operation: "consonantCount++ (2 → 3)",
+                operationType: "increment",
+                description: "Check if 'l' is a vowel using indexOf. Result is -1, so it's a consonant."
+            },
+            {
+                i: 4, char: 'o', vowelCount: 1, consonantCount: 3,
+                condition: `vowels.indexOf('o') !== -1 (${vowels.indexOf('o')} !== -1)`,
+                conditionResult: true,
+                operation: "vowelCount++ (1 → 2)",
+                operationType: "increment",
+                description: "Check if 'o' is a vowel using indexOf. Result is 4, so it's a vowel."
+            },
+            {
+                i: 5, char: '', vowelCount: 2, consonantCount: 3,
+                condition: "i < input.length (5 < 5)",
+                conditionResult: false,
+                operation: "Algorithm complete",
+                operationType: "complete",
+                description: "Loop condition fails. Algorithm finished with final counts."
+            }
+        ];
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} of ${steps.length}`;
+            
+            document.getElementById('var-i').textContent = `i = ${step.i}`;
+            document.getElementById('var-char').textContent = `char = '${step.char}'`;
+            document.getElementById('var-vowelCount').textContent = `vowelCount = ${step.vowelCount}`;
+            document.getElementById('var-consonantCount').textContent = `consonantCount = ${step.consonantCount}`;
+            
+            document.querySelectorAll('.variable').forEach(v => {
+                v.className = 'variable';
+            });
+            
+            if (step.operationType === 'increment') {
+                if (step.operation.includes('vowelCount')) {
+                    document.getElementById('var-vowelCount').classList.add('increment');
+                } else if (step.operation.includes('consonantCount')) {
+                    document.getElementById('var-consonantCount').classList.add('increment');
+                }
+            }
+            
+            document.getElementById('var-i').classList.add('active');
+            if (step.char) document.getElementById('var-char').classList.add('active');
+            
+            const conditionsDiv = document.getElementById('conditions');
+            conditionsDiv.innerHTML = `<div class="condition ${step.conditionResult ? 'true' : 'false'}">${step.condition} ${step.conditionResult ? '✓' : '✗'}</div>`;
+            
+            const operationsDiv = document.getElementById('operations');
+            operationsDiv.innerHTML = `<div class="operation ${step.operationType}">${step.operation}</div>`;
+            
+            document.getElementById('result').textContent = `vowelCount: ${step.vowelCount}, consonantCount: ${step.consonantCount}`;
+            document.getElementById('finalResult').textContent = `Vowels: ${step.vowelCount}, Consonants: ${step.consonantCount}`;
+            
+            updateStringDisplay();
+            updateButtons();
+        }
+        
+        function updateStringDisplay() {
+            const step = steps[currentStep];
+            const display = document.getElementById('stringDisplay');
+            display.innerHTML = '';
+            
+            for (let j = 0; j < input.length; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'char-cell';
+                cell.textContent = input[j];
+                
+                if (j < step.i) {
+                    cell.classList.add('visited');
+                    if (vowels.indexOf(input[j]) !== -1) {
+                        cell.classList.add('vowel');
+                    } else {
+                        cell.classList.add('consonant');
+                    }
+                } else if (j === step.i && step.char) {
+                    cell.classList.add('current');
+                    if (step.conditionResult) {
+                        cell.classList.add('vowel');
+                    } else {
+                        cell.classList.add('consonant');
+                    }
+                    
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    pointer.textContent = 'i';
+                    cell.appendChild(pointer);
+                }
+                
+                display.appendChild(cell);
+            }
+        }
+        
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+        
+        function reset() {
+            currentStep = 0;
+            updateDisplay();
+        }
+        
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const header = content.previousElementSibling;
+            
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                header.textContent = header.textContent.replace('▼', '▶');
+            } else {
+                content.classList.add('show');
+                header.textContent = header.textContent.replace('▶', '▼');
+            }
+        }
+        
+        document.getElementById('nextBtn').addEventListener('click', nextStep);
+        document.getElementById('prevBtn').addEventListener('click', prevStep);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+        
+        updateDisplay();
+    </script>
+</body>
+</html>

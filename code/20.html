@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIS Algorithm Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 10px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .section {
+            border: 1px solid black;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: white;
+        }
+        
+        .section h3 {
+            font-size: 14px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid black;
+            padding-bottom: 3px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            padding: 6px 12px;
+            background: white;
+            border: 2px solid black;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .array-display {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 5px 0;
+        }
+        
+        .array-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .array-cell.current {
+            background: #ffff00;
+        }
+        
+        .array-cell.comparing {
+            background: #ffccff;
+        }
+        
+        .dp-display {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 5px 0;
+        }
+        
+        .dp-cell {
+            width: 40px;
+            height: 30px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .dp-cell.updated {
+            background: #90EE90;
+        }
+        
+        .variables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 11px;
+        }
+        
+        .variable {
+            padding: 4px;
+            border: 1px solid black;
+            background: white;
+        }
+        
+        .variable.active {
+            background: #ffff00;
+        }
+        
+        .variable.increment {
+            background: #90EE90;
+        }
+        
+        .variable.decrement {
+            background: #ffcccc;
+        }
+        
+        .condition {
+            padding: 4px;
+            margin: 2px 0;
+            border: 1px solid black;
+            font-size: 11px;
+        }
+        
+        .condition.true {
+            background: #90EE90;
+        }
+        
+        .condition.false {
+            background: #ffcccc;
+        }
+        
+        .operation {
+            padding: 4px;
+            margin: 2px 0;
+            border: 1px solid black;
+            font-size: 11px;
+        }
+        
+        .operation.increment {
+            background: #90EE90;
+        }
+        
+        .operation.update {
+            background: #add8e6;
+        }
+        
+        .collapsible {
+            cursor: pointer;
+            padding: 8px;
+            background: #f0f0f0;
+            border: 1px solid black;
+            margin-top: 10px;
+        }
+        
+        .collapsible:hover {
+            background: #e0e0e0;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            border: 1px solid black;
+            border-top: none;
+            background: white;
+        }
+        
+        .step-counter {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .pointer {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 1px 3px;
+            border: 1px solid black;
+            border-radius: 3px;
+            z-index: 10;
+        }
+        
+        .pointer.current { background: #ff69b4; color: white; }
+        .pointer.comparing { background: #32cd32; color: white; }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="section">
+            <h3>Problem</h3>
+            <p>Find the length of the longest strictly increasing subsequence.</p>
+            <p><strong>Input:</strong> [10,9,2,5,3,7,101,18]</p>
+            <p><strong>Output:</strong> 4 (e.g., [2,3,7,101])</p>
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="section">
+            <h3>Step Counter</h3>
+            <div class="step-counter" id="stepCounter">Step 0 of 36</div>
+        </div>
+        
+        <div class="section">
+            <h3>Variables</h3>
+            <div class="variables-grid" id="variablesGrid"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Current Conditions</h3>
+            <div id="conditionsDisplay"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Live Operations</h3>
+            <div id="operationsDisplay"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Current Step Info</h3>
+            <div id="stepInfo"></div>
+        </div>
+        
+        <div class="collapsible" onclick="toggleCollapsible('theory')">
+            ▼ Algorithm Theory & Explanation
+        </div>
+        <div class="collapsible-content" id="theory">
+            <h4>Dynamic Programming Approach</h4>
+            <p>The LIS problem uses dynamic programming where dp[i] represents the length of the longest increasing subsequence ending at index i.</p>
+            <p>For each element, we check all previous elements. If a previous element is smaller, we can extend its subsequence.</p>
+            <p>Time complexity: O(n²), Space complexity: O(n)</p>
+        </div>
+        
+        <div class="collapsible" onclick="toggleCollapsible('tricks')">
+            ▼ Algorithm Tricks & Optimizations
+        </div>
+        <div class="collapsible-content" id="tricks">
+            <p>• Initialize all dp values to 1 (each element forms a subsequence of length 1)</p>
+            <p>• For each position i, check all positions j < i</p>
+            <p>• If nums[j] < nums[i], then dp[i] = max(dp[i], dp[j] + 1)</p>
+            <p>• The answer is the maximum value in the dp array</p>
+        </div>
+        
+        <div class="collapsible" onclick="toggleCollapsible('edge-cases')">
+            ▼ Edge Cases & Boundary Logic
+        </div>
+        <div class="collapsible-content" id="edge-cases">
+            <p>• Empty array: return 0</p>
+            <p>• Single element: return 1</p>
+            <p>• All elements equal: return 1</p>
+            <p>• Strictly decreasing: return 1</p>
+            <p>• Already sorted: return array length</p>
+        </div>
+    </div>
+    
+    <div class="right-panel">
+        <div class="section">
+            <h3>Input Array</h3>
+            <div class="array-display" id="inputArray"></div>
+        </div>
+        
+        <div class="section">
+            <h3>DP Array (Length of LIS ending at each index)</h3>
+            <div class="dp-display" id="dpArray"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Result</h3>
+            <div id="result">Length: 0</div>
+        </div>
+    </div>
+    
+    <script>
+        const nums = [10, 9, 2, 5, 3, 7, 101, 18];
+        const n = nums.length;
+        let currentStep = 0;
+        let steps = [];
+        
+        function generateSteps() {
+            steps = [];
+            const dp = new Array(n).fill(1);
+            
+            steps.push({
+                i: -1, j: -1, dp: [...dp], maxLen: 1,
+                info: "Initialize dp array with 1s (each element forms a subsequence of length 1)",
+                variables: { i: -1, j: -1, maxLen: 1 },
+                conditions: [], operations: []
+            });
+            
+            for (let i = 1; i < n; i++) {
+                steps.push({
+                    i: i, j: -1, dp: [...dp], maxLen: Math.max(...dp),
+                    info: `Starting to process element at index ${i} (value: ${nums[i]})`,
+                    variables: { i: i, j: -1, maxLen: Math.max(...dp) },
+                    conditions: [], operations: []
+                });
+                
+                for (let j = 0; j < i; j++) {
+                    const condition = nums[j] < nums[i];
+                    steps.push({
+                        i: i, j: j, dp: [...dp], maxLen: Math.max(...dp),
+                        info: `Comparing nums[${j}] = ${nums[j]} with nums[${i}] = ${nums[i]}`,
+                        variables: { i: i, j: j, maxLen: Math.max(...dp) },
+                        conditions: [`nums[${j}] < nums[${i}] (${nums[j]} < ${nums[i]}) ${condition ? '✓' : '✗'}`],
+                        operations: []
+                    });
+                    
+                    if (condition) {
+                        const oldValue = dp[i];
+                        const newValue = Math.max(dp[i], dp[j] + 1);
+                        if (newValue > oldValue) {
+                            dp[i] = newValue;
+                            steps.push({
+                                i: i, j: j, dp: [...dp], maxLen: Math.max(...dp),
+                                info: `Update dp[${i}] from ${oldValue} to ${newValue} (dp[${j}] + 1 = ${dp[j]} + 1)`,
+                                variables: { i: i, j: j, maxLen: Math.max(...dp) },
+                                conditions: [],
+                                operations: [`dp[${i}] = max(${oldValue}, ${dp[j]} + 1) = ${newValue}`]
+                            });
+                        }
+                    }
+                }
+            }
+            
+            steps.push({
+                i: -1, j: -1, dp: [...dp], maxLen: Math.max(...dp),
+                info: `Algorithm complete. Maximum LIS length is ${Math.max(...dp)}`,
+                variables: { i: -1, j: -1, maxLen: Math.max(...dp) },
+                conditions: [], operations: []
+            });
+        }
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep} of ${steps.length - 1}`;
+            
+            const inputArray = document.getElementById('inputArray');
+            inputArray.innerHTML = '';
+            nums.forEach((num, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = num;
+                
+                if (idx === step.i) cell.classList.add('current');
+                if (idx === step.j) cell.classList.add('comparing');
+                
+                const cellContainer = document.createElement('div');
+                cellContainer.style.position = 'relative';
+                cellContainer.appendChild(cell);
+                
+                if (idx === step.i && step.i >= 0) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    pointer.textContent = 'i';
+                    pointer.style.top = '-20px';
+                    pointer.style.left = '50%';
+                    pointer.style.transform = 'translateX(-50%)';
+                    cellContainer.appendChild(pointer);
+                }
+                
+                if (idx === step.j && step.j >= 0) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer comparing';
+                    pointer.textContent = 'j';
+                    pointer.style.bottom = '-20px';
+                    pointer.style.left = '50%';
+                    pointer.style.transform = 'translateX(-50%)';
+                    cellContainer.appendChild(pointer);
+                }
+                
+                inputArray.appendChild(cellContainer);
+            });
+            
+            const dpArray = document.getElementById('dpArray');
+            dpArray.innerHTML = '';
+            step.dp.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'dp-cell';
+                cell.textContent = val;
+                
+                if (currentStep > 0 && steps[currentStep - 1] && 
+                    steps[currentStep - 1].dp[idx] !== val) {
+                    cell.classList.add('updated');
+                }
+                
+                dpArray.appendChild(cell);
+            });
+            
+            const variablesGrid = document.getElementById('variablesGrid');
+            variablesGrid.innerHTML = '';
+            Object.entries(step.variables).forEach(([key, value]) => {
+                const div = document.createElement('div');
+                div.className = 'variable';
+                div.innerHTML = `<strong>${key}:</strong> ${value}`;
+                variablesGrid.appendChild(div);
+            });
+            
+            const conditionsDisplay = document.getElementById('conditionsDisplay');
+            conditionsDisplay.innerHTML = '';
+            step.conditions.forEach(condition => {
+                const div = document.createElement('div');
+                div.className = `condition ${condition.includes('✓') ? 'true' : 'false'}`;
+                div.textContent = condition;
+                conditionsDisplay.appendChild(div);
+            });
+            
+            const operationsDisplay = document.getElementById('operationsDisplay');
+            operationsDisplay.innerHTML = '';
+            step.operations.forEach(operation => {
+                const div = document.createElement('div');
+                div.className = 'operation update';
+                div.textContent = operation;
+                operationsDisplay.appendChild(div);
+            });
+            
+            document.getElementById('stepInfo').textContent = step.info;
+            document.getElementById('result').textContent = `Length: ${step.maxLen}`;
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const button = content.previousElementSibling;
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                button.textContent = button.textContent.replace('▲', '▼');
+            } else {
+                content.style.display = 'block';
+                button.textContent = button.textContent.replace('▼', '▲');
+            }
+        }
+        
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            currentStep = 0;
+            updateDisplay();
+        });
+        
+        generateSteps();
+        updateDisplay();
+    </script>
+</body>
+</html>

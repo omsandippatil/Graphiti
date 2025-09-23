@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimum Cost Insertion Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            font-size: 13px;
+            line-height: 1.3;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            width: 60%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 40%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .section {
+            margin-bottom: 12px;
+            padding: 8px;
+            border: 1px solid black;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-decoration: underline;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        button {
+            background: white;
+            border: 2px solid black;
+            padding: 8px 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button:disabled {
+            background: #e0e0e0;
+            cursor: not-allowed;
+        }
+        
+        .variables {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .var-item {
+            padding: 4px;
+            border: 1px solid #ccc;
+        }
+        
+        .var-active {
+            background: #ffff99;
+        }
+        
+        .var-increment {
+            background: #90EE90;
+        }
+        
+        .var-decrement {
+            background: #ffcccc;
+        }
+        
+        .condition-item {
+            padding: 4px;
+            margin: 2px 0;
+            border: 1px solid #ccc;
+        }
+        
+        .condition-true {
+            background: #90EE90;
+        }
+        
+        .condition-false {
+            background: #ffcccc;
+        }
+        
+        .operation-item {
+            padding: 4px;
+            margin: 2px 0;
+            border: 1px solid #ccc;
+        }
+        
+        .op-increment {
+            background: #90EE90;
+        }
+        
+        .op-decrement {
+            background: #ffcccc;
+        }
+        
+        .op-add {
+            background: #ADD8E6;
+        }
+        
+        .visualization {
+            position: relative;
+        }
+        
+        .option-container {
+            margin: 15px 0;
+            padding: 10px;
+            border: 2px solid black;
+        }
+        
+        .option-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .array-display {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        
+        .array-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 2px;
+            font-weight: bold;
+            font-size: 14px;
+            background: white;
+        }
+        
+        .array-cell.current {
+            background: #ffff99;
+            border-color: #ff1493;
+            border-width: 3px;
+        }
+        
+        .array-cell.inserted {
+            background: #f0f0f0;
+        }
+        
+        .pointer {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+        }
+        
+        .pointer-current {
+            border-bottom: 12px solid #ff1493;
+            top: -15px;
+        }
+        
+        .pointer-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+        }
+        
+        .collapsible-header {
+            background: #f0f0f0;
+            border: 1px solid black;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .collapsible-content {
+            display: none;
+            border: 1px solid black;
+            border-top: none;
+            padding: 15px;
+        }
+        
+        .result-section {
+            text-align: center;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .cost-display {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        .step-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: black;
+            color: white;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="section">
+                <div class="section-title">Problem Statement</div>
+                <div>Find the minimum total cost to insert elements [3, 1, 4] into an initially empty array, where cost = max - min of current array after each insertion.</div>
+                <div style="margin-top: 8px;"><strong>Example:</strong> Insert 3: cost = 0, Insert 1: cost = 2, Insert 4: cost = 3 → Total = 5</div>
+            </div>
+            
+            <div class="controls">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Variables</div>
+                <div class="variables">
+                    <div class="var-item" id="var-option">Option: <span id="val-option">1</span></div>
+                    <div class="var-item" id="var-step">Step: <span id="val-step">1</span></div>
+                    <div class="var-item" id="var-element">Element: <span id="val-element">3</span></div>
+                    <div class="var-item" id="var-cost">Cost: <span id="val-cost">0</span></div>
+                    <div class="var-item" id="var-total">Total Cost: <span id="val-total">0</span></div>
+                    <div class="var-item" id="var-min">Min: <span id="val-min">-</span></div>
+                    <div class="var-item" id="var-max">Max: <span id="val-max">-</span></div>
+                    <div class="var-item" id="var-size">Array Size: <span id="val-size">0</span></div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Current Condition Check</div>
+                <div id="condition-display">Starting Option 1: [3, 1, 4]</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Live Operation</div>
+                <div id="operation-display">Initialize empty array</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Current Array State</div>
+                <div id="array-state">[]</div>
+            </div>
+            
+            <div class="result-section">
+                <div class="cost-display">Current Step Cost: <span id="current-cost">0</span></div>
+                <div class="cost-display">Running Total: <span id="running-total">0</span></div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="step-counter">Step <span id="step-counter">1</span> / 10</div>
+            <div class="visualization">
+                <div id="current-option-display"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="collapsible">
+        <div class="collapsible-header" onclick="toggleCollapsible()">
+            📚 Theory, Algorithm Explanation, Tricks & Edge Cases (Click to Expand)
+        </div>
+        <div class="collapsible-content" id="theory-content">
+            <h3>Algorithm Theory</h3>
+            <p>The Minimum Cost Insertion problem requires finding the optimal order to insert elements to minimize total cost, where each insertion cost equals max - min of the resulting array.</p>
+            
+            <h3>Key Insights</h3>
+            <ul>
+                <li>First element insertion always costs 0 (max = min)</li>
+                <li>Subsequent insertions depend on how the new element affects the range</li>
+                <li>Different insertion orders can yield different total costs</li>
+            </ul>
+            
+            <h3>Edge Cases</h3>
+            <ul>
+                <li>Single element: cost = 0</li>
+                <li>All elements equal: total cost = 0</li>
+                <li>Extreme values: consider impact on range</li>
+            </ul>
+            
+            <h3>Optimization Tricks</h3>
+            <ul>
+                <li>Try all permutations for small inputs</li>
+                <li>Use dynamic programming for larger inputs</li>
+                <li>Consider greedy approaches based on element values</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const steps = [
+            // Option 1: [3, 1, 4]
+            { option: 1, stepInOption: 1, element: 3, array: [], cost: 0, totalCost: 0, operation: "Insert 3 into empty array", condition: "Array is empty", min: null, max: null },
+            { option: 1, stepInOption: 2, element: 3, array: [3], cost: 0, totalCost: 0, operation: "Array = [3], cost = 3-3 = 0", condition: "min = max = 3", min: 3, max: 3 },
+            { option: 1, stepInOption: 3, element: 1, array: [3], cost: 2, totalCost: 0, operation: "Insert 1 into [3]", condition: "New element 1 < min 3", min: 3, max: 3 },
+            { option: 1, stepInOption: 4, element: 1, array: [3, 1], cost: 2, totalCost: 2, operation: "Array = [3,1], cost = 3-1 = 2", condition: "min = 1, max = 3", min: 1, max: 3 },
+            { option: 1, stepInOption: 5, element: 4, array: [3, 1], cost: 3, totalCost: 2, operation: "Insert 4 into [3,1]", condition: "New element 4 > max 3", min: 1, max: 3 },
+            { option: 1, stepInOption: 6, element: 4, array: [3, 1, 4], cost: 3, totalCost: 5, operation: "Array = [3,1,4], cost = 4-1 = 3", condition: "Final: min = 1, max = 4", min: 1, max: 4 },
+            
+            // Option 2: [1, 3, 4]
+            { option: 2, stepInOption: 1, element: 1, array: [], cost: 0, totalCost: 0, operation: "Insert 1 into empty array", condition: "Array is empty", min: null, max: null },
+            { option: 2, stepInOption: 2, element: 1, array: [1], cost: 0, totalCost: 0, operation: "Array = [1], cost = 1-1 = 0", condition: "min = max = 1", min: 1, max: 1 },
+            { option: 2, stepInOption: 3, element: 3, array: [1], cost: 2, totalCost: 0, operation: "Insert 3 into [1]", condition: "New element 3 > max 1", min: 1, max: 1 },
+            { option: 2, stepInOption: 4, element: 3, array: [1, 3], cost: 2, totalCost: 2, operation: "Array = [1,3], cost = 3-1 = 2", condition: "min = 1, max = 3", min: 1, max: 3 },
+            { option: 2, stepInOption: 5, element: 4, array: [1, 3], cost: 3, totalCost: 2, operation: "Insert 4 into [1,3]", condition: "New element 4 > max 3", min: 1, max: 3 },
+            { option: 2, stepInOption: 6, element: 4, array: [1, 3, 4], cost: 3, totalCost: 5, operation: "Array = [1,3,4], cost = 4-1 = 3", condition: "Final: min = 1, max = 4", min: 1, max: 4 }
+        ];
+        
+        let currentStep = 0;
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            // Update variables
+            document.getElementById('val-option').textContent = step.option;
+            document.getElementById('val-step').textContent = step.stepInOption;
+            document.getElementById('val-element').textContent = step.element;
+            document.getElementById('val-cost').textContent = step.cost;
+            document.getElementById('val-total').textContent = step.totalCost;
+            document.getElementById('val-min').textContent = step.min || '-';
+            document.getElementById('val-max').textContent = step.max || '-';
+            document.getElementById('val-size').textContent = step.array.length;
+            
+            // Clear variable highlighting
+            document.querySelectorAll('.var-item').forEach(el => {
+                el.className = 'var-item';
+            });
+            
+            // Highlight active variables
+            if (step.stepInOption % 2 === 1) {
+                document.getElementById('var-element').classList.add('var-active');
+            } else {
+                document.getElementById('var-cost').classList.add('var-increment');
+                document.getElementById('var-total').classList.add('var-increment');
+            }
+            
+            // Update condition display
+            document.getElementById('condition-display').textContent = step.condition;
+            document.getElementById('condition-display').className = step.stepInOption % 2 === 1 ? 'condition-true' : 'condition-false';
+            
+            // Update operation display
+            document.getElementById('operation-display').textContent = step.operation;
+            document.getElementById('operation-display').className = step.stepInOption % 2 === 0 ? 'operation-item op-add' : 'operation-item';
+            
+            // Update array state
+            document.getElementById('array-state').textContent = '[' + step.array.join(', ') + ']';
+            
+            // Update result displays
+            document.getElementById('current-cost').textContent = step.cost;
+            document.getElementById('running-total').textContent = step.totalCost;
+            
+            // Update step counter
+            document.getElementById('step-counter').textContent = currentStep + 1;
+            
+            // Update visualization
+            updateVisualization(step);
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function updateVisualization(step) {
+            const container = document.getElementById('current-option-display');
+            container.innerHTML = '';
+            
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option-container';
+            
+            const title = document.createElement('div');
+            title.className = 'option-title';
+            title.textContent = `Option ${step.option}: Insert ${step.element}`;
+            optionDiv.appendChild(title);
+            
+            const arrayDisplay = document.createElement('div');
+            arrayDisplay.className = 'array-display';
+            
+            if (step.array.length === 0) {
+                const emptyText = document.createElement('div');
+                emptyText.textContent = 'Empty Array []';
+                emptyText.style.padding = '20px';
+                emptyText.style.textAlign = 'center';
+                emptyText.style.border = '2px dashed #ccc';
+                arrayDisplay.appendChild(emptyText);
+            } else {
+                step.array.forEach((val, index) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'array-cell';
+                    if (index === step.array.length - 1 && step.stepInOption % 2 === 0) {
+                        cell.classList.add('current');
+                    } else if (step.stepInOption % 2 === 0) {
+                        cell.classList.add('inserted');
+                    }
+                    cell.textContent = val;
+                    arrayDisplay.appendChild(cell);
+                });
+            }
+            
+            optionDiv.appendChild(arrayDisplay);
+            
+            const costInfo = document.createElement('div');
+            costInfo.style.marginTop = '10px';
+            costInfo.innerHTML = `<strong>Cost:</strong> ${step.cost} | <strong>Total:</strong> ${step.totalCost}`;
+            optionDiv.appendChild(costInfo);
+            
+            container.appendChild(optionDiv);
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+        
+        function reset() {
+            currentStep = 0;
+            updateDisplay();
+        }
+        
+        function toggleCollapsible() {
+            const content = document.getElementById('theory-content');
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // Event listeners
+        document.getElementById('nextBtn').addEventListener('click', nextStep);
+        document.getElementById('prevBtn').addEventListener('click', prevStep);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextStep();
+            if (e.key === 'ArrowLeft') prevStep();
+            if (e.key === 'r' || e.key === 'R') reset();
+        });
+        
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>

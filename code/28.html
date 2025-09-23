@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Non-Repeated Character</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: white;
+            color: black;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .question h2 {
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid black;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .section {
+            border: 2px solid black;
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-content {
+            padding: 15px;
+            display: none;
+        }
+
+        .section-content.visible {
+            display: block;
+        }
+
+        .variables {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .variable {
+            margin-bottom: 8px;
+            padding: 5px;
+            border: 1px solid black;
+        }
+
+        .variable.active {
+            background: #FFFF99;
+        }
+
+        .variable.increment {
+            background: #90EE90;
+        }
+
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+
+        .conditions {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .condition {
+            margin-bottom: 8px;
+            padding: 5px;
+            border: 1px solid black;
+        }
+
+        .condition.true {
+            background: #90EE90;
+            color: black;
+        }
+
+        .condition.false {
+            background: #FFB6C1;
+            color: black;
+        }
+
+        .operations {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .operation {
+            margin-bottom: 8px;
+            padding: 5px;
+            border: 1px solid black;
+        }
+
+        .operation.increment {
+            background: #90EE90;
+        }
+
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+
+        .operation.add {
+            background: #ADD8E6;
+        }
+
+        .string-container {
+            position: relative;
+            display: flex;
+            gap: 5px;
+            margin-bottom: 30px;
+        }
+
+        .char-cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+            background: white;
+        }
+
+        .char-cell.visited {
+            background: #F0F0F0;
+        }
+
+        .char-cell.current {
+            background: #FFFF99;
+        }
+
+        .pointer {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 3px;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        .pointer.current {
+            background: #FF69B4;
+            color: white;
+            top: -25px;
+        }
+
+        .frequency-table {
+            border: 2px solid black;
+            margin-bottom: 20px;
+        }
+
+        .frequency-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .frequency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 1px;
+            background: black;
+            padding: 1px;
+        }
+
+        .frequency-cell {
+            background: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .frequency-cell.active {
+            background: #FFFF99;
+        }
+
+        .result-section {
+            border: 2px solid black;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .step-counter {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="question">
+            <h2>First Non-Repeated Character</h2>
+            <p>Find the first character that appears exactly once in the string.</p>
+            <p><strong>Example:</strong> "aaaabaaaa" → 'b' (first character with count = 1)</p>
+        </div>
+
+        <div class="controls">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div class="step-counter">
+            Step <span id="stepCount">0</span> of <span id="totalSteps">0</span>
+        </div>
+
+        <div class="variables">
+            <h3>Variables</h3>
+            <div id="variablesContent"></div>
+        </div>
+
+        <div class="conditions">
+            <h3>Current Conditions</h3>
+            <div id="conditionsContent">No conditions being evaluated</div>
+        </div>
+
+        <div class="operations">
+            <h3>Current Operation</h3>
+            <div id="operationsContent">Ready to start</div>
+        </div>
+
+        <div class="result-section">
+            <h3>Result</h3>
+            <div id="result">Not found yet</div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('theory')">Theory & Explanation</div>
+            <div class="section-content" id="theory">
+                <p><strong>Algorithm:</strong> Two-pass approach</p>
+                <p>1. First pass: Count frequency of each character</p>
+                <p>2. Second pass: Find first character with frequency = 1</p>
+                <p><strong>Time Complexity:</strong> O(n)</p>
+                <p><strong>Space Complexity:</strong> O(1) - limited character set</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('tricks')">Optimization Tricks</div>
+            <div class="section-content" id="tricks">
+                <p>• Use hash map for O(1) character counting</p>
+                <p>• Early termination possible with frequency limit</p>
+                <p>• Consider ASCII vs Unicode character sets</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('edge')">Edge Cases</div>
+            <div class="section-content" id="edge">
+                <p>• Empty string: return null/undefined</p>
+                <p>• All characters repeated: return null/undefined</p>
+                <p>• Single character: return that character</p>
+                <p>• Case sensitivity considerations</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="string-container" id="stringContainer"></div>
+        
+        <div class="frequency-table">
+            <div class="frequency-header">Character Frequencies</div>
+            <div class="frequency-grid" id="frequencyGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        const inputString = "aaaabaaaa";
+        let currentStep = 0;
+        let steps = [];
+        let frequency = {};
+
+        function initializeAlgorithm() {
+            frequency = {};
+            steps = [];
+            
+            steps.push({
+                type: 'start',
+                description: 'Initialize algorithm',
+                variables: { i: 0, char: '', frequency: {}, result: null },
+                operation: 'Starting first pass - counting frequencies'
+            });
+
+            for (let i = 0; i < inputString.length; i++) {
+                const char = inputString[i];
+                const newFreq = { ...frequency };
+                newFreq[char] = (newFreq[char] || 0) + 1;
+                
+                steps.push({
+                    type: 'count',
+                    index: i,
+                    char: char,
+                    variables: { 
+                        i: i, 
+                        char: char, 
+                        frequency: { ...newFreq },
+                        result: null 
+                    },
+                    operation: `Count character '${char}': ${(frequency[char] || 0)} → ${newFreq[char]}`,
+                    condition: `Processing character at index ${i}`
+                });
+                
+                frequency = newFreq;
+            }
+
+            steps.push({
+                type: 'transition',
+                description: 'First pass complete, starting second pass',
+                variables: { i: 0, char: '', frequency: { ...frequency }, result: null },
+                operation: 'Starting second pass - finding first non-repeated character'
+            });
+
+            for (let i = 0; i < inputString.length; i++) {
+                const char = inputString[i];
+                const isNonRepeated = frequency[char] === 1;
+                
+                steps.push({
+                    type: 'check',
+                    index: i,
+                    char: char,
+                    variables: { 
+                        i: i, 
+                        char: char, 
+                        frequency: { ...frequency },
+                        result: isNonRepeated ? char : null 
+                    },
+                    operation: isNonRepeated ? 
+                        `Found first non-repeated character: '${char}'` : 
+                        `Character '${char}' appears ${frequency[char]} times - continue`,
+                    condition: `frequency['${char}'] === 1? ${frequency[char]} === 1? ${isNonRepeated}`,
+                    found: isNonRepeated
+                });
+
+                if (isNonRepeated) {
+                    break;
+                }
+            }
+
+            document.getElementById('totalSteps').textContent = steps.length - 1;
+            renderStep();
+        }
+
+        function renderStep() {
+            const step = steps[currentStep];
+            if (!step) return;
+
+            renderVariables(step.variables);
+            renderConditions(step);
+            renderOperations(step);
+            renderVisualization(step);
+            renderResult(step);
+            
+            document.getElementById('stepCount').textContent = currentStep;
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+
+        function renderVariables(variables) {
+            const content = document.getElementById('variablesContent');
+            content.innerHTML = '';
+            
+            for (const [key, value] of Object.entries(variables)) {
+                if (key === 'frequency') continue;
+                
+                const div = document.createElement('div');
+                div.className = 'variable';
+                
+                let displayValue = value;
+                if (value === null) displayValue = 'null';
+                if (typeof value === 'string') displayValue = `'${value}'`;
+                
+                div.textContent = `${key}: ${displayValue}`;
+                content.appendChild(div);
+            }
+        }
+
+        function renderConditions(step) {
+            const content = document.getElementById('conditionsContent');
+            
+            if (step.condition) {
+                content.innerHTML = '';
+                const div = document.createElement('div');
+                div.className = `condition ${step.found !== undefined ? (step.found ? 'true' : 'false') : ''}`;
+                
+                let conditionText = step.condition;
+                if (step.found !== undefined) {
+                    conditionText += ` → ${step.found ? '✓' : '✗'}`;
+                }
+                
+                div.textContent = conditionText;
+                content.appendChild(div);
+            } else {
+                content.textContent = 'No conditions being evaluated';
+            }
+        }
+
+        function renderOperations(step) {
+            const content = document.getElementById('operationsContent');
+            content.innerHTML = '';
+            
+            const div = document.createElement('div');
+            div.className = 'operation';
+            
+            if (step.type === 'count') {
+                div.className += ' increment';
+            } else if (step.found) {
+                div.className += ' add';
+            }
+            
+            div.textContent = step.operation;
+            content.appendChild(div);
+        }
+
+        function renderVisualization(step) {
+            const container = document.getElementById('stringContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < inputString.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'char-cell';
+                cell.textContent = inputString[i];
+                
+                if (step.type === 'count' || step.type === 'check') {
+                    if (i < step.index) {
+                        cell.className += ' visited';
+                    } else if (i === step.index) {
+                        cell.className += ' current';
+                        
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer current';
+                        pointer.textContent = step.type === 'count' ? 'Counting' : 'Checking';
+                        cell.appendChild(pointer);
+                    }
+                }
+                
+                container.appendChild(cell);
+            }
+            
+            renderFrequencyTable(step);
+        }
+
+        function renderFrequencyTable(step) {
+            const grid = document.getElementById('frequencyGrid');
+            grid.innerHTML = '';
+            
+            const freq = step.variables.frequency;
+            const chars = Object.keys(freq).sort();
+            
+            chars.forEach(char => {
+                const cell = document.createElement('div');
+                cell.className = 'frequency-cell';
+                if (step.char === char && (step.type === 'count' || step.type === 'check')) {
+                    cell.className += ' active';
+                }
+                cell.innerHTML = `'${char}'<br>${freq[char]}`;
+                grid.appendChild(cell);
+            });
+        }
+
+        function renderResult(step) {
+            const result = document.getElementById('result');
+            if (step.variables.result !== null) {
+                result.textContent = `'${step.variables.result}'`;
+            } else {
+                result.textContent = 'Not found yet';
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderStep();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            renderStep();
+        }
+
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId);
+            content.classList.toggle('visible');
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', nextStep);
+        document.getElementById('prevBtn').addEventListener('click', prevStep);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextStep();
+            if (e.key === 'ArrowLeft') prevStep();
+            if (e.key === 'r' || e.key === 'R') reset();
+        });
+
+        initializeAlgorithm();
+    </script>
+</body>
+</html>

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>String Rotation Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .problem-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 2px solid black;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .controls button {
+            background: black;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        .controls button:hover {
+            background: #333;
+        }
+        
+        .controls button:disabled {
+            background: #ccc;
+            color: #888;
+            cursor: not-allowed;
+        }
+        
+        .section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+        }
+        
+        .section-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            font-weight: bold;
+        }
+        
+        .section-content {
+            padding: 10px;
+            min-height: 40px;
+        }
+        
+        .variables {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .variable {
+            padding: 8px;
+            border: 1px solid black;
+            background: white;
+        }
+        
+        .variable.active {
+            background: #ffff99;
+        }
+        
+        .variable.increment {
+            background: #90EE90;
+        }
+        
+        .variable.decrement {
+            background: #FFB6C1;
+        }
+        
+        .condition {
+            padding: 8px;
+            border: 1px solid black;
+            margin: 5px 0;
+        }
+        
+        .condition.true {
+            background: #90EE90;
+        }
+        
+        .condition.false {
+            background: #FFB6C1;
+        }
+        
+        .operation {
+            padding: 8px;
+            border: 1px solid black;
+            margin: 5px 0;
+        }
+        
+        .operation.increment {
+            background: #90EE90;
+        }
+        
+        .operation.decrement {
+            background: #FFB6C1;
+        }
+        
+        .operation.compare {
+            background: #ADD8E6;
+        }
+        
+        .operation.found {
+            background: #98FB98;
+        }
+        
+        .visualization {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .string-container {
+            position: relative;
+            display: flex;
+            gap: 2px;
+        }
+        
+        .char-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            background: white;
+            position: relative;
+        }
+        
+        .char-cell.current {
+            background: #ffff99;
+            border-color: #ff1493;
+            border-width: 3px;
+        }
+        
+        .char-cell.matched {
+            background: #90EE90;
+        }
+        
+        .char-cell.searching {
+            background: #FFE4B5;
+        }
+        
+        .char-cell.found-start {
+            background: #87CEEB;
+            border-color: #4169E1;
+            border-width: 3px;
+        }
+        
+        .char-cell.verifying {
+            background: #DDA0DD;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -30px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 15px solid;
+            z-index: 10;
+        }
+        
+        .pointer.search {
+            border-top-color: #ff1493;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .pointer.target {
+            border-top-color: #1e90ff;
+            left: 50%;
+            transform: translateX(-50%);
+            top: -50px;
+        }
+        
+        .pointer.verify {
+            border-top-color: #9932cc;
+            left: 50%;
+            transform: translateX(-50%);
+            top: -70px;
+        }
+        
+        .pointer-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 11;
+        }
+        
+        .pointer-label.search {
+            color: #ff1493;
+        }
+        
+        .pointer-label.target {
+            color: #1e90ff;
+            top: -45px;
+        }
+        
+        .pointer-label.verify {
+            color: #9932cc;
+            top: -65px;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+            border: 1px solid black;
+        }
+        
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+            border-top: 1px solid black;
+        }
+        
+        .collapsible.open .collapsible-content {
+            display: block;
+        }
+        
+        .result-section {
+            padding: 10px;
+            border: 2px solid black;
+            background: #f0f0f0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .rotation-demo {
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid black;
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="problem-section">
+            <h3>String Rotation Check</h3>
+            <p><strong>Problem:</strong> Find minimum rotations to transform string1 to string2</p>
+            <p><strong>Strategy:</strong> Find first char of target, then verify sequence</p>
+            <p><strong>Example:</strong> "ABCD" → "CDAB" (find 'C' at pos 2, verify "CDAB")</p>
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Variables</div>
+            <div class="section-content">
+                <div class="variables" id="variables"></div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Current Condition</div>
+            <div class="section-content" id="conditions">
+                Ready to start
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Current Operation</div>
+            <div class="section-content" id="operations">
+                Click Next to begin
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Step Info</div>
+            <div class="section-content" id="stepInfo">
+                <div>Step: <span id="stepCounter">0</span></div>
+                <div>Phase: <span id="phase">Initialize</span></div>
+                <div>Status: <span id="status">Ready</span></div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Result</div>
+            <div class="section-content">
+                <div class="result-section" id="result">Not computed yet</div>
+                <div class="rotation-demo" id="rotationDemo" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <div class="collapsible">
+            <div class="collapsible-header">▶ Algorithm Theory</div>
+            <div class="collapsible-content">
+                <h4>Optimized String Rotation Algorithm</h4>
+                <p>Instead of trying all rotations, we:</p>
+                <ol>
+                    <li>Find the first character of target string in original string</li>
+                    <li>Calculate rotation steps needed to reach that position</li>
+                    <li>Verify if the rotated sequence matches the target</li>
+                </ol>
+                <p><strong>Time Complexity:</strong> O(n) average case, O(n²) worst case</p>
+                <p><strong>Space Complexity:</strong> O(1)</p>
+            </div>
+        </div>
+        
+        <div class="collapsible">
+            <div class="collapsible-header">▶ Edge Cases</div>
+            <div class="collapsible-content">
+                <ul>
+                    <li>Multiple occurrences of first character</li>
+                    <li>No valid rotation exists</li>
+                    <li>Identical strings (0 rotations)</li>
+                    <li>Single character repeated</li>
+                    <li>Different length strings</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="collapsible">
+            <div class="collapsible-header">▶ Implementation Notes</div>
+            <div class="collapsible-content">
+                <p>The algorithm first locates potential starting positions by finding the target's first character in the source. Then it verifies if rotating to that position produces the target sequence.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="right-panel">
+        <div class="visualization">
+            <div>
+                <div style="text-align: center; margin-bottom: 10px; font-weight: bold;">Original: "ABCD"</div>
+                <div class="string-container" id="string1"></div>
+            </div>
+            <div>
+                <div style="text-align: center; margin-bottom: 10px; font-weight: bold;">Target: "CDAB"</div>
+                <div class="string-container" id="string2"></div>
+            </div>
+            <div id="rotationSection" style="display: none;">
+                <div style="text-align: center; margin-bottom: 10px; font-weight: bold;" id="rotationLabel"></div>
+                <div class="string-container" id="rotated"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class StringRotationVisualizer {
+            constructor() {
+                this.string1 = "ABCD";
+                this.string2 = "CDAB";
+                this.currentStep = 0;
+                this.searchIndex = 0;
+                this.targetChar = this.string2[0];
+                this.foundPosition = -1;
+                this.verifyIndex = 0;
+                this.rotationSteps = 0;
+                this.isVerifying = false;
+                
+                this.steps = this.generateSteps();
+                this.init();
+            }
+            
+            generateSteps() {
+                const steps = [];
+                const n = this.string1.length;
+                const targetChar = this.string2[0];
+                
+                steps.push({
+                    type: 'init',
+                    searchIndex: 0,
+                    description: 'Initialize search for first character of target',
+                    operation: `Looking for '${targetChar}' in original string`,
+                    condition: `target[0] = '${targetChar}'`,
+                    phase: 'Initialize'
+                });
+                
+                // Phase 1: Search for first character
+                let foundPos = -1;
+                for (let i = 0; i < n; i++) {
+                    steps.push({
+                        type: 'search',
+                        searchIndex: i,
+                        description: `Checking position ${i}`,
+                        operation: `Compare original[${i}] = '${this.string1[i]}' with target[0] = '${targetChar}'`,
+                        condition: `'${this.string1[i]}' ${this.string1[i] === targetChar ? '==' : '!='} '${targetChar}' → ${this.string1[i] === targetChar}`,
+                        phase: 'Search',
+                        match: this.string1[i] === targetChar
+                    });
+                    
+                    if (this.string1[i] === targetChar) {
+                        foundPos = i;
+                        steps.push({
+                            type: 'found',
+                            searchIndex: i,
+                            foundPosition: i,
+                            rotationSteps: i,
+                            description: `Found '${targetChar}' at position ${i}`,
+                            operation: `Rotation steps needed: ${i}`,
+                            condition: `Found match! Need ${i} left rotations`,
+                            phase: 'Found'
+                        });
+                        break;
+                    }
+                }
+                
+                if (foundPos !== -1) {
+                    steps.push({
+                        type: 'startVerify',
+                        foundPosition: foundPos,
+                        rotationSteps: foundPos,
+                        description: 'Start verifying rotated sequence',
+                        operation: 'Create rotated string and verify each character',
+                        condition: 'Begin sequence verification',
+                        phase: 'Verify Setup'
+                    });
+                    
+                    // Phase 2: Verify the rotated sequence
+                    let allMatch = true;
+                    for (let i = 0; i < n; i++) {
+                        const rotatedIndex = (i + foundPos) % n;
+                        const rotatedChar = this.string1[rotatedIndex];
+                        const targetChar = this.string2[i];
+                        const match = rotatedChar === targetChar;
+                        
+                        steps.push({
+                            type: 'verify',
+                            foundPosition: foundPos,
+                            rotationSteps: foundPos,
+                            verifyIndex: i,
+                            description: `Verify position ${i}`,
+                            operation: `rotated[${i}] = '${rotatedChar}' vs target[${i}] = '${targetChar}' → ${match ? 'MATCH' : 'MISMATCH'}`,
+                            condition: `'${rotatedChar}' ${match ? '==' : '!='} '${targetChar}'`,
+                            phase: 'Verify',
+                            match: match,
+                            rotatedChar: rotatedChar,
+                            targetChar: targetChar
+                        });
+                        
+                        if (!match) {
+                            allMatch = false;
+                            steps.push({
+                                type: 'verifyFail',
+                                foundPosition: foundPos,
+                                rotationSteps: foundPos,
+                                verifyIndex: i,
+                                description: 'Verification failed',
+                                operation: 'Sequence does not match, continue search',
+                                condition: 'This rotation does not work',
+                                phase: 'Verify Failed'
+                            });
+                            break;
+                        }
+                    }
+                    
+                    if (allMatch) {
+                        steps.push({
+                            type: 'success',
+                            foundPosition: foundPos,
+                            rotationSteps: foundPos,
+                            verifyIndex: n - 1,
+                            description: `Success! ${foundPos} rotations needed`,
+                            operation: `Return ${foundPos}`,
+                            condition: 'All characters verified successfully',
+                            phase: 'Complete'
+                        });
+                    }
+                }
+                
+                return steps;
+            }
+            
+            init() {
+                this.updateDisplay();
+                this.setupEventListeners();
+                this.setupCollapsibles();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('nextBtn').addEventListener('click', () => this.nextStep());
+                document.getElementById('prevBtn').addEventListener('click', () => this.prevStep());
+                document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+            }
+            
+            setupCollapsibles() {
+                const headers = document.querySelectorAll('.collapsible-header');
+                headers.forEach(header => {
+                    header.addEventListener('click', () => {
+                        const collapsible = header.parentElement;
+                        collapsible.classList.toggle('open');
+                        header.textContent = collapsible.classList.contains('open') ? 
+                            header.textContent.replace('▶', '▼') : 
+                            header.textContent.replace('▼', '▶');
+                    });
+                });
+            }
+            
+            nextStep() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.currentStep++;
+                    this.updateDisplay();
+                }
+            }
+            
+            prevStep() {
+                if (this.currentStep > 0) {
+                    this.currentStep--;
+                    this.updateDisplay();
+                }
+            }
+            
+            reset() {
+                this.currentStep = 0;
+                this.updateDisplay();
+            }
+            
+            updateDisplay() {
+                const step = this.steps[this.currentStep];
+                
+                this.updateButtons();
+                this.updateVariables(step);
+                this.updateConditions(step);
+                this.updateOperations(step);
+                this.updateStepInfo(step);
+                this.updateResult(step);
+                this.updateVisualization(step);
+            }
+            
+            updateButtons() {
+                document.getElementById('prevBtn').disabled = this.currentStep === 0;
+                document.getElementById('nextBtn').disabled = this.currentStep === this.steps.length - 1;
+            }
+            
+            updateVariables(step) {
+                const container = document.getElementById('variables');
+                container.innerHTML = `
+                    <div class="variable ${step.type === 'search' ? 'active' : ''}">
+                        <strong>searchIndex:</strong> ${step.searchIndex || 0}
+                    </div>
+                    <div class="variable ${step.type === 'found' ? 'active' : ''}">
+                        <strong>foundPos:</strong> ${step.foundPosition !== undefined ? step.foundPosition : -1}
+                    </div>
+                    <div class="variable ${step.type === 'found' ? 'increment' : ''}">
+                        <strong>rotationSteps:</strong> ${step.rotationSteps || 0}
+                    </div>
+                    <div class="variable ${step.type === 'verify' ? 'active' : ''}">
+                        <strong>verifyIndex:</strong> ${step.verifyIndex !== undefined ? step.verifyIndex : 0}
+                    </div>
+                `;
+            }
+            
+            updateConditions(step) {
+                const container = document.getElementById('conditions');
+                const isTrue = step.condition.includes('true') || step.condition.includes('MATCH') || step.condition.includes('Found');
+                const isFalse = step.condition.includes('false') || step.condition.includes('MISMATCH') || step.condition.includes('!=');
+                
+                container.innerHTML = `
+                    <div class="condition ${isTrue ? 'true' : isFalse ? 'false' : ''}">
+                        ${step.condition}
+                    </div>
+                `;
+            }
+            
+            updateOperations(step) {
+                const container = document.getElementById('operations');
+                let className = '';
+                
+                if (step.operation.includes('MATCH') || step.operation.includes('Return')) {
+                    className = 'found';
+                } else if (step.operation.includes('Compare') || step.operation.includes('vs')) {
+                    className = 'compare';
+                } else if (step.operation.includes('MISMATCH')) {
+                    className = 'decrement';
+                }
+                
+                container.innerHTML = `
+                    <div class="operation ${className}">
+                        ${step.operation}
+                    </div>
+                `;
+            }
+            
+            updateStepInfo(step) {
+                document.getElementById('stepCounter').textContent = this.currentStep + 1;
+                document.getElementById('phase').textContent = step.phase;
+                document.getElementById('status').textContent = step.description;
+            }
+            
+            updateResult(step) {
+                const container = document.getElementById('result');
+                const demoContainer = document.getElementById('rotationDemo');
+                
+                if (step.type === 'success') {
+                    container.textContent = `Found! ${step.rotationSteps} rotations needed`;
+                    container.style.background = '#90EE90';
+                    
+                    // Show rotation demo
+                    demoContainer.style.display = 'block';
+                    demoContainer.innerHTML = `
+                        <strong>Rotation Demo:</strong><br>
+                        Original: ${this.string1}<br>
+                        Rotate left ${step.rotationSteps} steps:<br>
+                        ${this.getRotatedString(step.rotationSteps)} = Target!
+                    `;
+                } else if (step.phase === 'Search') {
+                    container.textContent = `Searching for '${this.targetChar}'... (checked ${(step.searchIndex || 0) + 1}/${this.string1.length})`;
+                    container.style.background = '#f0f0f0';
+                    demoContainer.style.display = 'none';
+                } else if (step.phase === 'Verify') {
+                    container.textContent = `Verifying rotation... (${(step.verifyIndex || 0) + 1}/${this.string1.length} chars checked)`;
+                    container.style.background = '#f0f0f0';
+                    demoContainer.style.display = 'none';
+                } else {
+                    container.textContent = `Phase: ${step.phase}`;
+                    container.style.background = '#f0f0f0';
+                    demoContainer.style.display = 'none';
+                }
+            }
+            
+            getRotatedString(steps) {
+                let result = this.string1;
+                for (let i = 0; i < steps; i++) {
+                    result = result.substring(1) + result[0];
+                }
+                return result;
+            }
+            
+            updateVisualization(step) {
+                this.renderString1(step);
+                this.renderString2(step);
+                this.renderRotatedString(step);
+            }
+            
+            renderString1(step) {
+                const container = document.getElementById('string1');
+                container.innerHTML = '';
+                
+                for (let i = 0; i < this.string1.length; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'char-cell';
+                    cell.textContent = this.string1[i];
+                    
+                    if (step.type === 'search' && i === step.searchIndex) {
+                        cell.classList.add('searching');
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer search';
+                        cell.appendChild(pointer);
+                        
+                        const label = document.createElement('div');
+                        label.className = 'pointer-label search';
+                        label.textContent = 'searching';
+                        cell.appendChild(label);
+                    } else if ((step.type === 'found' || step.foundPosition !== undefined) && i === step.foundPosition) {
+                        cell.classList.add('found-start');
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer search';
+                        cell.appendChild(pointer);
+                        
+                        const label = document.createElement('div');
+                        label.className = 'pointer-label search';
+                        label.textContent = 'found';
+                        cell.appendChild(label);
+                    }
+                    
+                    container.appendChild(cell);
+                }
+            }
+            
+            renderString2(step) {
+                const container = document.getElementById('string2');
+                container.innerHTML = '';
+                
+                for (let i = 0; i < this.string2.length; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'char-cell';
+                    cell.textContent = this.string2[i];
+                    
+                    if ((step.type === 'search' || step.type === 'init') && i === 0) {
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer target';
+                        cell.appendChild(pointer);
+                        
+                        const label = document.createElement('div');
+                        label.className = 'pointer-label target';
+                        label.textContent = 'target';
+                        cell.appendChild(label);
+                    } else if (step.type === 'verify' && i === step.verifyIndex) {
+                        cell.classList.add('verifying');
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer verify';
+                        cell.appendChild(pointer);
+                        
+                        const label = document.createElement('div');
+                        label.className = 'pointer-label verify';
+                        label.textContent = 'verify';
+                        cell.appendChild(label);
+                    } else if (step.type === 'verify' && i < step.verifyIndex && step.match !== false) {
+                        cell.classList.add('matched');
+                    } else if (step.type === 'success' && i <= step.verifyIndex) {
+                        cell.classList.add('matched');
+                    }
+                    
+                    container.appendChild(cell);
+                }
+            }
+            
+            renderRotatedString(step) {
+                const rotationSection = document.getElementById('rotationSection');
+                const container = document.getElementById('rotated');
+                const label = document.getElementById('rotationLabel');
+                
+                if (step.type === 'startVerify' || step.type === 'verify' || step.type === 'success' || step.type === 'verifyFail') {
+                    rotationSection.style.display = 'block';
+                    label.textContent = `Rotated (${step.rotationSteps} steps): "${this.getRotatedString(step.rotationSteps)}"`;
+                    
+                    container.innerHTML = '';
+                    const rotatedStr = this.getRotatedString(step.rotationSteps);
+                    
+                    for (let i = 0; i < rotatedStr.length; i++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'char-cell';
+                        cell.textContent = rotatedStr[i];
+                        
+                        if (step.type === 'verify' && i === step.verifyIndex) {
+                            cell.classList.add('current');
+                            const pointer = document.createElement('div');
+                            pointer.className = 'pointer search';
+                            cell.appendChild(pointer);
+                            
+                            const label = document.createElement('div');
+                            label.className = 'pointer-label search';
+                            label.textContent = 'checking';
+                            cell.appendChild(label);
+                        } else if ((step.type === 'verify' || step.type === 'success') && i < step.verifyIndex) {
+                            cell.classList.add('matched');
+                        } else if (step.type === 'success' && i <= step.verifyIndex) {
+                            cell.classList.add('matched');
+                        }
+                        
+                        container.appendChild(cell);
+                    }
+                } else {
+                    rotationSection.style.display = 'none';
+                }
+            }
+        }
+        
+        new StringRotationVisualizer();
+    </script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rearrange Positives and Negatives</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .question-section {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .question-section h2 {
+            margin-bottom: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .variables-section {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .variable {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 3px;
+        }
+        
+        .variable.highlight {
+            background: yellow;
+        }
+        
+        .variable.increment {
+            background: lightgreen;
+        }
+        
+        .variable.decrement {
+            background: lightcoral;
+        }
+        
+        .conditions-section {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .condition {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        
+        .condition.true {
+            background: lightgreen;
+        }
+        
+        .condition.false {
+            background: lightcoral;
+        }
+        
+        .operations-section {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .operation {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        
+        .operation.increment {
+            background: lightgreen;
+        }
+        
+        .operation.decrement {
+            background: lightcoral;
+        }
+        
+        .operation.add {
+            background: lightblue;
+        }
+        
+        .result-section {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .array-display {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .array-cell {
+            border: 2px solid black;
+            padding: 8px;
+            min-width: 40px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .array-cell.current {
+            background: #ffeb3b;
+            border-color: #ff5722;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+        
+        .pointer.pos {
+            background: #e91e63;
+            color: white;
+        }
+        
+        .pointer.neg {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .pointer.res {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+        }
+        
+        .collapsible-header {
+            border: 2px solid black;
+            padding: 10px;
+            cursor: pointer;
+            background: white;
+        }
+        
+        .collapsible-content {
+            display: none;
+            border: 2px solid black;
+            border-top: none;
+            padding: 15px;
+        }
+        
+        .step-counter {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="question-section">
+            <h2>Problem: Rearrange Positives and Negatives Alternately</h2>
+            <p>Given an array with positive and negative numbers, rearrange them alternately starting with positive numbers.</p>
+            <p><strong>Example:</strong> [-3, 1, 2, -4, 5, -6] → [1, -3, 2, -4, 5, -6]</p>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="nextBtn">Next</button>
+            <button class="btn" id="prevBtn">Previous</button>
+            <button class="btn" id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="step-counter">
+            Step: <span id="stepCount">0</span>
+        </div>
+        
+        <div class="variables-section">
+            <h3>Variables</h3>
+            <div class="variable" id="posIndex">
+                <span>posIndex:</span>
+                <span id="posIndexValue">0</span>
+            </div>
+            <div class="variable" id="negIndex">
+                <span>negIndex:</span>
+                <span id="negIndexValue">0</span>
+            </div>
+            <div class="variable" id="resultIndex">
+                <span>resultIndex:</span>
+                <span id="resultIndexValue">0</span>
+            </div>
+            <div class="variable" id="isPositiveTurn">
+                <span>isPositiveTurn:</span>
+                <span id="isPositiveTurnValue">true</span>
+            </div>
+        </div>
+        
+        <div class="conditions-section">
+            <h3>Current Condition</h3>
+            <div id="currentCondition"></div>
+        </div>
+        
+        <div class="operations-section">
+            <h3>Current Operation</h3>
+            <div id="currentOperation"></div>
+        </div>
+        
+        <div class="result-section">
+            <h3>Result Array</h3>
+            <div class="array-display" id="resultDisplay"></div>
+        </div>
+        
+        <div class="collapsible">
+            <div class="collapsible-header" onclick="toggleCollapsible('theory')">
+                ▶ Algorithm Theory & Explanation
+            </div>
+            <div class="collapsible-content" id="theory">
+                <h4>Algorithm Approach:</h4>
+                <p>1. Separate positive and negative numbers into different arrays</p>
+                <p>2. Use two pointers to track current position in each array</p>
+                <p>3. Alternate between placing positive and negative numbers</p>
+                <p>4. Handle remaining elements when one array is exhausted</p>
+                
+                <h4>Time Complexity:</h4>
+                <p>O(n) - Single pass through the array</p>
+                
+                <h4>Space Complexity:</h4>
+                <p>O(n) - Additional arrays for positives and negatives</p>
+                
+                <h4>Edge Cases:</h4>
+                <p>- More positives than negatives or vice versa</p>
+                <p>- All positive or all negative numbers</p>
+                <p>- Empty array</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="right-panel">
+        <h3>Arrays Visualization</h3>
+        <div style="margin: 20px 0;">
+            <h4>Positive Numbers:</h4>
+            <div class="array-display" id="positiveArray"></div>
+        </div>
+        <div style="margin: 20px 0;">
+            <h4>Negative Numbers:</h4>
+            <div class="array-display" id="negativeArray"></div>
+        </div>
+        <div style="margin: 20px 0;">
+            <h4>Original Array:</h4>
+            <div class="array-display" id="originalArray"></div>
+        </div>
+    </div>
+
+    <script>
+        const originalData = [-3, 1, 2, -4, 5, -6];
+        let positiveNums = [];
+        let negativeNums = [];
+        let result = [];
+        let currentStep = 0;
+        let steps = [];
+        
+        function initializeData() {
+            positiveNums = originalData.filter(num => num > 0);
+            negativeNums = originalData.filter(num => num < 0);
+            result = new Array(originalData.length);
+            generateSteps();
+            displayArrays();
+            executeStep();
+        }
+        
+        function generateSteps() {
+            steps = [];
+            let posIndex = 0;
+            let negIndex = 0;
+            let resultIndex = 0;
+            let isPositiveTurn = true;
+            
+            steps.push({
+                type: 'init',
+                posIndex,
+                negIndex,
+                resultIndex,
+                isPositiveTurn,
+                result: [...result],
+                condition: 'Initialize variables',
+                operation: 'Start alternating arrangement'
+            });
+            
+            while (posIndex < positiveNums.length || negIndex < negativeNums.length) {
+                if (isPositiveTurn && posIndex < positiveNums.length) {
+                    result[resultIndex] = positiveNums[posIndex];
+                    steps.push({
+                        type: 'add_positive',
+                        posIndex,
+                        negIndex,
+                        resultIndex,
+                        isPositiveTurn,
+                        result: [...result],
+                        condition: `isPositiveTurn (${isPositiveTurn}) && posIndex < positiveNums.length (${posIndex} < ${positiveNums.length}) ✓`,
+                        operation: `Add positive: result[${resultIndex}] = positiveNums[${posIndex}] = ${positiveNums[posIndex]}`
+                    });
+                    posIndex++;
+                    resultIndex++;
+                    isPositiveTurn = false;
+                } else if (!isPositiveTurn && negIndex < negativeNums.length) {
+                    result[resultIndex] = negativeNums[negIndex];
+                    steps.push({
+                        type: 'add_negative',
+                        posIndex,
+                        negIndex,
+                        resultIndex,
+                        isPositiveTurn,
+                        result: [...result],
+                        condition: `!isPositiveTurn (${!isPositiveTurn}) && negIndex < negativeNums.length (${negIndex} < ${negativeNums.length}) ✓`,
+                        operation: `Add negative: result[${resultIndex}] = negativeNums[${negIndex}] = ${negativeNums[negIndex]}`
+                    });
+                    negIndex++;
+                    resultIndex++;
+                    isPositiveTurn = true;
+                } else if (posIndex < positiveNums.length) {
+                    result[resultIndex] = positiveNums[posIndex];
+                    steps.push({
+                        type: 'add_remaining_positive',
+                        posIndex,
+                        negIndex,
+                        resultIndex,
+                        isPositiveTurn,
+                        result: [...result],
+                        condition: `No more negatives, add remaining positive`,
+                        operation: `Add remaining: result[${resultIndex}] = positiveNums[${posIndex}] = ${positiveNums[posIndex]}`
+                    });
+                    posIndex++;
+                    resultIndex++;
+                } else {
+                    result[resultIndex] = negativeNums[negIndex];
+                    steps.push({
+                        type: 'add_remaining_negative',
+                        posIndex,
+                        negIndex,
+                        resultIndex,
+                        isPositiveTurn,
+                        result: [...result],
+                        condition: `No more positives, add remaining negative`,
+                        operation: `Add remaining: result[${resultIndex}] = negativeNums[${negIndex}] = ${negativeNums[negIndex]}`
+                    });
+                    negIndex++;
+                    resultIndex++;
+                }
+            }
+            
+            steps.push({
+                type: 'complete',
+                posIndex,
+                negIndex,
+                resultIndex,
+                isPositiveTurn,
+                result: [...result],
+                condition: 'Algorithm complete',
+                operation: 'All elements arranged alternately'
+            });
+        }
+        
+        function displayArrays() {
+            document.getElementById('originalArray').innerHTML = originalData.map(num => 
+                `<div class="array-cell">${num}</div>`
+            ).join('');
+            
+            document.getElementById('positiveArray').innerHTML = positiveNums.map((num, idx) => 
+                `<div class="array-cell" id="pos-${idx}">
+                    ${num}
+                    <div class="pointer pos" id="pos-pointer-${idx}" style="display: none;">P</div>
+                </div>`
+            ).join('');
+            
+            document.getElementById('negativeArray').innerHTML = negativeNums.map((num, idx) => 
+                `<div class="array-cell" id="neg-${idx}">
+                    ${num}
+                    <div class="pointer neg" id="neg-pointer-${idx}" style="display: none;">N</div>
+                </div>`
+            ).join('');
+        }
+        
+        function executeStep() {
+            if (currentStep >= steps.length) return;
+            
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCount').textContent = currentStep;
+            document.getElementById('posIndexValue').textContent = step.posIndex;
+            document.getElementById('negIndexValue').textContent = step.negIndex;
+            document.getElementById('resultIndexValue').textContent = step.resultIndex;
+            document.getElementById('isPositiveTurnValue').textContent = step.isPositiveTurn;
+            
+            document.getElementById('currentCondition').innerHTML = `<div class="condition true">${step.condition}</div>`;
+            
+            let operationClass = 'add';
+            if (step.type.includes('positive')) operationClass = 'increment';
+            if (step.type.includes('negative')) operationClass = 'decrement';
+            
+            document.getElementById('currentOperation').innerHTML = `<div class="operation ${operationClass}">${step.operation}</div>`;
+            
+            document.getElementById('resultDisplay').innerHTML = step.result.map((num, idx) => 
+                `<div class="array-cell ${idx === step.resultIndex - 1 ? 'current' : ''}">
+                    ${num !== undefined ? num : ''}
+                    ${idx === step.resultIndex ? '<div class="pointer res">R</div>' : ''}
+                </div>`
+            ).join('');
+            
+            document.querySelectorAll('.pointer').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.array-cell').forEach(c => c.classList.remove('current'));
+            
+            if (step.posIndex < positiveNums.length) {
+                const posPointer = document.getElementById(`pos-pointer-${step.posIndex}`);
+                if (posPointer) posPointer.style.display = 'block';
+                document.getElementById(`pos-${step.posIndex}`).classList.add('current');
+            }
+            
+            if (step.negIndex < negativeNums.length) {
+                const negPointer = document.getElementById(`neg-pointer-${step.negIndex}`);
+                if (negPointer) negPointer.style.display = 'block';
+                document.getElementById(`neg-${step.negIndex}`).classList.add('current');
+            }
+            
+            document.querySelectorAll('.variable').forEach(v => {
+                v.classList.remove('highlight', 'increment', 'decrement');
+            });
+            
+            if (step.type.includes('positive') || step.type.includes('remaining_positive')) {
+                document.getElementById('posIndex').classList.add('increment');
+                document.getElementById('resultIndex').classList.add('increment');
+            }
+            if (step.type.includes('negative') || step.type.includes('remaining_negative')) {
+                document.getElementById('negIndex').classList.add('increment');
+                document.getElementById('resultIndex').classList.add('increment');
+            }
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep >= steps.length - 1;
+        }
+        
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                executeStep();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                executeStep();
+            }
+        }
+        
+        function reset() {
+            currentStep = 0;
+            result = new Array(originalData.length);
+            generateSteps();
+            executeStep();
+        }
+        
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const header = content.previousElementSibling;
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                header.innerHTML = header.innerHTML.replace('▶', '▼');
+            } else {
+                content.style.display = 'none';
+                header.innerHTML = header.innerHTML.replace('▼', '▶');
+            }
+        }
+        
+        document.getElementById('nextBtn').addEventListener('click', nextStep);
+        document.getElementById('prevBtn').addEventListener('click', prevStep);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+        
+        initializeData();
+    </script>
+</body>
+</html>

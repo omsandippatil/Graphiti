@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kth Largest Element Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 50%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .question h2 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 2px solid black;
+            background: white;
+            color: black;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: black;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .section {
+            border: 2px solid black;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        .section h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .variables {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .var-item {
+            padding: 4px 8px;
+            border: 1px solid black;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .var-active { background: yellow; }
+        .var-increment { background: #90EE90; }
+        .var-decrement { background: #FFB6C1; }
+
+        .condition {
+            padding: 8px;
+            border: 1px solid black;
+            margin: 4px 0;
+            font-size: 12px;
+        }
+
+        .condition-true { background: #90EE90; }
+        .condition-false { background: #FFB6C1; }
+
+        .operation {
+            padding: 8px;
+            border: 1px solid black;
+            margin: 4px 0;
+            font-size: 12px;
+        }
+
+        .op-increment { background: #90EE90; }
+        .op-decrement { background: #FFB6C1; }
+        .op-pivot { background: #ADD8E6; }
+        .op-swap { background: #DDA0DD; }
+
+        .array-display {
+            display: flex;
+            gap: 4px;
+            margin: 8px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .array-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .cell-current { background: #FF69B4; color: white; }
+        .cell-pivot { background: #FFA500; color: white; }
+        .cell-left { background: #32CD32; color: white; }
+        .cell-right { background: #4169E1; color: white; }
+        .cell-swapped { background: #DDA0DD; color: white; }
+
+        .pointer {
+            position: absolute;
+            top: -25px;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 2px;
+            color: white;
+        }
+
+        .pointer-current { background: #FF69B4; }
+        .pointer-pivot { background: #FFA500; }
+        .pointer-left { background: #32CD32; }
+        .pointer-right { background: #4169E1; }
+
+        .collapsible {
+            margin-top: 20px;
+        }
+
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            border: 2px solid black;
+            border-top: none;
+        }
+
+        .step-counter {
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="question">
+                <h2>Kth Largest Element</h2>
+                <p>Find the kth largest element in an unsorted array.</p>
+                <p><strong>Example:</strong> [3,2,1,5,6,4], k=2 → Output: 5</p>
+            </div>
+
+            <div class="controls">
+                <button class="btn" id="prevBtn">Previous</button>
+                <button class="btn" id="nextBtn">Next</button>
+                <button class="btn" id="resetBtn">Reset</button>
+            </div>
+
+            <div class="step-counter">
+                Step: <span id="stepCounter">0</span>
+            </div>
+
+            <div class="section">
+                <h3>Variables</h3>
+                <div class="variables" id="variables">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Current Condition</h3>
+                <div id="conditions">
+                    <div class="condition">No condition being evaluated</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Current Operation</h3>
+                <div id="operations">
+                    <div class="operation">Starting quickselect algorithm</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Result</h3>
+                <div id="result">Finding kth largest element...</div>
+            </div>
+
+            <div class="collapsible">
+                <button class="collapsible-header" onclick="toggleCollapsible(this)">
+                    Theory & Explanation ▼
+                </button>
+                <div class="collapsible-content">
+                    <h3>Algorithm: Quickselect</h3>
+                    <p>Quickselect is a selection algorithm to find the kth smallest/largest element. It uses the partition logic of quicksort but only recurses into one side.</p>
+                    
+                    <h3>Time Complexity</h3>
+                    <p>Average: O(n), Worst: O(n²)</p>
+                    
+                    <h3>Key Steps</h3>
+                    <p>1. Choose a pivot element</p>
+                    <p>2. Partition array around pivot</p>
+                    <p>3. Compare pivot position with target</p>
+                    <p>4. Recurse into appropriate side</p>
+                    
+                    <h3>Edge Cases</h3>
+                    <p>• Empty array</p>
+                    <p>• k out of bounds</p>
+                    <p>• Single element</p>
+                    <p>• All elements equal</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h3>Array Visualization</h3>
+            <div class="array-display" id="arrayDisplay">
+            </div>
+            <div style="margin-top: 20px; font-size: 12px;">
+                <div>🔴 Current | 🟠 Pivot | 🟢 Left | 🔵 Right</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const arr = [3, 2, 1, 5, 6, 4];
+        const k = 2;
+        const target = arr.length - k;
+        
+        let steps = [];
+        let currentStep = 0;
+
+        function generateSteps() {
+            steps = [];
+            const workArr = [...arr];
+            quickselectSteps(workArr, 0, workArr.length - 1, target, 0);
+        }
+
+        function quickselectSteps(nums, left, right, targetIdx, depth) {
+            if (left >= right) {
+                steps.push({
+                    array: [...nums],
+                    variables: {left, right, targetIdx, pivotIdx: left},
+                    condition: `left >= right (${left} >= ${right})`,
+                    conditionResult: true,
+                    operation: `Found element at position ${left}: ${nums[left]}`,
+                    operationType: 'pivot',
+                    result: `Kth largest element: ${nums[targetIdx]}`,
+                    pointers: {current: left, pivot: left}
+                });
+                return nums[left];
+            }
+
+            steps.push({
+                array: [...nums],
+                variables: {left, right, targetIdx},
+                condition: `left < right (${left} < ${right})`,
+                conditionResult: true,
+                operation: 'Starting partition phase',
+                operationType: 'pivot',
+                result: 'Partitioning...',
+                pointers: {left, right}
+            });
+
+            const pivotIdx = partition(nums, left, right);
+            
+            steps.push({
+                array: [...nums],
+                variables: {left, right, targetIdx, pivotIdx},
+                condition: `pivotIdx == targetIdx (${pivotIdx} == ${targetIdx})`,
+                conditionResult: pivotIdx === targetIdx,
+                operation: pivotIdx === targetIdx ? 
+                    `Found target at pivot position ${pivotIdx}` :
+                    `Pivot at ${pivotIdx}, target at ${targetIdx}`,
+                operationType: 'pivot',
+                result: pivotIdx === targetIdx ? 
+                    `Kth largest element: ${nums[pivotIdx]}` : 
+                    'Continue searching...',
+                pointers: {pivot: pivotIdx, current: pivotIdx}
+            });
+
+            if (pivotIdx === targetIdx) {
+                return nums[pivotIdx];
+            } else if (pivotIdx > targetIdx) {
+                return quickselectSteps(nums, left, pivotIdx - 1, targetIdx, depth + 1);
+            } else {
+                return quickselectSteps(nums, pivotIdx + 1, right, targetIdx, depth + 1);
+            }
+        }
+
+        function partition(nums, left, right) {
+            const pivot = nums[right];
+            let i = left;
+            
+            steps.push({
+                array: [...nums],
+                variables: {left, right, i, pivot},
+                condition: 'Initializing partition',
+                conditionResult: true,
+                operation: `Pivot selected: ${pivot} at position ${right}`,
+                operationType: 'pivot',
+                result: 'Partitioning...',
+                pointers: {pivot: right, left: i}
+            });
+
+            for (let j = left; j < right; j++) {
+                steps.push({
+                    array: [...nums],
+                    variables: {left, right, i, j, pivot},
+                    condition: `nums[${j}] <= pivot (${nums[j]} <= ${pivot})`,
+                    conditionResult: nums[j] <= pivot,
+                    operation: nums[j] <= pivot ? 
+                        `${nums[j]} <= ${pivot}, increment i and swap` : 
+                        `${nums[j]} > ${pivot}, continue`,
+                    operationType: nums[j] <= pivot ? 'swap' : 'increment',
+                    result: 'Partitioning...',
+                    pointers: {pivot: right, left: i, current: j}
+                });
+
+                if (nums[j] <= pivot) {
+                    [nums[i], nums[j]] = [nums[j], nums[i]];
+                    i++;
+                    
+                    steps.push({
+                        array: [...nums],
+                        variables: {left, right, i, j, pivot},
+                        condition: 'After swap',
+                        conditionResult: true,
+                        operation: `Swapped positions ${i-1} and ${j}, i = ${i}`,
+                        operationType: 'swap',
+                        result: 'Partitioning...',
+                        pointers: {pivot: right, left: i, current: j}
+                    });
+                }
+            }
+
+            [nums[i], nums[right]] = [nums[right], nums[i]];
+            
+            steps.push({
+                array: [...nums],
+                variables: {left, right, i, pivot},
+                condition: 'Partition complete',
+                conditionResult: true,
+                operation: `Final swap: pivot ${pivot} to position ${i}`,
+                operationType: 'swap',
+                result: `Partition complete, pivot at ${i}`,
+                pointers: {pivot: i, current: i}
+            });
+
+            return i;
+        }
+
+        function updateDisplay() {
+            const step = steps[currentStep];
+            if (!step) return;
+
+            document.getElementById('stepCounter').textContent = currentStep + 1;
+
+            const varsDiv = document.getElementById('variables');
+            varsDiv.innerHTML = '';
+            
+            Object.entries(step.variables).forEach(([key, value]) => {
+                const div = document.createElement('div');
+                div.className = 'var-item';
+                div.innerHTML = `<span>${key}:</span><span>${value}</span>`;
+                varsDiv.appendChild(div);
+            });
+
+            const condDiv = document.getElementById('conditions');
+            condDiv.innerHTML = `
+                <div class="condition ${step.conditionResult ? 'condition-true' : 'condition-false'}">
+                    ${step.condition} ${step.conditionResult ? '✓' : '✗'}
+                </div>
+            `;
+
+            const opDiv = document.getElementById('operations');
+            opDiv.innerHTML = `
+                <div class="operation op-${step.operationType}">
+                    ${step.operation}
+                </div>
+            `;
+
+            document.getElementById('result').textContent = step.result;
+
+            const arrayDiv = document.getElementById('arrayDisplay');
+            arrayDiv.innerHTML = '';
+            
+            step.array.forEach((value, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = value;
+                
+                if (step.pointers) {
+                    if (step.pointers.current === index) cell.classList.add('cell-current');
+                    else if (step.pointers.pivot === index) cell.classList.add('cell-pivot');
+                    else if (step.pointers.left === index) cell.classList.add('cell-left');
+                    else if (step.pointers.right === index) cell.classList.add('cell-right');
+                }
+                
+                if (step.pointers) {
+                    Object.entries(step.pointers).forEach(([type, pos]) => {
+                        if (pos === index) {
+                            const pointer = document.createElement('div');
+                            pointer.className = `pointer pointer-${type}`;
+                            pointer.textContent = type.toUpperCase();
+                            cell.appendChild(pointer);
+                        }
+                    });
+                }
+                
+                arrayDiv.appendChild(cell);
+            });
+
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+
+        function toggleCollapsible(header) {
+            const content = header.nextElementSibling;
+            const isOpen = content.style.display === 'block';
+            content.style.display = isOpen ? 'none' : 'block';
+            header.textContent = header.textContent.replace(
+                isOpen ? '▲' : '▼', 
+                isOpen ? '▼' : '▲'
+            );
+        }
+
+        document.getElementById('prevBtn').onclick = () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        };
+
+        document.getElementById('nextBtn').onclick = () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        };
+
+        document.getElementById('resetBtn').onclick = () => {
+            currentStep = 0;
+            updateDisplay();
+        };
+
+        generateSteps();
+        updateDisplay();
+    </script>
+</body>
+</html>

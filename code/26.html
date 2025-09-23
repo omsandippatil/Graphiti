@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palindrome Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            width: 50%;
+            padding: 15px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 50%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .problem-section {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .problem-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .problem-example {
+            font-size: 14px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid black;
+            color: black;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: black;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn:disabled:hover {
+            background: white;
+            color: black;
+        }
+
+        .info-section {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .variables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .variable {
+            padding: 5px;
+            border: 1px solid black;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .variable.active {
+            background: yellow;
+        }
+
+        .variable.increment {
+            background: lightgreen;
+        }
+
+        .variable.decrement {
+            background: lightcoral;
+        }
+
+        .condition {
+            padding: 5px;
+            margin: 2px 0;
+            border: 1px solid black;
+            font-size: 12px;
+        }
+
+        .condition.true {
+            background: lightgreen;
+        }
+
+        .condition.false {
+            background: lightcoral;
+        }
+
+        .operation {
+            padding: 5px;
+            margin: 2px 0;
+            border: 1px solid black;
+            font-size: 12px;
+        }
+
+        .operation.increment {
+            background: lightgreen;
+        }
+
+        .operation.decrement {
+            background: lightcoral;
+        }
+
+        .operation.compare {
+            background: lightblue;
+        }
+
+        .string-container {
+            display: flex;
+            gap: 2px;
+            margin: 20px 0;
+        }
+
+        .char-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+            background: white;
+        }
+
+        .char-cell.visited {
+            background: #f0f0f0;
+        }
+
+        .char-cell.current {
+            background: #e0e0e0;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -25px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .pointer.left {
+            border-bottom: 15px solid #ff1493;
+        }
+
+        .pointer.right {
+            border-bottom: 15px solid #00ff00;
+            top: 45px;
+            border-top: 15px solid #00ff00;
+            border-bottom: none;
+        }
+
+        .pointer-label {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .pointer.right .pointer-label {
+            top: 55px;
+        }
+
+        .collapsible {
+            margin-top: 20px;
+        }
+
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            font-weight: bold;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            border: 2px solid black;
+            border-top: none;
+        }
+
+        .step-counter {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-section {
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .result-true {
+            color: green;
+        }
+
+        .result-false {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="problem-section">
+            <div class="problem-title">Palindrome String Check</div>
+            <div class="problem-example">Input: "racecar" → Output: True</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="prevBtn">Previous</button>
+            <button class="btn" id="nextBtn">Next</button>
+            <button class="btn" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="step-counter" id="stepCounter">Step 0 / 8</div>
+
+        <div class="info-section">
+            <div class="section-title">Variables</div>
+            <div class="variables-grid">
+                <div class="variable" id="var-left">left: 0</div>
+                <div class="variable" id="var-right">right: 6</div>
+                <div class="variable" id="var-length">length: 7</div>
+                <div class="variable" id="var-result">result: null</div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="section-title">Current Condition</div>
+            <div id="conditionDisplay">
+                <div class="condition">Initialization</div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="section-title">Current Operation</div>
+            <div id="operationDisplay">
+                <div class="operation">Setting up variables</div>
+            </div>
+        </div>
+
+        <div class="result-section">
+            <div class="section-title">Result</div>
+            <div class="result-value" id="resultValue">Processing...</div>
+        </div>
+
+        <div class="collapsible">
+            <button class="collapsible-header" onclick="toggleCollapsible(this)">
+                Algorithm Theory & Explanation
+            </button>
+            <div class="collapsible-content">
+                <h3>Two Pointer Technique</h3>
+                <p>This algorithm uses two pointers starting from opposite ends of the string, moving towards the center while comparing characters.</p>
+                
+                <h3>Time Complexity: O(n/2) = O(n)</h3>
+                <p>We only need to check half the string in the worst case.</p>
+                
+                <h3>Space Complexity: O(1)</h3>
+                <p>Only using constant extra space for pointer variables.</p>
+                
+                <h3>Edge Cases</h3>
+                <ul>
+                    <li>Empty string (considered palindrome)</li>
+                    <li>Single character (always palindrome)</li>
+                    <li>Even vs odd length strings</li>
+                    <li>Case sensitivity considerations</li>
+                </ul>
+                
+                <h3>Algorithm Steps</h3>
+                <ol>
+                    <li>Initialize left pointer at start (0)</li>
+                    <li>Initialize right pointer at end (length-1)</li>
+                    <li>While left < right:</li>
+                    <li>Compare characters at left and right positions</li>
+                    <li>If different, return false</li>
+                    <li>Move left pointer right, right pointer left</li>
+                    <li>If loop completes, return true</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="string-container" id="stringContainer">
+        </div>
+    </div>
+
+    <script>
+        const input = "racecar";
+        let currentStep = 0;
+        const totalSteps = 8;
+        
+        const steps = [
+            {
+                left: 0, right: 6, result: null,
+                condition: "Initialization",
+                operation: "Set left = 0, right = length - 1 (6)",
+                activeVars: [],
+                visited: [],
+                current: []
+            },
+            {
+                left: 0, right: 6, result: null,
+                condition: "left < right (0 < 6) ✓",
+                operation: "Check if pointers haven't crossed",
+                activeVars: ['left', 'right'],
+                visited: [],
+                current: [0, 6]
+            },
+            {
+                left: 0, right: 6, result: null,
+                condition: "s[0] == s[6] ('r' == 'r') ✓",
+                operation: "Compare characters at positions 0 and 6",
+                activeVars: [],
+                visited: [0, 6],
+                current: [0, 6]
+            },
+            {
+                left: 1, right: 5, result: null,
+                condition: "left < right (1 < 5) ✓",
+                operation: "Move pointers: left++ (0→1), right-- (6→5)",
+                activeVars: ['left', 'right'],
+                visited: [0, 6],
+                current: [1, 5]
+            },
+            {
+                left: 1, right: 5, result: null,
+                condition: "s[1] == s[5] ('a' == 'a') ✓",
+                operation: "Compare characters at positions 1 and 5",
+                activeVars: [],
+                visited: [0, 1, 5, 6],
+                current: [1, 5]
+            },
+            {
+                left: 2, right: 4, result: null,
+                condition: "left < right (2 < 4) ✓",
+                operation: "Move pointers: left++ (1→2), right-- (5→4)",
+                activeVars: ['left', 'right'],
+                visited: [0, 1, 5, 6],
+                current: [2, 4]
+            },
+            {
+                left: 2, right: 4, result: null,
+                condition: "s[2] == s[4] ('c' == 'c') ✓",
+                operation: "Compare characters at positions 2 and 4",
+                activeVars: [],
+                visited: [0, 1, 2, 4, 5, 6],
+                current: [2, 4]
+            },
+            {
+                left: 3, right: 3, result: true,
+                condition: "left >= right (3 >= 3) ✓",
+                operation: "Pointers met/crossed - palindrome confirmed",
+                activeVars: ['result'],
+                visited: [0, 1, 2, 3, 4, 5, 6],
+                current: [3]
+            }
+        ];
+
+        function initializeVisualization() {
+            const container = document.getElementById('stringContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < input.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'char-cell';
+                cell.textContent = input[i];
+                cell.id = `cell-${i}`;
+                container.appendChild(cell);
+            }
+            
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep} / ${totalSteps - 1}`;
+            
+            document.getElementById('var-left').textContent = `left: ${step.left}`;
+            document.getElementById('var-right').textContent = `right: ${step.right}`;
+            document.getElementById('var-length').textContent = `length: ${input.length}`;
+            document.getElementById('var-result').textContent = `result: ${step.result === null ? 'null' : step.result}`;
+            
+            document.querySelectorAll('.variable').forEach(v => {
+                v.className = 'variable';
+            });
+            
+            step.activeVars.forEach(varName => {
+                const element = document.getElementById(`var-${varName}`);
+                if (element) element.classList.add('active');
+            });
+            
+            document.getElementById('conditionDisplay').innerHTML = 
+                `<div class="condition ${step.condition.includes('✓') ? 'true' : ''}">${step.condition}</div>`;
+            
+            let operationClass = '';
+            if (step.operation.includes('++') || step.operation.includes('Move')) operationClass = 'increment';
+            else if (step.operation.includes('Compare')) operationClass = 'compare';
+            
+            document.getElementById('operationDisplay').innerHTML = 
+                `<div class="operation ${operationClass}">${step.operation}</div>`;
+            
+            const resultElement = document.getElementById('resultValue');
+            if (step.result === null) {
+                resultElement.textContent = 'Processing...';
+                resultElement.className = 'result-value';
+            } else if (step.result === true) {
+                resultElement.textContent = 'True (Palindrome)';
+                resultElement.className = 'result-value result-true';
+            } else {
+                resultElement.textContent = 'False (Not Palindrome)';
+                resultElement.className = 'result-value result-false';
+            }
+            
+            for (let i = 0; i < input.length; i++) {
+                const cell = document.getElementById(`cell-${i}`);
+                cell.className = 'char-cell';
+                cell.innerHTML = input[i];
+                
+                if (step.visited.includes(i)) {
+                    cell.classList.add('visited');
+                }
+                if (step.current.includes(i)) {
+                    cell.classList.add('current');
+                }
+            }
+            
+            document.querySelectorAll('.pointer').forEach(p => p.remove());
+            
+            if (step.current.includes(step.left) && step.left < input.length) {
+                const leftCell = document.getElementById(`cell-${step.left}`);
+                const leftPointer = document.createElement('div');
+                leftPointer.className = 'pointer left';
+                leftPointer.innerHTML = `<div class="pointer-label">LEFT</div>`;
+                leftCell.appendChild(leftPointer);
+            }
+            
+            if (step.current.includes(step.right) && step.right < input.length && step.right !== step.left) {
+                const rightCell = document.getElementById(`cell-${step.right}`);
+                const rightPointer = document.createElement('div');
+                rightPointer.className = 'pointer right';
+                rightPointer.innerHTML = `<div class="pointer-label">RIGHT</div>`;
+                rightCell.appendChild(rightPointer);
+            }
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === totalSteps - 1;
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            updateDisplay();
+        }
+
+        function toggleCollapsible(header) {
+            const content = header.nextElementSibling;
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', nextStep);
+        document.getElementById('prevBtn').addEventListener('click', prevStep);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        initializeVisualization();
+    </script>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anagram Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .question-section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        
+        .question-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .navigation {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            background: white;
+            color: black;
+            border: 2px solid black;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            background: black;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        button:disabled:hover {
+            background: white;
+            color: black;
+        }
+        
+        .variables-section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .variable {
+            margin-bottom: 5px;
+            padding: 3px;
+        }
+        
+        .variable.active {
+            background: yellow;
+        }
+        
+        .variable.increment {
+            background: lightgreen;
+        }
+        
+        .variable.decrement {
+            background: lightcoral;
+        }
+        
+        .conditions-section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        
+        .condition {
+            margin-bottom: 5px;
+            padding: 3px;
+        }
+        
+        .condition.true {
+            background: lightgreen;
+        }
+        
+        .condition.false {
+            background: lightcoral;
+        }
+        
+        .operations-section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        
+        .operation {
+            margin-bottom: 5px;
+            padding: 3px;
+        }
+        
+        .operation.increment {
+            background: lightgreen;
+        }
+        
+        .operation.decrement {
+            background: lightcoral;
+        }
+        
+        .operation.process {
+            background: lightblue;
+        }
+        
+        .result-section {
+            margin-bottom: 15px;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        
+        .string-display {
+            display: flex;
+            gap: 2px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .char-cell {
+            border: 2px solid black;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            position: relative;
+            font-weight: bold;
+        }
+        
+        .char-cell.current {
+            background: yellow;
+        }
+        
+        .char-cell.processed {
+            background: lightgray;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -25px;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+        
+        .pointer.current {
+            background: hotpink;
+            color: white;
+        }
+        
+        .frequency-display {
+            margin: 20px 0;
+        }
+        
+        .freq-table {
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        .freq-table th, .freq-table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .freq-table th {
+            background: black;
+            color: white;
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+            border: 1px solid black;
+        }
+        
+        .collapsible-header {
+            background: black;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+        }
+        
+        .collapsible.active .collapsible-content {
+            display: block;
+        }
+        
+        .step-counter {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="question-section">
+                <div class="question-title">Check if Two Strings Are Anagrams</div>
+                <div>Input: "listen", "silent" → Output: True</div>
+            </div>
+            
+            <div class="navigation">
+                <button id="prevBtn">Previous</button>
+                <button id="nextBtn">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            
+            <div class="step-counter" id="stepCounter">Step 1 of 15</div>
+            
+            <div class="variables-section">
+                <div class="section-title">Variables</div>
+                <div id="variables"></div>
+            </div>
+            
+            <div class="conditions-section">
+                <div class="section-title">Current Condition</div>
+                <div id="conditions"></div>
+            </div>
+            
+            <div class="operations-section">
+                <div class="section-title">Current Operation</div>
+                <div id="operations"></div>
+            </div>
+            
+            <div class="result-section">
+                <div class="section-title">Result</div>
+                <div id="result">Calculating...</div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div>
+                <div class="section-title">String 1: "listen"</div>
+                <div class="string-display" id="string1"></div>
+            </div>
+            
+            <div>
+                <div class="section-title">String 2: "silent"</div>
+                <div class="string-display" id="string2"></div>
+            </div>
+            
+            <div class="frequency-display">
+                <div class="section-title">Character Frequencies</div>
+                <div id="frequencies"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="collapsible">
+        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+            Algorithm Explanation & Theory
+        </div>
+        <div class="collapsible-content">
+            <h3>Algorithm Overview</h3>
+            <p>Two strings are anagrams if they contain the same characters with the same frequencies, just rearranged.</p>
+            
+            <h3>Approach: Character Frequency Counting</h3>
+            <p>1. Check if lengths are equal (if not, cannot be anagrams)</p>
+            <p>2. Count frequency of each character in both strings</p>
+            <p>3. Compare frequency maps - if identical, strings are anagrams</p>
+            
+            <h3>Time Complexity: O(n)</h3>
+            <p>We traverse each string once to count frequencies, then compare.</p>
+            
+            <h3>Space Complexity: O(k)</h3>
+            <p>Where k is the number of unique characters (at most 26 for lowercase letters).</p>
+            
+            <h3>Edge Cases</h3>
+            <p>- Empty strings (considered anagrams)</p>
+            <p>- Different lengths (cannot be anagrams)</p>
+            <p>- Case sensitivity considerations</p>
+            <p>- Single character strings</p>
+        </div>
+    </div>
+    
+    <script>
+        const str1 = "listen";
+        const str2 = "silent";
+        let currentStep = 0;
+        let freq1 = {};
+        let freq2 = {};
+        let i = 0;
+        let j = 0;
+        let isAnagram = false;
+        
+        const steps = [
+            {
+                description: "Initialize: Check if lengths are equal",
+                variables: { str1: '"listen"', str2: '"silent"', i: 0, j: 0, freq1: {}, freq2: {}, isAnagram: false },
+                condition: `str1.length === str2.length (${str1.length} === ${str2.length})`,
+                conditionResult: true,
+                operation: "Length check passed - continue to frequency counting",
+                currentChar1: -1,
+                currentChar2: -1
+            }
+        ];
+        
+        for (let k = 0; k < str1.length; k++) {
+            steps.push({
+                description: `Count character '${str1[k]}' in string 1`,
+                variables: { str1: '"listen"', str2: '"silent"', i: k, j: j, freq1: {...freq1}, freq2: {...freq2}, isAnagram: false },
+                condition: `Processing str1[${k}] = '${str1[k]}'`,
+                conditionResult: true,
+                operation: `freq1['${str1[k]}'] = ${(freq1[str1[k]] || 0) + 1}`,
+                currentChar1: k,
+                currentChar2: -1
+            });
+            freq1[str1[k]] = (freq1[str1[k]] || 0) + 1;
+        }
+        
+        for (let k = 0; k < str2.length; k++) {
+            steps.push({
+                description: `Count character '${str2[k]}' in string 2`,
+                variables: { str1: '"listen"', str2: '"silent"', i: str1.length, j: k, freq1: {...freq1}, freq2: {...freq2}, isAnagram: false },
+                condition: `Processing str2[${k}] = '${str2[k]}'`,
+                conditionResult: true,
+                operation: `freq2['${str2[k]}'] = ${(freq2[str2[k]] || 0) + 1}`,
+                currentChar1: -1,
+                currentChar2: k
+            });
+            freq2[str2[k]] = (freq2[str2[k]] || 0) + 1;
+        }
+        
+        const chars1 = Object.keys(freq1);
+        for (let k = 0; k < chars1.length; k++) {
+            const char = chars1[k];
+            const match = freq1[char] === freq2[char];
+            steps.push({
+                description: `Compare frequency of '${char}'`,
+                variables: { str1: '"listen"', str2: '"silent"', i: str1.length, j: str2.length, freq1: {...freq1}, freq2: {...freq2}, isAnagram: false },
+                condition: `freq1['${char}'] === freq2['${char}'] (${freq1[char]} === ${freq2[char] || 0})`,
+                conditionResult: match,
+                operation: match ? `Frequency match for '${char}'` : `Frequency mismatch for '${char}' - not anagrams`,
+                currentChar1: -1,
+                currentChar2: -1
+            });
+            if (!match) {
+                isAnagram = false;
+                break;
+            }
+        }
+        
+        if (steps[steps.length - 1].conditionResult) {
+            isAnagram = true;
+            steps.push({
+                description: "All frequencies match - strings are anagrams",
+                variables: { str1: '"listen"', str2: '"silent"', i: str1.length, j: str2.length, freq1: {...freq1}, freq2: {...freq2}, isAnagram: true },
+                condition: "All character frequencies match",
+                conditionResult: true,
+                operation: "Result: Strings are anagrams",
+                currentChar1: -1,
+                currentChar2: -1
+            });
+        }
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} of ${steps.length}`;
+            
+            const variablesDiv = document.getElementById('variables');
+            variablesDiv.innerHTML = '';
+            for (const [key, value] of Object.entries(step.variables)) {
+                const div = document.createElement('div');
+                div.className = 'variable';
+                if (key === 'i' && step.currentChar1 >= 0) div.classList.add('active');
+                if (key === 'j' && step.currentChar2 >= 0) div.classList.add('active');
+                div.textContent = `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`;
+                variablesDiv.appendChild(div);
+            }
+            
+            const conditionsDiv = document.getElementById('conditions');
+            conditionsDiv.innerHTML = '';
+            const condDiv = document.createElement('div');
+            condDiv.className = `condition ${step.conditionResult ? 'true' : 'false'}`;
+            condDiv.textContent = `${step.condition} ${step.conditionResult ? '✓' : '✗'}`;
+            conditionsDiv.appendChild(condDiv);
+            
+            const operationsDiv = document.getElementById('operations');
+            operationsDiv.innerHTML = '';
+            const opDiv = document.createElement('div');
+            opDiv.className = 'operation process';
+            opDiv.textContent = step.operation;
+            operationsDiv.appendChild(opDiv);
+            
+            const resultDiv = document.getElementById('result');
+            if (currentStep === steps.length - 1) {
+                resultDiv.textContent = step.variables.isAnagram ? 'True - Strings are anagrams' : 'False - Strings are not anagrams';
+            } else {
+                resultDiv.textContent = 'Calculating...';
+            }
+            
+            updateStringDisplay();
+            updateFrequencyDisplay(step);
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function updateStringDisplay() {
+            const step = steps[currentStep];
+            
+            const string1Div = document.getElementById('string1');
+            string1Div.innerHTML = '';
+            for (let k = 0; k < str1.length; k++) {
+                const cell = document.createElement('div');
+                cell.className = 'char-cell';
+                cell.textContent = str1[k];
+                
+                if (k === step.currentChar1) {
+                    cell.classList.add('current');
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    pointer.textContent = 'i';
+                    cell.appendChild(pointer);
+                } else if (k < step.variables.i && step.currentChar1 !== k) {
+                    cell.classList.add('processed');
+                }
+                
+                string1Div.appendChild(cell);
+            }
+            
+            const string2Div = document.getElementById('string2');
+            string2Div.innerHTML = '';
+            for (let k = 0; k < str2.length; k++) {
+                const cell = document.createElement('div');
+                cell.className = 'char-cell';
+                cell.textContent = str2[k];
+                
+                if (k === step.currentChar2) {
+                    cell.classList.add('current');
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer current';
+                    pointer.textContent = 'j';
+                    cell.appendChild(pointer);
+                } else if (k < step.variables.j && step.currentChar2 !== k) {
+                    cell.classList.add('processed');
+                }
+                
+                string2Div.appendChild(cell);
+            }
+        }
+        
+        function updateFrequencyDisplay(step) {
+            const freqDiv = document.getElementById('frequencies');
+            freqDiv.innerHTML = '';
+            
+            if (Object.keys(step.variables.freq1).length > 0 || Object.keys(step.variables.freq2).length > 0) {
+                const table1 = document.createElement('table');
+                table1.className = 'freq-table';
+                table1.innerHTML = '<tr><th colspan="2">String 1 Frequencies</th></tr><tr><th>Char</th><th>Count</th></tr>';
+                
+                for (const [char, count] of Object.entries(step.variables.freq1)) {
+                    const row = table1.insertRow();
+                    row.innerHTML = `<td>${char}</td><td>${count}</td>`;
+                }
+                freqDiv.appendChild(table1);
+                
+                const table2 = document.createElement('table');
+                table2.className = 'freq-table';
+                table2.innerHTML = '<tr><th colspan="2">String 2 Frequencies</th></tr><tr><th>Char</th><th>Count</th></tr>';
+                
+                for (const [char, count] of Object.entries(step.variables.freq2)) {
+                    const row = table2.insertRow();
+                    row.innerHTML = `<td>${char}</td><td>${count}</td>`;
+                }
+                freqDiv.appendChild(table2);
+            }
+        }
+        
+        function toggleCollapsible(element) {
+            element.parentElement.classList.toggle('active');
+        }
+        
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            currentStep = 0;
+            updateDisplay();
+        });
+        
+        updateDisplay();
+    </script>
+</body>
+</html>

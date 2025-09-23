@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subarray with Given Sum</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: white;
+            color: black;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .left-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid black;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .question-section {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .question-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .problem-statement {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .example {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .controls {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .controls button {
+            background: white;
+            color: black;
+            border: 2px solid black;
+            padding: 8px 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .controls button:hover {
+            background: #f0f0f0;
+        }
+        
+        .controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .info-section {
+            border: 2px solid black;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid black;
+            padding-bottom: 5px;
+        }
+        
+        .variables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .variable {
+            padding: 5px 8px;
+            border: 1px solid black;
+            font-size: 14px;
+        }
+        
+        .variable.active {
+            background: yellow;
+        }
+        
+        .variable.increment {
+            background: lightgreen;
+        }
+        
+        .variable.decrement {
+            background: lightcoral;
+        }
+        
+        .condition {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid black;
+            font-size: 14px;
+        }
+        
+        .condition.true {
+            background: lightgreen;
+        }
+        
+        .condition.false {
+            background: lightcoral;
+        }
+        
+        .operation {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid black;
+            font-size: 14px;
+        }
+        
+        .operation.increment {
+            background: lightgreen;
+        }
+        
+        .operation.decrement {
+            background: lightcoral;
+        }
+        
+        .operation.add {
+            background: lightblue;
+        }
+        
+        .step-counter {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .result-display {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .array-visualization {
+            position: relative;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .array-cell {
+            width: 60px;
+            height: 60px;
+            border: 3px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            background: white;
+            position: relative;
+        }
+        
+        .array-cell.in-window {
+            background: #f0f0f0;
+        }
+        
+        .array-cell.current {
+            background: #e0e0e0;
+        }
+        
+        .pointer {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        
+        .pointer.left {
+            background: #ff1493;
+            color: white;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .pointer.right {
+            background: #00ff00;
+            color: black;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .collapsible {
+            margin-top: 20px;
+        }
+        
+        .collapsible-header {
+            background: white;
+            border: 2px solid black;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .collapsible-header:hover {
+            background: #f0f0f0;
+        }
+        
+        .collapsible-content {
+            display: none;
+            border: 2px solid black;
+            border-top: none;
+            padding: 15px;
+            background: white;
+        }
+        
+        .collapsible-content.open {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="question-section">
+            <div class="question-title">Subarray with Given Sum</div>
+            <div class="problem-statement">Find a contiguous subarray with sum equal to target.</div>
+            <div class="example">Input: [1,2,3,7,5], Sum=12 → Output: indices 2-4</div>
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="step-counter">
+            <span id="stepCounter">Step 1 / 15</span>
+        </div>
+        
+        <div class="info-section">
+            <div class="section-title">Variables</div>
+            <div class="variables-grid">
+                <div class="variable" id="var-left">left: <span id="val-left">0</span></div>
+                <div class="variable" id="var-right">right: <span id="val-right">0</span></div>
+                <div class="variable" id="var-sum">sum: <span id="val-sum">0</span></div>
+                <div class="variable" id="var-target">target: <span id="val-target">12</span></div>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <div class="section-title">Current Condition</div>
+            <div id="currentCondition"></div>
+        </div>
+        
+        <div class="info-section">
+            <div class="section-title">Current Operation</div>
+            <div id="currentOperation"></div>
+        </div>
+        
+        <div class="result-display">
+            <div>Result: <span id="result">Not found yet</span></div>
+        </div>
+    </div>
+    
+    <div class="right-panel">
+        <div class="array-visualization" id="arrayViz"></div>
+    </div>
+    
+    <div class="left-panel">
+        <div class="collapsible">
+            <div class="collapsible-header" onclick="toggleCollapsible('theory')">
+                Theory & Algorithm Explanation ▼
+            </div>
+            <div class="collapsible-content" id="theory">
+                <h3>Sliding Window Approach</h3>
+                <p>This problem uses the sliding window technique with two pointers (left and right) to find a contiguous subarray with the given sum.</p>
+                
+                <h4>Algorithm Steps:</h4>
+                <ol>
+                    <li>Initialize left=0, right=0, sum=0</li>
+                    <li>Expand window by moving right pointer and adding elements</li>
+                    <li>If sum equals target, return indices</li>
+                    <li>If sum exceeds target, shrink window from left</li>
+                    <li>Continue until window is found or array is exhausted</li>
+                </ol>
+                
+                <h4>Time Complexity:</h4>
+                <p>O(n) - Each element is visited at most twice</p>
+                
+                <h4>Space Complexity:</h4>
+                <p>O(1) - Only using constant extra space</p>
+                
+                <h4>Edge Cases:</h4>
+                <ul>
+                    <li>Empty array or target = 0</li>
+                    <li>No valid subarray exists</li>
+                    <li>Single element equals target</li>
+                    <li>Entire array sum equals target</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const arr = [1, 2, 3, 7, 5];
+        const target = 12;
+        let currentStep = 0;
+        
+        const steps = [
+            { left: 0, right: 0, sum: 0, condition: "Initialize pointers", operation: "left = 0, right = 0, sum = 0", result: "Not found yet" },
+            { left: 0, right: 0, sum: 1, condition: "sum < target (1 < 12) ✓", operation: "Add arr[0] = 1 to sum", result: "Not found yet" },
+            { left: 0, right: 1, sum: 1, condition: "sum < target (1 < 12) ✓", operation: "right++ (0 → 1)", result: "Not found yet" },
+            { left: 0, right: 1, sum: 3, condition: "sum < target (3 < 12) ✓", operation: "Add arr[1] = 2 to sum", result: "Not found yet" },
+            { left: 0, right: 2, sum: 3, condition: "sum < target (3 < 12) ✓", operation: "right++ (1 → 2)", result: "Not found yet" },
+            { left: 0, right: 2, sum: 6, condition: "sum < target (6 < 12) ✓", operation: "Add arr[2] = 3 to sum", result: "Not found yet" },
+            { left: 0, right: 3, sum: 6, condition: "sum < target (6 < 12) ✓", operation: "right++ (2 → 3)", result: "Not found yet" },
+            { left: 0, right: 3, sum: 13, condition: "sum > target (13 > 12) ✓", operation: "Add arr[3] = 7 to sum", result: "Not found yet" },
+            { left: 1, right: 3, sum: 12, condition: "sum > target (13 > 12) ✓", operation: "Remove arr[0] = 1, left++ (0 → 1)", result: "Not found yet" },
+            { left: 1, right: 3, sum: 12, condition: "sum == target (12 == 12) ✓", operation: "Found subarray!", result: "[1, 3]" },
+            { left: 1, right: 4, sum: 12, condition: "Verification step", operation: "Subarray: [2,3,7]", result: "[1, 3]" },
+            { left: 1, right: 4, sum: 17, condition: "Continue checking", operation: "Add arr[4] = 5 to sum", result: "[1, 3]" },
+            { left: 2, right: 4, sum: 15, condition: "sum > target (17 > 12) ✓", operation: "Remove arr[1] = 2, left++ (1 → 2)", result: "[1, 3]" },
+            { left: 3, right: 4, sum: 12, condition: "sum > target (15 > 12) ✓", operation: "Remove arr[2] = 3, left++ (2 → 3)", result: "[1, 3]" },
+            { left: 3, right: 4, sum: 12, condition: "Algorithm complete", operation: "Final result found", result: "[1, 3]" }
+        ];
+        
+        function renderArray() {
+            const viz = document.getElementById('arrayViz');
+            viz.innerHTML = '';
+            
+            arr.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.textContent = val;
+                
+                const step = steps[currentStep];
+                if (idx >= step.left && idx <= step.right) {
+                    cell.classList.add('in-window');
+                }
+                
+                if (idx === step.left) {
+                    const leftPointer = document.createElement('div');
+                    leftPointer.className = 'pointer left';
+                    leftPointer.textContent = 'LEFT';
+                    cell.appendChild(leftPointer);
+                }
+                
+                if (idx === step.right) {
+                    const rightPointer = document.createElement('div');
+                    rightPointer.className = 'pointer right';
+                    rightPointer.textContent = 'RIGHT';
+                    cell.appendChild(rightPointer);
+                }
+                
+                viz.appendChild(cell);
+            });
+        }
+        
+        function updateDisplay() {
+            const step = steps[currentStep];
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} / ${steps.length}`;
+            
+            document.getElementById('val-left').textContent = step.left;
+            document.getElementById('val-right').textContent = step.right;
+            document.getElementById('val-sum').textContent = step.sum;
+            document.getElementById('val-target').textContent = target;
+            
+            const conditionDiv = document.getElementById('currentCondition');
+            conditionDiv.innerHTML = `<div class="condition ${step.condition.includes('✓') ? 'true' : 'false'}">${step.condition}</div>`;
+            
+            const operationDiv = document.getElementById('currentOperation');
+            let opClass = 'operation';
+            if (step.operation.includes('++') || step.operation.includes('Add')) opClass += ' increment';
+            else if (step.operation.includes('Remove')) opClass += ' decrement';
+            else if (step.operation.includes('Found')) opClass += ' add';
+            
+            operationDiv.innerHTML = `<div class="${opClass}">${step.operation}</div>`;
+            
+            document.getElementById('result').textContent = step.result;
+            
+            document.querySelectorAll('.variable').forEach(v => {
+                v.className = 'variable';
+            });
+            
+            if (step.operation.includes('left++')) {
+                document.getElementById('var-left').classList.add('increment');
+            }
+            if (step.operation.includes('right++')) {
+                document.getElementById('var-right').classList.add('increment');
+            }
+            if (step.operation.includes('Add') || step.operation.includes('Remove')) {
+                document.getElementById('var-sum').classList.add('active');
+            }
+            
+            renderArray();
+            
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+        
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const header = content.previousElementSibling;
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                header.textContent = header.textContent.replace('▲', '▼');
+            } else {
+                content.classList.add('open');
+                header.textContent = header.textContent.replace('▼', '▲');
+            }
+        }
+        
+        document.getElementById('prevBtn').onclick = () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        };
+        
+        document.getElementById('nextBtn').onclick = () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        };
+        
+        document.getElementById('resetBtn').onclick = () => {
+            currentStep = 0;
+            updateDisplay();
+        };
+        
+        updateDisplay();
+    </script>
+</body>
+</html>
