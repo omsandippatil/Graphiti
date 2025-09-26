@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -283,6 +284,27 @@
             padding: 20px;
             font-style: italic;
         }
+
+        .paste-warning {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ff0000;
+            color: #fff;
+            padding: 20px 40px;
+            border: 3px solid #000;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 10000;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            25% { transform: translate(-50%, -50%) rotate(-5deg); }
+            75% { transform: translate(-50%, -50%) rotate(5deg); }
+        }
     </style>
 </head>
 <body>
@@ -434,6 +456,17 @@
             'trie': 'words',
             'priorityqueue': 'pq'
         };
+
+        function showPasteWarning() {
+            const warning = document.createElement('div');
+            warning.className = 'paste-warning';
+            warning.textContent = 'No No No No';
+            document.body.appendChild(warning);
+            
+            setTimeout(() => {
+                document.body.removeChild(warning);
+            }, 1000);
+        }
 
         function setStatus(message, type = '') {
             const statusDiv = document.getElementById('statusIndicator');
@@ -790,6 +823,7 @@ ${variableDeclarations}
 
         document.addEventListener('paste', function(e) {
             e.preventDefault();
+            showPasteWarning();
         });
 
         document.addEventListener('cut', function(e) {
