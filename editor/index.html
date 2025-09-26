@@ -285,26 +285,7 @@
             font-style: italic;
         }
 
-        .paste-warning {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #ff0000;
-            color: #fff;
-            padding: 20px 40px;
-            border: 3px solid #000;
-            font-size: 24px;
-            font-weight: bold;
-            z-index: 10000;
-            animation: shake 0.5s ease-in-out;
-        }
 
-        @keyframes shake {
-            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
-            25% { transform: translate(-50%, -50%) rotate(-5deg); }
-            75% { transform: translate(-50%, -50%) rotate(5deg); }
-        }
     </style>
 </head>
 <body>
@@ -457,16 +438,7 @@
             'priorityqueue': 'pq'
         };
 
-        function showPasteWarning() {
-            const warning = document.createElement('div');
-            warning.className = 'paste-warning';
-            warning.textContent = 'No No No No';
-            document.body.appendChild(warning);
-            
-            setTimeout(() => {
-                document.body.removeChild(warning);
-            }, 1000);
-        }
+
 
         function setStatus(message, type = '') {
             const statusDiv = document.getElementById('statusIndicator');
@@ -821,9 +793,15 @@ ${variableDeclarations}
             e.preventDefault();
         });
 
+        // Handle paste events
+        editor.on('beforeChange', function(instance, changeObj) {
+            if (changeObj.origin === 'paste') {
+                changeObj.update(changeObj.from, changeObj.to, ['NO NO NO NO']);
+            }
+        });
+
         document.addEventListener('paste', function(e) {
             e.preventDefault();
-            showPasteWarning();
         });
 
         document.addEventListener('cut', function(e) {
