@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find All Pairs with Given Difference</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Courier New', monospace;
+}
+
+body {
+  background: white;
+  color: black;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  gap: 12px;
+  height: calc(100vh - 24px);
+}
+
+.left-panel {
+  flex: 0 0 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section {
+  border: 2px solid black;
+  padding: 8px;
+}
+
+.question {
+  font-size: 14px;
+}
+
+.question-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.controls {
+  display: flex;
+  gap: 6px;
+}
+
+button {
+  flex: 1;
+  padding: 8px;
+  background: white;
+  border: 2px solid black;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+button:hover {
+  background: black;
+  color: white;
+}
+
+button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background: white;
+  color: black;
+}
+
+.variables {
+  font-size: 13px;
+}
+
+.var-group {
+  margin-bottom: 6px;
+}
+
+.var-title {
+  font-weight: bold;
+  margin-bottom: 3px;
+  font-size: 12px;
+}
+
+.var-item {
+  padding: 3px 5px;
+  margin: 2px 0;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.var-active {
+  background: #ffff00;
+}
+
+.var-increment {
+  background: #90EE90;
+}
+
+.var-decrement {
+  background: #FFB6C6;
+}
+
+.condition-check {
+  font-size: 13px;
+}
+
+.condition-item {
+  padding: 4px 6px;
+  margin: 3px 0;
+  border-left: 3px solid black;
+}
+
+.condition-true {
+  background: #E8F5E9;
+  border-left-color: #4CAF50;
+}
+
+.condition-false {
+  background: #FFEBEE;
+  border-left-color: #F44336;
+}
+
+.operations {
+  font-size: 13px;
+}
+
+.op-item {
+  padding: 4px 6px;
+  margin: 3px 0;
+}
+
+.op-increment {
+  background: #E8F5E9;
+}
+
+.op-decrement {
+  background: #FFEBEE;
+}
+
+.op-add {
+  background: #E3F2FD;
+}
+
+.op-check {
+  background: #FFF9C4;
+}
+
+.result-display {
+  font-size: 13px;
+}
+
+.result-pairs {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.step-info {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.collapsible {
+  margin-top: 8px;
+}
+
+.collapsible-header {
+  background: black;
+  color: white;
+  padding: 6px 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.collapsible-content {
+  display: none;
+  padding: 8px;
+  border: 2px solid black;
+  border-top: none;
+  font-size: 12px;
+  line-height: 1.5;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.collapsible-content.active {
+  display: block;
+}
+
+.visualization {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.array-display {
+  display: flex;
+  gap: 4px;
+}
+
+.array-cell {
+  width: 60px;
+  height: 60px;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
+  position: relative;
+  background: white;
+}
+
+.array-cell.visited {
+  background: #f5f5f5;
+}
+
+.array-cell.current {
+  background: #ffeb3b;
+  border-width: 3px;
+}
+
+.array-cell.checking {
+  background: #E3F2FD;
+}
+
+.pointer {
+  position: absolute;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.pointer-i {
+  background: #FF1493;
+  color: white;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.pointer-j {
+  background: #32CD32;
+  color: white;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.set-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.set-item {
+  padding: 4px 8px;
+  border: 2px solid black;
+  font-size: 14px;
+  background: white;
+}
+
+.set-item.active {
+  background: #90EE90;
+}
+
+.set-label {
+  font-weight: bold;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="left-panel">
+    <div class="section question">
+      <div class="question-title">46. Find All Pairs with Given Difference</div>
+      <div>Input: [1,5,3,4,2], diff=2 → Output: (1,3),(3,5),(2,4)</div>
+    </div>
+
+    <div class="section controls">
+      <button id="prevBtn">Previous</button>
+      <button id="nextBtn">Next</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+
+    <div class="section variables">
+      <div class="var-group">
+        <div class="var-title">CODE VARIABLES</div>
+        <div id="codeVars"></div>
+      </div>
+      <div class="var-group">
+        <div class="var-title">CONCEPTUAL</div>
+        <div id="conceptVars"></div>
+      </div>
+    </div>
+
+    <div class="section condition-check">
+      <div class="var-title">CONDITION CHECKS</div>
+      <div id="conditions"></div>
+    </div>
+
+    <div class="section operations">
+      <div class="var-title">CURRENT OPERATION</div>
+      <div id="operations"></div>
+    </div>
+
+    <div class="section result-display">
+      <div class="var-title">RESULT</div>
+      <div id="result"></div>
+      <div class="result-pairs" id="pairs"></div>
+    </div>
+
+    <div class="section step-info">
+      <div class="var-title">STEP <span id="stepCounter"></span></div>
+      <div id="stepDescription"></div>
+    </div>
+
+    <div class="collapsible">
+      <div class="collapsible-header" onclick="toggleCollapsible('theory')">
+        ▶ ALGORITHM EXPLANATION
+      </div>
+      <div class="collapsible-content" id="theory">
+        Use a hash set for O(1) lookups. For each number x, check if (x+diff) exists in the set. This finds all pairs where the second element minus the first equals the target difference. Building a set first allows constant-time existence checks instead of nested loops.
+      </div>
+    </div>
+
+    <div class="collapsible">
+      <div class="collapsible-header" onclick="toggleCollapsible('tricks')">
+        ▶ TRICKS & OPTIMIZATIONS
+      </div>
+      <div class="collapsible-content" id="tricks">
+        Only check (x+diff), not (x-diff) to avoid duplicate pairs. Use a set for O(n) time complexity instead of O(n²) with nested loops. The set build phase is separate from the search phase for clarity.
+      </div>
+    </div>
+
+    <div class="collapsible">
+      <div class="collapsible-header" onclick="toggleCollapsible('edge')">
+        ▶ EDGE CASES & CAVEATS
+      </div>
+      <div class="collapsible-content" id="edge">
+        Handle diff=0 by checking for duplicate values. Empty arrays return empty results. Negative differences work the same way. The order of pairs in output doesn't matter. Each pair appears once.
+      </div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="visualization">
+      <div>
+        <div class="set-label">INPUT ARRAY</div>
+        <div class="array-display" id="arrayDisplay"></div>
+      </div>
+      <div>
+        <div class="set-label">HASH SET</div>
+        <div class="set-display" id="setDisplay"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const arr = [1, 5, 3, 4, 2];
+const diff = 2;
+let currentStep = 0;
+
+const steps = [
+  {
+    description: "Initialize empty set and result array",
+    codeVars: {i: null, current: null},
+    conceptVars: {phase: "initialization"},
+    conditions: [],
+    operations: [{text: "Create empty set", type: "check"}],
+    visualization: {current: -1, checking: -1, visited: [], setItems: [], setActive: null},
+    result: []
+  },
+  {
+    description: "Start building set: examine arr[0] = 1",
+    codeVars: {i: 0, current: 1},
+    conceptVars: {phase: "building set"},
+    conditions: [],
+    operations: [{text: "Add 1 to set", type: "add"}],
+    visualization: {current: 0, checking: -1, visited: [], setItems: [1], setActive: 1},
+    result: []
+  },
+  {
+    description: "Continue building set: examine arr[1] = 5",
+    codeVars: {i: 1, current: 5},
+    conceptVars: {phase: "building set"},
+    conditions: [],
+    operations: [{text: "Add 5 to set", type: "add"}],
+    visualization: {current: 1, checking: -1, visited: [0], setItems: [1, 5], setActive: 5},
+    result: []
+  },
+  {
+    description: "Continue building set: examine arr[2] = 3",
+    codeVars: {i: 2, current: 3},
+    conceptVars: {phase: "building set"},
+    conditions: [],
+    operations: [{text: "Add 3 to set", type: "add"}],
+    visualization: {current: 2, checking: -1, visited: [0, 1], setItems: [1, 5, 3], setActive: 3},
+    result: []
+  },
+  {
+    description: "Continue building set: examine arr[3] = 4",
+    codeVars: {i: 3, current: 4},
+    conceptVars: {phase: "building set"},
+    conditions: [],
+    operations: [{text: "Add 4 to set", type: "add"}],
+    visualization: {current: 3, checking: -1, visited: [0, 1, 2], setItems: [1, 5, 3, 4], setActive: 4},
+    result: []
+  },
+  {
+    description: "Complete building set: examine arr[4] = 2",
+    codeVars: {i: 4, current: 2},
+    conceptVars: {phase: "building set"},
+    conditions: [],
+    operations: [{text: "Add 2 to set", type: "add"}],
+    visualization: {current: 4, checking: -1, visited: [0, 1, 2, 3], setItems: [1, 5, 3, 4, 2], setActive: 2},
+    result: []
+  },
+  {
+    description: "Set built. Start searching: check arr[0] = 1",
+    codeVars: {i: 0, current: 1, target: 3},
+    conceptVars: {phase: "searching pairs", looking_for: "1 + 2 = 3"},
+    conditions: [{text: "set.has(1 + 2) = set.has(3) ✓", result: true}],
+    operations: [{text: "Check if 3 exists in set", type: "check"}],
+    visualization: {current: 0, checking: -1, visited: [], setItems: [1, 5, 3, 4, 2], setActive: 3},
+    result: []
+  },
+  {
+    description: "Found pair (1, 3). Add to result",
+    codeVars: {i: 0, current: 1, target: 3},
+    conceptVars: {phase: "searching pairs", pair_found: "(1, 3)"},
+    conditions: [],
+    operations: [{text: "Add pair (1, 3) to result", type: "add"}],
+    visualization: {current: 0, checking: -1, visited: [], setItems: [1, 5, 3, 4, 2], setActive: 3},
+    result: [[1, 3]]
+  },
+  {
+    description: "Continue searching: check arr[1] = 5",
+    codeVars: {i: 1, current: 5, target: 7},
+    conceptVars: {phase: "searching pairs", looking_for: "5 + 2 = 7"},
+    conditions: [{text: "set.has(5 + 2) = set.has(7) ✗", result: false}],
+    operations: [{text: "Check if 7 exists in set", type: "check"}],
+    visualization: {current: 1, checking: -1, visited: [0], setItems: [1, 5, 3, 4, 2], setActive: null},
+    result: [[1, 3]]
+  },
+  {
+    description: "No pair found for 5. Continue to arr[2] = 3",
+    codeVars: {i: 2, current: 3, target: 5},
+    conceptVars: {phase: "searching pairs", looking_for: "3 + 2 = 5"},
+    conditions: [{text: "set.has(3 + 2) = set.has(5) ✓", result: true}],
+    operations: [{text: "Check if 5 exists in set", type: "check"}],
+    visualization: {current: 2, checking: -1, visited: [0, 1], setItems: [1, 5, 3, 4, 2], setActive: 5},
+    result: [[1, 3]]
+  },
+  {
+    description: "Found pair (3, 5). Add to result",
+    codeVars: {i: 2, current: 3, target: 5},
+    conceptVars: {phase: "searching pairs", pair_found: "(3, 5)"},
+    conditions: [],
+    operations: [{text: "Add pair (3, 5) to result", type: "add"}],
+    visualization: {current: 2, checking: -1, visited: [0, 1], setItems: [1, 5, 3, 4, 2], setActive: 5},
+    result: [[1, 3], [3, 5]]
+  },
+  {
+    description: "Continue searching: check arr[3] = 4",
+    codeVars: {i: 3, current: 4, target: 6},
+    conceptVars: {phase: "searching pairs", looking_for: "4 + 2 = 6"},
+    conditions: [{text: "set.has(4 + 2) = set.has(6) ✗", result: false}],
+    operations: [{text: "Check if 6 exists in set", type: "check"}],
+    visualization: {current: 3, checking: -1, visited: [0, 1, 2], setItems: [1, 5, 3, 4, 2], setActive: null},
+    result: [[1, 3], [3, 5]]
+  },
+  {
+    description: "No pair found for 4. Check arr[4] = 2",
+    codeVars: {i: 4, current: 2, target: 4},
+    conceptVars: {phase: "searching pairs", looking_for: "2 + 2 = 4"},
+    conditions: [{text: "set.has(2 + 2) = set.has(4) ✓", result: true}],
+    operations: [{text: "Check if 4 exists in set", type: "check"}],
+    visualization: {current: 4, checking: -1, visited: [0, 1, 2, 3], setItems: [1, 5, 3, 4, 2], setActive: 4},
+    result: [[1, 3], [3, 5]]
+  },
+  {
+    description: "Found pair (2, 4). Add to result",
+    codeVars: {i: 4, current: 2, target: 4},
+    conceptVars: {phase: "searching pairs", pair_found: "(2, 4)"},
+    conditions: [],
+    operations: [{text: "Add pair (2, 4) to result", type: "add"}],
+    visualization: {current: 4, checking: -1, visited: [0, 1, 2, 3], setItems: [1, 5, 3, 4, 2], setActive: 4},
+    result: [[1, 3], [3, 5], [2, 4]]
+  },
+  {
+    description: "Search complete. All pairs found",
+    codeVars: {i: null, current: null, target: null},
+    conceptVars: {phase: "complete"},
+    conditions: [],
+    operations: [{text: "Algorithm finished", type: "check"}],
+    visualization: {current: -1, checking: -1, visited: [0, 1, 2, 3, 4], setItems: [1, 5, 3, 4, 2], setActive: null},
+    result: [[1, 3], [3, 5], [2, 4]]
+  }
+];
+
+function render() {
+  const step = steps[currentStep];
+  
+  document.getElementById('stepCounter').textContent = `${currentStep + 1}/${steps.length}`;
+  document.getElementById('stepDescription').textContent = step.description;
+  
+  let codeVarsHtml = '';
+  for (let [key, value] of Object.entries(step.codeVars)) {
+    const varClass = '';
+    codeVarsHtml += `<span class="var-item ${varClass}">${key}: ${value === null ? '-' : value}</span>`;
+  }
+  document.getElementById('codeVars').innerHTML = codeVarsHtml;
+  
+  let conceptVarsHtml = '';
+  for (let [key, value] of Object.entries(step.conceptVars)) {
+    conceptVarsHtml += `<span class="var-item">${key}: ${value}</span>`;
+  }
+  document.getElementById('conceptVars').innerHTML = conceptVarsHtml;
+  
+  let conditionsHtml = '';
+  if (step.conditions.length === 0) {
+    conditionsHtml = '<div style="opacity: 0.5">No conditions this step</div>';
+  } else {
+    step.conditions.forEach(cond => {
+      const condClass = cond.result ? 'condition-true' : 'condition-false';
+      conditionsHtml += `<div class="condition-item ${condClass}">${cond.text}</div>`;
+    });
+  }
+  document.getElementById('conditions').innerHTML = conditionsHtml;
+  
+  let operationsHtml = '';
+  step.operations.forEach(op => {
+    let opClass = '';
+    if (op.type === 'increment') opClass = 'op-increment';
+    else if (op.type === 'decrement') opClass = 'op-decrement';
+    else if (op.type === 'add') opClass = 'op-add';
+    else if (op.type === 'check') opClass = 'op-check';
+    operationsHtml += `<div class="op-item ${opClass}">${op.text}</div>`;
+  });
+  document.getElementById('operations').innerHTML = operationsHtml;
+  
+  document.getElementById('result').textContent = `Pairs found: ${step.result.length}`;
+  document.getElementById('pairs').textContent = step.result.map(p => `(${p[0]},${p[1]})`).join(' ');
+  
+  let arrayHtml = '';
+  arr.forEach((val, idx) => {
+    let cellClass = 'array-cell';
+    if (step.visualization.visited.includes(idx)) cellClass += ' visited';
+    if (idx === step.visualization.current) cellClass += ' current';
+    if (idx === step.visualization.checking) cellClass += ' checking';
+    
+    let pointers = '';
+    if (idx === step.visualization.current && step.codeVars.i !== null) {
+      pointers += '<div class="pointer pointer-i">i</div>';
+    }
+    
+    arrayHtml += `<div class="${cellClass}">${val}${pointers}</div>`;
+  });
+  document.getElementById('arrayDisplay').innerHTML = arrayHtml;
+  
+  let setHtml = '';
+  step.visualization.setItems.forEach(item => {
+    const activeClass = item === step.visualization.setActive ? 'active' : '';
+    setHtml += `<div class="set-item ${activeClass}">${item}</div>`;
+  });
+  if (step.visualization.setItems.length === 0) {
+    setHtml = '<div style="opacity: 0.5">Empty</div>';
+  }
+  document.getElementById('setDisplay').innerHTML = setHtml;
+  
+  document.getElementById('prevBtn').disabled = currentStep === 0;
+  document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    render();
+  }
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if (currentStep > 0) {
+    currentStep--;
+    render();
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  currentStep = 0;
+  render();
+});
+
+function toggleCollapsible(id) {
+  const content = document.getElementById(id);
+  content.classList.toggle('active');
+  const header = content.previousElementSibling;
+  header.textContent = content.classList.contains('active') 
+    ? header.textContent.replace('▶', '▼')
+    : header.textContent.replace('▼', '▶');
+}
+
+render();
+</script>
+
+</body>
+</html>

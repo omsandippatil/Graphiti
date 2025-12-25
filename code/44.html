@@ -1,0 +1,704 @@
+<!DOCTYPE DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Longest Consecutive Sequence Visualization</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Courier New', monospace;
+}
+
+body {
+background: white;
+color: black;
+padding: 20px;
+display: flex;
+gap: 20px;
+height: 100vh;
+overflow: hidden;
+}
+
+.left-panel {
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: 15px;
+}
+
+.right-panel {
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: 15px;
+}
+
+.section {
+border: 2px solid black;
+padding: 12px;
+}
+
+.section-title {
+font-weight: bold;
+margin-bottom: 8px;
+font-size: 14px;
+}
+
+.controls {
+display: flex;
+gap: 10px;
+}
+
+button {
+background: white;
+border: 2px solid black;
+padding: 8px 16px;
+cursor: pointer;
+font-size: 14px;
+font-weight: bold;
+}
+
+button:hover {
+background: black;
+color: white;
+}
+
+button:disabled {
+opacity: 0.3;
+cursor: not-allowed;
+}
+
+button:disabled:hover {
+background: white;
+color: black;
+}
+
+.variables {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 8px;
+font-size: 13px;
+}
+
+.var-item {
+padding: 6px;
+border: 1px solid black;
+}
+
+.var-label {
+font-weight: bold;
+}
+
+.highlight-yellow {
+background: #ffeb3b;
+}
+
+.highlight-green {
+background: #4caf50;
+color: white;
+}
+
+.highlight-red {
+background: #f44336;
+color: white;
+}
+
+.condition-check {
+padding: 8px;
+border: 2px solid black;
+margin-bottom: 8px;
+font-size: 13px;
+}
+
+.condition-true {
+background: #4caf50;
+color: white;
+}
+
+.condition-false {
+background: #f44336;
+color: white;
+}
+
+.operation-display {
+padding: 8px;
+border: 2px solid black;
+font-size: 13px;
+font-weight: bold;
+}
+
+.op-increment {
+background: #4caf50;
+color: white;
+}
+
+.op-decrement {
+background: #f44336;
+color: white;
+}
+
+.op-add {
+background: #2196f3;
+color: white;
+}
+
+.op-check {
+background: #ff9800;
+color: white;
+}
+
+.visualization {
+border: 2px solid black;
+padding: 20px;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 15px;
+flex: 1;
+}
+
+.array-display {
+display: flex;
+gap: 8px;
+flex-wrap: wrap;
+justify-content: center;
+}
+
+.array-cell {
+width: 50px;
+height: 50px;
+border: 2px solid black;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: bold;
+font-size: 16px;
+position: relative;
+background: white;
+}
+
+.array-cell.checked {
+background: #e0e0e0;
+}
+
+.array-cell.in-sequence {
+background: #90ee90;
+}
+
+.array-cell.current {
+border: 3px solid #ff1493;
+box-shadow: 0 0 10px #ff1493;
+}
+
+.pointer {
+position: absolute;
+font-size: 11px;
+font-weight: bold;
+padding: 2px 6px;
+border-radius: 3px;
+white-space: nowrap;
+}
+
+.ptr-current {
+background: #ff1493;
+color: white;
+top: -25px;
+}
+
+.ptr-start {
+background: #32cd32;
+color: white;
+bottom: -25px;
+left: 0;
+}
+
+.ptr-end {
+background: #2196f3;
+color: white;
+bottom: -25px;
+right: 0;
+}
+
+.set-display {
+margin-top: 20px;
+}
+
+.set-title {
+font-weight: bold;
+margin-bottom: 10px;
+text-align: center;
+}
+
+.set-items {
+display: flex;
+gap: 6px;
+flex-wrap: wrap;
+justify-content: center;
+}
+
+.set-item {
+padding: 6px 12px;
+border: 2px solid black;
+font-size: 14px;
+}
+
+.result-display {
+text-align: center;
+font-size: 16px;
+padding: 10px;
+border: 2px solid black;
+background: white;
+font-weight: bold;
+}
+
+.collapsible {
+border: 2px solid black;
+margin-top: 15px;
+}
+
+.collapsible-header {
+padding: 10px;
+background: black;
+color: white;
+cursor: pointer;
+font-weight: bold;
+user-select: none;
+}
+
+.collapsible-content {
+padding: 12px;
+display: none;
+font-size: 13px;
+line-height: 1.6;
+}
+
+.collapsible-content.active {
+display: block;
+}
+
+.step-info {
+font-size: 13px;
+line-height: 1.5;
+}
+
+.sequence-display {
+margin-top: 15px;
+padding: 10px;
+border: 2px solid black;
+}
+
+.sequence-title {
+font-weight: bold;
+margin-bottom: 8px;
+}
+
+.sequence-items {
+display: flex;
+gap: 6px;
+flex-wrap: wrap;
+}
+
+.sequence-item {
+padding: 6px 10px;
+border: 2px solid #32cd32;
+background: #90ee90;
+font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+<div class="section">
+<div class="section-title">PROBLEM</div>
+<div style="font-size: 13px; line-height: 1.5;">
+Given an unsorted array of integers, find the length of the longest consecutive elements sequence.<br><br>
+Input: [100,4,200,1,3,2] → Output: 4<br>
+Explanation: Sequence is [1,2,3,4]
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">CONTROLS</div>
+<div class="controls">
+<button id="prevBtn">PREVIOUS</button>
+<button id="nextBtn">NEXT</button>
+<button id="resetBtn">RESET</button>
+</div>
+<div style="margin-top: 10px; font-size: 13px;">
+Step: <span id="stepCounter">0</span> / <span id="totalSteps">0</span>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">VARIABLES</div>
+<div class="variables" id="variables"></div>
+</div>
+
+<div class="section">
+<div class="section-title">CONDITION CHECK</div>
+<div id="conditionCheck"></div>
+</div>
+
+<div class="section">
+<div class="section-title">CURRENT OPERATION</div>
+<div id="operationDisplay"></div>
+</div>
+
+<div class="section">
+<div class="section-title">STEP EXPLANATION</div>
+<div class="step-info" id="stepInfo"></div>
+</div>
+
+<div class="collapsible">
+<div class="collapsible-header" onclick="toggleCollapsible(this)">
+▶ ALGORITHM EXPLANATION
+</div>
+<div class="collapsible-content">
+The algorithm uses a HashSet for O(1) lookups. For each number, check if it's the start of a sequence by verifying that (num-1) doesn't exist in the set. If it's a start, count consecutive numbers forward. Track the maximum length found. Time complexity: O(n), Space complexity: O(n).
+</div>
+</div>
+
+<div class="collapsible">
+<div class="collapsible-header" onclick="toggleCollapsible(this)">
+▶ KEY INSIGHTS
+</div>
+<div class="collapsible-content">
+Only start counting from numbers that are sequence beginnings to avoid redundant work. A number is a sequence start if (num-1) is not in the set. This ensures each number is visited at most twice in total across all sequences.
+</div>
+</div>
+
+<div class="collapsible">
+<div class="collapsible-header" onclick="toggleCollapsible(this)">
+▶ EDGE CASES
+</div>
+<div class="collapsible-content">
+Empty array returns 0. Single element returns 1. Array with duplicates: duplicates don't affect result since sets ignore them. All elements form one sequence: return array length. No consecutive elements: return 1.
+</div>
+</div>
+</div>
+
+<div class="right-panel">
+<div class="visualization">
+<div class="section-title">INPUT ARRAY</div>
+<div class="array-display" id="arrayDisplay"></div>
+
+<div class="set-display">
+<div class="set-title">HASHSET</div>
+<div class="set-items" id="setDisplay"></div>
+</div>
+
+<div class="sequence-display" id="sequenceDisplay" style="display: none;">
+<div class="sequence-title">CURRENT SEQUENCE</div>
+<div class="sequence-items" id="sequenceItems"></div>
+</div>
+</div>
+
+<div class="result-display">
+LONGEST LENGTH: <span id="result">0</span>
+</div>
+</div>
+
+<script>
+const inputArray = [100, 4, 200, 1, 3, 2];
+let steps = [];
+let currentStep = 0;
+
+function initializeSteps() {
+steps = [];
+const numSet = new Set(inputArray);
+let maxLength = 0;
+
+steps.push({
+type: 'init',
+array: [...inputArray],
+set: new Set(),
+maxLength: 0,
+currentIndex: -1,
+explanation: 'Initialize empty HashSet and maxLength = 0'
+});
+
+for (let i = 0; i < inputArray.length; i++) {
+steps.push({
+type: 'add_to_set',
+array: [...inputArray],
+set: new Set([...steps[steps.length - 1].set, inputArray[i]]),
+maxLength: maxLength,
+currentIndex: i,
+addingValue: inputArray[i],
+explanation: `Add ${inputArray[i]} to HashSet for O(1) lookup`
+});
+}
+
+const finalSet = new Set(inputArray);
+steps.push({
+type: 'set_complete',
+array: [...inputArray],
+set: new Set(finalSet),
+maxLength: maxLength,
+currentIndex: -1,
+explanation: 'HashSet construction complete. Begin scanning for sequence starts.'
+});
+
+for (let i = 0; i < inputArray.length; i++) {
+const num = inputArray[i];
+steps.push({
+type: 'check_num',
+array: [...inputArray],
+set: new Set(finalSet),
+maxLength: maxLength,
+currentIndex: i,
+checkingNum: num,
+explanation: `Check if ${num} is a sequence start`
+});
+
+const isStart = !finalSet.has(num - 1);
+steps.push({
+type: 'check_start',
+array: [...inputArray],
+set: new Set(finalSet),
+maxLength: maxLength,
+currentIndex: i,
+checkingNum: num,
+isStart: isStart,
+checkValue: num - 1,
+explanation: isStart ? `${num - 1} not in set, so ${num} is a sequence start` : `${num - 1} exists in set, skip ${num} (not a start)`
+});
+
+if (isStart) {
+let currentNum = num;
+let currentLength = 0;
+let sequence = [];
+
+while (finalSet.has(currentNum)) {
+currentLength++;
+sequence.push(currentNum);
+steps.push({
+type: 'count_sequence',
+array: [...inputArray],
+set: new Set(finalSet),
+maxLength: maxLength,
+currentIndex: i,
+sequenceStart: num,
+currentNum: currentNum,
+currentLength: currentLength,
+sequence: [...sequence],
+explanation: `${currentNum} exists in set. Length = ${currentLength}`
+});
+
+currentNum++;
+steps.push({
+type: 'check_next',
+array: [...inputArray],
+set: new Set(finalSet),
+maxLength: maxLength,
+currentIndex: i,
+sequenceStart: num,
+currentNum: currentNum,
+currentLength: currentLength,
+sequence: [...sequence],
+checkingNext: currentNum,
+hasNext: finalSet.has(currentNum),
+explanation: `Check if ${currentNum} exists in set`
+});
+
+if (!finalSet.has(currentNum)) {
+break;
+}
+}
+
+if (currentLength > maxLength) {
+maxLength = currentLength;
+steps.push({
+type: 'update_max',
+array: [...inputArray],
+set: new Set(finalSet),
+maxLength: maxLength,
+currentIndex: i,
+sequenceStart: num,
+currentLength: currentLength,
+sequence: [...sequence],
+explanation: `New maximum length found: ${maxLength}`
+});
+}
+}
+}
+
+steps.push({
+type: 'complete',
+array: [...inputArray],
+set: new Set(finalSet),
+maxLength: maxLength,
+currentIndex: -1,
+explanation: `Algorithm complete. Longest consecutive sequence length: ${maxLength}`
+});
+
+document.getElementById('totalSteps').textContent = steps.length - 1;
+}
+
+function render() {
+const step = steps[currentStep];
+document.getElementById('stepCounter').textContent = currentStep;
+
+const arrayDisplay = document.getElementById('arrayDisplay');
+arrayDisplay.innerHTML = '';
+step.array.forEach((val, idx) => {
+const cell = document.createElement('div');
+cell.className = 'array-cell';
+cell.textContent = val;
+
+if (idx === step.currentIndex) {
+cell.classList.add('current');
+const ptr = document.createElement('div');
+ptr.className = 'pointer ptr-current';
+ptr.textContent = 'CHECK';
+cell.appendChild(ptr);
+}
+
+if (step.sequence && step.sequence.includes(val)) {
+cell.classList.add('in-sequence');
+}
+
+if (step.type === 'add_to_set' && idx <= step.currentIndex) {
+cell.classList.add('checked');
+}
+
+arrayDisplay.appendChild(cell);
+});
+
+const setDisplay = document.getElementById('setDisplay');
+setDisplay.innerHTML = '';
+if (step.set.size > 0) {
+[...step.set].sort((a, b) => a - b).forEach(val => {
+const item = document.createElement('div');
+item.className = 'set-item';
+item.textContent = val;
+setDisplay.appendChild(item);
+});
+} else {
+setDisplay.innerHTML = '<div style="color: #666;">empty</div>';
+}
+
+document.getElementById('result').textContent = step.maxLength;
+
+const variables = document.getElementById('variables');
+variables.innerHTML = '';
+
+const addVar = (label, value, highlight = '') => {
+const varItem = document.createElement('div');
+varItem.className = 'var-item ' + highlight;
+varItem.innerHTML = `<span class="var-label">${label}:</span> ${value}`;
+variables.appendChild(varItem);
+};
+
+addVar('maxLength', step.maxLength, step.type === 'update_max' ? 'highlight-green' : '');
+addVar('currentIndex', step.currentIndex >= 0 ? step.currentIndex : 'N/A', step.currentIndex >= 0 ? 'highlight-yellow' : '');
+if (step.checkingNum !== undefined) {
+addVar('checkingNum', step.checkingNum, 'highlight-yellow');
+}
+if (step.currentNum !== undefined) {
+addVar('currentNum', step.currentNum, 'highlight-yellow');
+}
+if (step.currentLength !== undefined) {
+addVar('currentLength', step.currentLength, step.type === 'count_sequence' ? 'highlight-green' : '');
+}
+
+const conditionCheck = document.getElementById('conditionCheck');
+conditionCheck.innerHTML = '';
+
+if (step.type === 'check_start') {
+const cond = document.createElement('div');
+cond.className = 'condition-check ' + (step.isStart ? 'condition-true' : 'condition-false');
+cond.textContent = `${step.checkValue} in set? ${step.isStart ? '✗ (start)' : '✓ (skip)'}`;
+conditionCheck.appendChild(cond);
+} else if (step.type === 'check_next') {
+const cond = document.createElement('div');
+cond.className = 'condition-check ' + (step.hasNext ? 'condition-true' : 'condition-false');
+cond.textContent = `${step.checkingNext} in set? ${step.hasNext ? '✓' : '✗'}`;
+conditionCheck.appendChild(cond);
+} else {
+conditionCheck.innerHTML = '<div style="color: #666; font-size: 13px;">No condition check</div>';
+}
+
+const operationDisplay = document.getElementById('operationDisplay');
+operationDisplay.innerHTML = '';
+
+if (step.type === 'add_to_set') {
+const op = document.createElement('div');
+op.className = 'operation-display op-add';
+op.textContent = `Add ${step.addingValue} to HashSet`;
+operationDisplay.appendChild(op);
+} else if (step.type === 'count_sequence') {
+const op = document.createElement('div');
+op.className = 'operation-display op-increment';
+op.textContent = `currentLength++ (${step.currentLength - 1} → ${step.currentLength})`;
+operationDisplay.appendChild(op);
+} else if (step.type === 'update_max') {
+const op = document.createElement('div');
+op.className = 'operation-display op-increment';
+op.textContent = `maxLength = ${step.maxLength}`;
+operationDisplay.appendChild(op);
+} else if (step.type === 'check_num' || step.type === 'check_start' || step.type === 'check_next') {
+const op = document.createElement('div');
+op.className = 'operation-display op-check';
+op.textContent = 'Checking condition';
+operationDisplay.appendChild(op);
+} else {
+operationDisplay.innerHTML = '<div style="color: #666; font-size: 13px;">No operation</div>';
+}
+
+document.getElementById('stepInfo').textContent = step.explanation;
+
+const sequenceDisplay = document.getElementById('sequenceDisplay');
+const sequenceItems = document.getElementById('sequenceItems');
+if (step.sequence && step.sequence.length > 0) {
+sequenceDisplay.style.display = 'block';
+sequenceItems.innerHTML = '';
+step.sequence.forEach(val => {
+const item = document.createElement('div');
+item.className = 'sequence-item';
+item.textContent = val;
+sequenceItems.appendChild(item);
+});
+} else {
+sequenceDisplay.style.display = 'none';
+}
+
+document.getElementById('prevBtn').disabled = currentStep === 0;
+document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+}
+
+function toggleCollapsible(header) {
+const content = header.nextElementSibling;
+content.classList.toggle('active');
+header.textContent = content.classList.contains('active') ? '▼ ' + header.textContent.substring(2) : '▶ ' + header.textContent.substring(2);
+}
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+if (currentStep > 0) {
+currentStep--;
+render();
+}
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+if (currentStep < steps.length - 1) {
+currentStep++;
+render();
+}
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+currentStep = 0;
+render();
+});
+
+initializeSteps();
+render();
+</script>
+
+</body>
+</html>

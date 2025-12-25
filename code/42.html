@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sum of Distinct Elements</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Courier New', monospace;
+}
+
+body {
+  background: white;
+  color: black;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.left-panel {
+  width: 45%;
+  padding: 20px;
+  border-right: 2px solid black;
+  overflow-y: auto;
+}
+
+.right-panel {
+  width: 55%;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.problem-section {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid black;
+}
+
+.problem-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.problem-example {
+  font-size: 14px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid black;
+}
+
+button {
+  padding: 8px 16px;
+  background: white;
+  border: 2px solid black;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+button:hover {
+  background: black;
+  color: white;
+}
+
+button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background: white;
+  color: black;
+}
+
+.section {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid black;
+}
+
+.section-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.variables-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  font-size: 13px;
+}
+
+.variable {
+  padding: 6px;
+  border: 1px solid black;
+  background: white;
+}
+
+.variable.active {
+  background: yellow;
+}
+
+.variable.increment {
+  background: #90EE90;
+}
+
+.variable.decrement {
+  background: #FFB6C6;
+}
+
+.variable-name {
+  font-weight: bold;
+}
+
+.condition {
+  padding: 8px;
+  border: 1px solid black;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.condition.true {
+  background: #90EE90;
+}
+
+.condition.false {
+  background: #FFB6C6;
+}
+
+.operation {
+  padding: 8px;
+  border: 1px solid black;
+  font-size: 13px;
+}
+
+.operation.increment {
+  background: #90EE90;
+}
+
+.operation.decrement {
+  background: #FFB6C6;
+}
+
+.operation.add {
+  background: #B0E0E6;
+}
+
+.result-display {
+  padding: 8px;
+  border: 1px solid black;
+  font-size: 13px;
+}
+
+.array-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.array-cell {
+  width: 50px;
+  height: 50px;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  position: relative;
+}
+
+.array-cell.current {
+  background: yellow;
+}
+
+.array-cell.visited {
+  background: #E0E0E0;
+}
+
+.array-cell.duplicate {
+  background: #FFB6C6;
+  text-decoration: line-through;
+}
+
+.pointer {
+  position: absolute;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.pointer.i {
+  background: #FF1493;
+  color: white;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.collapsible-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px solid black;
+}
+
+.collapsible-header {
+  padding: 10px;
+  background: black;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  user-select: none;
+}
+
+.collapsible-content {
+  display: none;
+  padding: 15px;
+  border: 2px solid black;
+  border-top: none;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.collapsible-content.open {
+  display: block;
+}
+
+.set-display {
+  padding: 8px;
+  border: 1px solid black;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.set-items {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.set-item {
+  padding: 4px 8px;
+  border: 1px solid black;
+  background: #E0E0E0;
+}
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+  <div class="problem-section">
+    <div class="problem-title">Sum of Distinct Elements in an Array</div>
+    <div class="problem-example">Input: [1,2,2,3] → Output: 6</div>
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn">Previous</button>
+    <button id="nextBtn">Next</button>
+    <button id="resetBtn">Reset</button>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Step <span id="stepCounter">0</span></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Variables</div>
+    <div class="variables-grid" id="variablesGrid"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Set (Seen Elements)</div>
+    <div class="set-display">
+      <div>Size: <span id="setSize">0</span></div>
+      <div class="set-items" id="setItems"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Current Condition</div>
+    <div id="conditionDisplay"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Current Operation</div>
+    <div id="operationDisplay"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Result</div>
+    <div class="result-display">
+      Sum: <span id="resultValue">0</span>
+    </div>
+  </div>
+
+  <div class="collapsible-section">
+    <div class="collapsible-header" onclick="toggleCollapsible('theory')">
+      ▶ Algorithm Explanation & Theory
+    </div>
+    <div class="collapsible-content" id="theory">
+      <strong>Problem:</strong> Given an array of integers, return the sum of all distinct elements. Each unique value should only be counted once, regardless of how many times it appears in the array.
+      <br><br>
+      <strong>Approach:</strong> Use a Set data structure to track which elements we've already seen. As we iterate through the array, we only add elements to our sum if they haven't been seen before. The Set automatically handles uniqueness checking.
+      <br><br>
+      <strong>Time Complexity:</strong> O(n) where n is the length of the array. We iterate through each element once, and Set operations (add/has) are O(1) on average.
+      <br><br>
+      <strong>Space Complexity:</strong> O(k) where k is the number of distinct elements, as we store each unique element in the Set.
+      <br><br>
+      <strong>Edge Cases:</strong> Empty array returns 0. Array with all duplicates returns just one element. Negative numbers are handled the same as positive numbers.
+    </div>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="array-container" id="arrayContainer"></div>
+</div>
+
+<script>
+const array = [1, 2, 2, 3];
+let steps = [];
+let currentStep = 0;
+
+function generateSteps() {
+  const seen = new Set();
+  let sum = 0;
+  
+  steps.push({
+    i: -1,
+    sum: 0,
+    seen: new Set(),
+    condition: '',
+    operation: 'Initialize: sum = 0, seen = empty set',
+    visited: [],
+    current: -1,
+    isDuplicate: false,
+    activeVars: [],
+    modifiedVars: {}
+  });
+
+  for (let i = 0; i < array.length; i++) {
+    const num = array[i];
+    const isInSet = seen.has(num);
+    
+    steps.push({
+      i: i,
+      sum: sum,
+      seen: new Set(seen),
+      condition: `seen.has(${num}) = ${isInSet ? 'true' : 'false'}`,
+      operation: isInSet ? `Skip ${num} (already in set)` : `Check if ${num} is in set`,
+      visited: Array.from({length: i}, (_, idx) => idx),
+      current: i,
+      isDuplicate: isInSet,
+      activeVars: ['i', 'sum'],
+      modifiedVars: {}
+    });
+
+    if (!isInSet) {
+      seen.add(num);
+      sum += num;
+      
+      steps.push({
+        i: i,
+        sum: sum,
+        seen: new Set(seen),
+        condition: '',
+        operation: `Add ${num} to sum (${sum - num} + ${num} = ${sum})`,
+        visited: Array.from({length: i + 1}, (_, idx) => idx),
+        current: i,
+        isDuplicate: false,
+        activeVars: ['sum'],
+        modifiedVars: {sum: 'increment'}
+      });
+    }
+  }
+
+  steps.push({
+    i: array.length,
+    sum: sum,
+    seen: seen,
+    condition: '',
+    operation: `Complete: Return sum = ${sum}`,
+    visited: Array.from({length: array.length}, (_, idx) => idx),
+    current: -1,
+    isDuplicate: false,
+    activeVars: ['sum'],
+    modifiedVars: {}
+  });
+}
+
+function renderArray() {
+  const container = document.getElementById('arrayContainer');
+  container.innerHTML = '';
+  
+  const step = steps[currentStep];
+  
+  array.forEach((num, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'array-cell';
+    
+    if (idx === step.current) {
+      cell.classList.add('current');
+      if (step.isDuplicate) {
+        cell.classList.add('duplicate');
+      }
+    } else if (step.visited.includes(idx)) {
+      cell.classList.add('visited');
+      if (step.seen.has(num) && array.slice(0, idx).includes(num)) {
+        cell.classList.add('duplicate');
+      }
+    }
+    
+    cell.textContent = num;
+    
+    if (idx === step.i && step.i >= 0) {
+      const pointer = document.createElement('div');
+      pointer.className = 'pointer i';
+      pointer.textContent = 'i=' + idx;
+      cell.appendChild(pointer);
+    }
+    
+    container.appendChild(cell);
+  });
+}
+
+function renderVariables() {
+  const grid = document.getElementById('variablesGrid');
+  grid.innerHTML = '';
+  
+  const step = steps[currentStep];
+  
+  const vars = [
+    {name: 'i', value: step.i >= 0 ? step.i : '-'},
+    {name: 'sum', value: step.sum},
+    {name: 'current', value: step.current >= 0 ? array[step.current] : '-'},
+    {name: 'array.length', value: array.length}
+  ];
+  
+  vars.forEach(v => {
+    const div = document.createElement('div');
+    div.className = 'variable';
+    
+    if (step.activeVars.includes(v.name)) {
+      div.classList.add('active');
+    }
+    
+    if (step.modifiedVars[v.name] === 'increment') {
+      div.classList.add('increment');
+    } else if (step.modifiedVars[v.name] === 'decrement') {
+      div.classList.add('decrement');
+    }
+    
+    div.innerHTML = `<span class="variable-name">${v.name}:</span> ${v.value}`;
+    grid.appendChild(div);
+  });
+}
+
+function renderSet() {
+  const step = steps[currentStep];
+  document.getElementById('setSize').textContent = step.seen.size;
+  
+  const setItems = document.getElementById('setItems');
+  setItems.innerHTML = '';
+  
+  if (step.seen.size === 0) {
+    setItems.innerHTML = '<span style="color: #666;">empty</span>';
+  } else {
+    step.seen.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'set-item';
+      div.textContent = item;
+      setItems.appendChild(div);
+    });
+  }
+}
+
+function renderCondition() {
+  const container = document.getElementById('conditionDisplay');
+  const step = steps[currentStep];
+  
+  if (step.condition) {
+    const div = document.createElement('div');
+    div.className = 'condition';
+    div.classList.add(step.condition.includes('true') ? 'true' : 'false');
+    div.textContent = step.condition;
+    container.innerHTML = '';
+    container.appendChild(div);
+  } else {
+    container.innerHTML = '<div style="color: #666;">-</div>';
+  }
+}
+
+function renderOperation() {
+  const container = document.getElementById('operationDisplay');
+  const step = steps[currentStep];
+  
+  const div = document.createElement('div');
+  div.className = 'operation';
+  
+  if (step.operation.includes('Add')) {
+    div.classList.add('add');
+  } else if (step.operation.includes('Skip')) {
+    div.classList.add('decrement');
+  }
+  
+  div.textContent = step.operation;
+  container.innerHTML = '';
+  container.appendChild(div);
+}
+
+function render() {
+  document.getElementById('stepCounter').textContent = currentStep;
+  document.getElementById('resultValue').textContent = steps[currentStep].sum;
+  
+  renderArray();
+  renderVariables();
+  renderSet();
+  renderCondition();
+  renderOperation();
+  
+  document.getElementById('prevBtn').disabled = currentStep === 0;
+  document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+}
+
+function toggleCollapsible(id) {
+  const content = document.getElementById(id);
+  content.classList.toggle('open');
+  const header = content.previousElementSibling;
+  header.textContent = content.classList.contains('open') ? '▼ Algorithm Explanation & Theory' : '▶ Algorithm Explanation & Theory';
+}
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if (currentStep > 0) {
+    currentStep--;
+    render();
+  }
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    render();
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  currentStep = 0;
+  render();
+});
+
+generateSteps();
+render();
+</script>
+
+</body>
+</html>

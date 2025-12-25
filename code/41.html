@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Count Distinct Elements</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Courier New', monospace;
+  background: white;
+  color: black;
+  padding: 20px;
+  font-size: 13px;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+  max-width: 100%;
+  height: calc(100vh - 40px);
+}
+
+.left-panel {
+  flex: 0 0 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid black;
+  padding: 20px;
+}
+
+.section {
+  border: 2px solid black;
+  padding: 12px;
+}
+
+.section-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.problem {
+  line-height: 1.6;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  flex: 1;
+  padding: 10px;
+  background: white;
+  border: 2px solid black;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+button:hover {
+  background: black;
+  color: white;
+}
+
+button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: white;
+  color: black;
+}
+
+.variables {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.var-item {
+  padding: 6px;
+  border: 1px solid black;
+  display: flex;
+  justify-content: space-between;
+}
+
+.var-item.active {
+  background: #ffff99;
+}
+
+.var-item.increment {
+  background: #90EE90;
+}
+
+.var-item.decrement {
+  background: #FFB6C6;
+}
+
+.var-name {
+  font-weight: bold;
+}
+
+.step-info {
+  line-height: 1.6;
+  min-height: 60px;
+}
+
+.condition {
+  padding: 6px;
+  border: 1px solid black;
+  margin: 4px 0;
+  display: inline-block;
+}
+
+.condition.true {
+  background: #90EE90;
+}
+
+.condition.false {
+  background: #FFB6C6;
+}
+
+.operation {
+  padding: 6px;
+  border: 1px solid black;
+  margin: 4px 0;
+  display: inline-block;
+}
+
+.operation.increment {
+  background: #90EE90;
+}
+
+.operation.decrement {
+  background: #FFB6C6;
+}
+
+.operation.add {
+  background: #B0E0E6;
+}
+
+.visualization {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.array-display {
+  display: flex;
+  gap: 4px;
+}
+
+.array-cell {
+  width: 60px;
+  height: 60px;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  position: relative;
+  background: white;
+}
+
+.array-cell.visited {
+  background: #f0f0f0;
+}
+
+.array-cell.current {
+  background: #ffff99;
+  border: 3px solid black;
+}
+
+.pointer {
+  position: absolute;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 4px;
+  border: 1px solid black;
+  white-space: nowrap;
+}
+
+.pointer.i {
+  background: #FF1493;
+  color: white;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.set-display {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-height: 60px;
+  border: 2px solid black;
+  padding: 10px;
+}
+
+.set-item {
+  width: 50px;
+  height: 50px;
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  background: white;
+}
+
+.set-item.new {
+  background: #B0E0E6;
+}
+
+.collapsible {
+  border: 2px solid black;
+  margin-top: 12px;
+}
+
+.collapsible-header {
+  padding: 12px;
+  cursor: pointer;
+  background: white;
+  font-weight: bold;
+  user-select: none;
+}
+
+.collapsible-header:hover {
+  background: black;
+  color: white;
+}
+
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.collapsible-content.open {
+  max-height: 2000px;
+  padding: 12px;
+  border-top: 2px solid black;
+}
+
+.result {
+  padding: 6px;
+  border: 1px solid black;
+  font-weight: bold;
+  text-align: center;
+  background: #f0f0f0;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="left-panel">
+    <div class="section">
+      <div class="section-title">Problem</div>
+      <div class="problem">
+        Count Distinct Elements in an Array<br>
+        Input: [1,2,2,3] → Output: 3
+      </div>
+    </div>
+
+    <div class="section controls">
+      <button id="prevBtn">Previous</button>
+      <button id="nextBtn">Next</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Step: <span id="stepCounter">0</span></div>
+      <div class="step-info" id="stepInfo">Click Next to start</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Variables</div>
+      <div class="variables" id="variables"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Conditions</div>
+      <div id="conditions">No conditions yet</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Operations</div>
+      <div id="operations">No operations yet</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Result</div>
+      <div class="result" id="result">count = 0</div>
+    </div>
+
+    <div class="collapsible">
+      <div class="collapsible-header" onclick="toggleCollapsible(this)">
+        ▶ Algorithm Theory & Explanation
+      </div>
+      <div class="collapsible-content">
+        <strong>Approach:</strong> Use a Set data structure to automatically handle uniqueness. Sets only store distinct values.<br><br>
+        <strong>Algorithm Steps:</strong><br>
+        1. Initialize empty Set<br>
+        2. Iterate through array<br>
+        3. Add each element to Set<br>
+        4. Return Set size<br><br>
+        <strong>Time Complexity:</strong> O(n)<br>
+        <strong>Space Complexity:</strong> O(n)<br><br>
+        <strong>Key Insight:</strong> Sets ignore duplicate insertions, maintaining only unique values.
+      </div>
+    </div>
+
+    <div class="collapsible">
+      <div class="collapsible-header" onclick="toggleCollapsible(this)">
+        ▶ Edge Cases & Caveats
+      </div>
+      <div class="collapsible-content">
+        <strong>Edge Cases:</strong><br>
+        • Empty array: return 0<br>
+        • All same elements: return 1<br>
+        • All unique elements: return n<br>
+        • Single element: return 1<br><br>
+        <strong>Caveats:</strong><br>
+        • Set uses hash-based storage<br>
+        • Order not preserved<br>
+        • Extra space required
+      </div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="visualization">
+      <div>
+        <div style="font-weight: bold; margin-bottom: 10px;">Input Array:</div>
+        <div class="array-display" id="arrayDisplay"></div>
+      </div>
+      <div>
+        <div style="font-weight: bold; margin-bottom: 10px;">Set (Distinct Elements):</div>
+        <div class="set-display" id="setDisplay"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const arr = [1, 2, 2, 3];
+let currentStep = 0;
+let steps = [];
+
+function generateSteps() {
+  const s = [];
+  const set = new Set();
+  
+  s.push({
+    description: 'Initialize: Create empty Set and start iteration',
+    i: -1,
+    set: new Set(),
+    count: 0,
+    conditions: [],
+    operations: [],
+    vars: { i: -1, 'arr.length': arr.length, 'set.size': 0 }
+  });
+
+  for (let i = 0; i < arr.length; i++) {
+    const beforeSize = set.size;
+    const isNew = !set.has(arr[i]);
+    
+    s.push({
+      description: `Check element at index ${i}: value = ${arr[i]}`,
+      i: i,
+      set: new Set(set),
+      count: set.size,
+      conditions: [`i < arr.length (${i} < ${arr.length}) ✓`],
+      operations: [],
+      vars: { i: i, 'arr[i]': arr[i], 'arr.length': arr.length, 'set.size': set.size }
+    });
+
+    set.add(arr[i]);
+    
+    s.push({
+      description: isNew ? `Add ${arr[i]} to Set (new element)` : `Add ${arr[i]} to Set (duplicate, ignored)`,
+      i: i,
+      set: new Set(set),
+      count: set.size,
+      conditions: [],
+      operations: [isNew ? `set.add(${arr[i]}) - Added` : `set.add(${arr[i]}) - Duplicate`],
+      vars: { i: i, 'arr[i]': arr[i], 'arr.length': arr.length, 'set.size': set.size },
+      newElement: isNew ? arr[i] : null
+    });
+  }
+
+  s.push({
+    description: 'Loop complete: Return set.size as count of distinct elements',
+    i: arr.length,
+    set: new Set(set),
+    count: set.size,
+    conditions: [`i < arr.length (${arr.length} < ${arr.length}) ✗`],
+    operations: [`Return count = ${set.size}`],
+    vars: { i: arr.length, 'arr.length': arr.length, 'set.size': set.size }
+  });
+
+  return s;
+}
+
+function render() {
+  const step = steps[currentStep];
+  
+  document.getElementById('stepCounter').textContent = `${currentStep}/${steps.length - 1}`;
+  document.getElementById('stepInfo').textContent = step.description;
+  
+  const varsHtml = Object.entries(step.vars).map(([name, value]) => {
+    let className = 'var-item';
+    return `<div class="${className}"><span class="var-name">${name}:</span><span>${value}</span></div>`;
+  }).join('');
+  document.getElementById('variables').innerHTML = varsHtml;
+  
+  if (step.conditions.length > 0) {
+    const condsHtml = step.conditions.map(c => {
+      const isTrue = c.includes('✓');
+      return `<div class="condition ${isTrue ? 'true' : 'false'}">${c}</div>`;
+    }).join('');
+    document.getElementById('conditions').innerHTML = condsHtml;
+  } else {
+    document.getElementById('conditions').innerHTML = 'No conditions evaluated';
+  }
+  
+  if (step.operations.length > 0) {
+    const opsHtml = step.operations.map(o => {
+      let className = 'operation';
+      if (o.includes('Added')) className += ' add';
+      return `<div class="${className}">${o}</div>`;
+    }).join('');
+    document.getElementById('operations').innerHTML = opsHtml;
+  } else {
+    document.getElementById('operations').innerHTML = 'No operations this step';
+  }
+  
+  document.getElementById('result').textContent = `count = ${step.count}`;
+  
+  const arrayHtml = arr.map((val, idx) => {
+    let className = 'array-cell';
+    if (idx < step.i) className += ' visited';
+    if (idx === step.i) className += ' current';
+    
+    const pointer = idx === step.i ? '<div class="pointer i">i</div>' : '';
+    
+    return `<div class="${className}">${val}${pointer}</div>`;
+  }).join('');
+  document.getElementById('arrayDisplay').innerHTML = arrayHtml;
+  
+  const setHtml = Array.from(step.set).map(val => {
+    let className = 'set-item';
+    if (step.newElement === val) className += ' new';
+    return `<div class="${className}">${val}</div>`;
+  }).join('');
+  document.getElementById('setDisplay').innerHTML = setHtml || '<div style="color: #999;">Empty Set</div>';
+  
+  document.getElementById('prevBtn').disabled = currentStep === 0;
+  document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+}
+
+function nextStep() {
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    render();
+  }
+}
+
+function prevStep() {
+  if (currentStep > 0) {
+    currentStep--;
+    render();
+  }
+}
+
+function reset() {
+  currentStep = 0;
+  render();
+}
+
+function toggleCollapsible(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('open');
+  header.textContent = content.classList.contains('open') 
+    ? header.textContent.replace('▶', '▼')
+    : header.textContent.replace('▼', '▶');
+}
+
+document.getElementById('nextBtn').addEventListener('click', nextStep);
+document.getElementById('prevBtn').addEventListener('click', prevStep);
+document.getElementById('resetBtn').addEventListener('click', reset);
+
+steps = generateSteps();
+render();
+</script>
+
+</body>
+</html>

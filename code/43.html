@@ -1,0 +1,727 @@
+<!DOCTYPE DOCTYPE>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subarray with Zero Sum Visualization</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {
+font-family: 'Courier New', monospace;
+background: white;
+color: black;
+display: flex;
+height: 100vh;
+overflow: hidden;
+}
+
+.left-panel {
+width: 50%;
+padding: 20px;
+border-right: 2px solid black;
+overflow-y: auto;
+}
+
+.right-panel {
+width: 50%;
+padding: 20px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+}
+
+.question {
+margin-bottom: 15px;
+padding: 10px;
+border: 2px solid black;
+}
+
+.question h2 {
+font-size: 18px;
+margin-bottom: 8px;
+}
+
+.question p {
+font-size: 14px;
+line-height: 1.4;
+}
+
+.controls {
+margin-bottom: 15px;
+padding: 10px;
+border: 2px solid black;
+display: flex;
+gap: 10px;
+}
+
+button {
+padding: 8px 16px;
+background: white;
+border: 2px solid black;
+cursor: pointer;
+font-family: 'Courier New', monospace;
+font-size: 14px;
+}
+
+button:hover {
+background: black;
+color: white;
+}
+
+button:disabled {
+opacity: 0.3;
+cursor: not-allowed;
+}
+
+button:disabled:hover {
+background: white;
+color: black;
+}
+
+.step-info {
+margin-bottom: 15px;
+padding: 10px;
+border: 2px solid black;
+}
+
+.step-info h3 {
+font-size: 16px;
+margin-bottom: 8px;
+}
+
+.step-info p {
+font-size: 13px;
+line-height: 1.5;
+}
+
+.variables {
+margin-bottom: 15px;
+padding: 10px;
+border: 2px solid black;
+}
+
+.variables h3 {
+font-size: 16px;
+margin-bottom: 8px;
+}
+
+.var-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 8px;
+}
+
+.var-item {
+padding: 6px;
+border: 1px solid black;
+font-size: 13px;
+}
+
+.var-item.active {
+background: yellow;
+}
+
+.var-item.increment {
+background: #90EE90;
+}
+
+.var-item.decrement {
+background: #FFB6C6;
+}
+
+.conditions {
+margin-bottom: 15px;
+padding: 10px;
+border: 2px solid black;
+}
+
+.conditions h3 {
+font-size: 16px;
+margin-bottom: 8px;
+}
+
+.condition-item {
+padding: 6px;
+margin-bottom: 4px;
+border: 1px solid black;
+font-size: 13px;
+}
+
+.condition-item.true {
+background: #90EE90;
+}
+
+.condition-item.false {
+background: #FFB6C6;
+}
+
+.operations {
+margin-bottom: 15px;
+padding: 10px;
+border: 2px solid black;
+}
+
+.operations h3 {
+font-size: 16px;
+margin-bottom: 8px;
+}
+
+.operation-item {
+padding: 6px;
+margin-bottom: 4px;
+font-size: 13px;
+}
+
+.operation-item.add {
+background: #ADD8E6;
+}
+
+.operation-item.increment {
+background: #90EE90;
+}
+
+.operation-item.decrement {
+background: #FFB6C6;
+}
+
+.result-section {
+margin-bottom: 15px;
+padding: 10px;
+border: 2px solid black;
+}
+
+.result-section h3 {
+font-size: 16px;
+margin-bottom: 8px;
+}
+
+.array-display {
+display: flex;
+gap: 4px;
+flex-wrap: wrap;
+}
+
+.array-cell {
+width: 40px;
+height: 40px;
+border: 2px solid black;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 14px;
+position: relative;
+}
+
+.array-cell.current {
+background: #FFD700;
+border-width: 3px;
+}
+
+.array-cell.visited {
+background: #E8E8E8;
+}
+
+.pointer {
+position: absolute;
+font-size: 10px;
+font-weight: bold;
+padding: 2px 4px;
+border-radius: 2px;
+white-space: nowrap;
+}
+
+.pointer.pink {
+background: #FF1493;
+color: white;
+}
+
+.pointer.green {
+background: #00FF00;
+color: black;
+}
+
+.collapsible {
+margin-top: 15px;
+border: 2px solid black;
+}
+
+.collapsible-header {
+padding: 10px;
+background: white;
+cursor: pointer;
+font-size: 14px;
+font-weight: bold;
+border-bottom: 2px solid black;
+}
+
+.collapsible-header:hover {
+background: black;
+color: white;
+}
+
+.collapsible-content {
+display: none;
+padding: 10px;
+font-size: 13px;
+line-height: 1.6;
+}
+
+.collapsible-content.open {
+display: block;
+}
+
+.visualization {
+display: flex;
+gap: 20px;
+align-items: flex-start;
+}
+
+.hash-table {
+border: 2px solid black;
+padding: 15px;
+}
+
+.hash-table h4 {
+font-size: 14px;
+margin-bottom: 10px;
+}
+
+.hash-row {
+display: flex;
+align-items: center;
+margin-bottom: 6px;
+gap: 10px;
+font-size: 13px;
+}
+
+.hash-key {
+padding: 4px 8px;
+border: 1px solid black;
+min-width: 60px;
+}
+
+.hash-value {
+padding: 4px 8px;
+border: 1px solid black;
+min-width: 60px;
+}
+
+.hash-row.highlight {
+background: yellow;
+}
+</style>
+</head>
+<body>
+<div class="left-panel">
+<div class="question">
+<h2>43. Subarray with Zero Sum</h2>
+<p>Given an array of integers, determine if there exists a contiguous subarray with sum equal to zero.</p>
+<p><strong>Input:</strong> [4,2,-3,1,6] → <strong>Output:</strong> True</p>
+<p><strong>Example:</strong> Subarray [2,-3,1] has sum = 0</p>
+</div>
+
+<div class="controls">
+<button id="prevBtn">Previous</button>
+<button id="nextBtn">Next</button>
+<button id="resetBtn">Reset</button>
+</div>
+
+<div class="step-info">
+<h3>Step <span id="stepCounter">0</span></h3>
+<p id="stepDescription"></p>
+</div>
+
+<div class="variables">
+<h3>Variables</h3>
+<div class="var-grid" id="varGrid"></div>
+</div>
+
+<div class="conditions">
+<h3>Condition Checks</h3>
+<div id="conditionsList"></div>
+</div>
+
+<div class="operations">
+<h3>Current Operation</h3>
+<div id="operationsList"></div>
+</div>
+
+<div class="result-section">
+<h3>Result</h3>
+<div id="resultDisplay"></div>
+</div>
+
+<div class="collapsible">
+<div class="collapsible-header" onclick="toggleCollapsible('theory')">
+▶ Algorithm Theory & Explanation
+</div>
+<div class="collapsible-content" id="theory">
+<h4>Prefix Sum with Hash Table Approach</h4>
+<p>This algorithm uses the prefix sum technique combined with a hash table to detect if any subarray sums to zero in O(n) time.</p>
+<p><strong>Key Insight:</strong> If prefix_sum[i] == prefix_sum[j] where i < j, then the subarray from index i+1 to j has sum = 0.</p>
+<p><strong>Special Case:</strong> If any prefix sum equals 0, then the subarray from start to current index has sum = 0.</p>
+<p><strong>Time Complexity:</strong> O(n) - single pass through array</p>
+<p><strong>Space Complexity:</strong> O(n) - hash table storage</p>
+</div>
+</div>
+
+<div class="collapsible">
+<div class="collapsible-header" onclick="toggleCollapsible('tricks')">
+▶ Tricks & Optimizations
+</div>
+<div class="collapsible-content" id="tricks">
+<p><strong>Hash Table Initialization:</strong> Start with {0: -1} to handle subarrays starting from index 0.</p>
+<p><strong>Early Exit:</strong> Return true immediately when duplicate prefix sum is found.</p>
+<p><strong>Single Pass:</strong> No need to recalculate sums, maintain running total.</p>
+</div>
+</div>
+
+<div class="collapsible">
+<div class="collapsible-header" onclick="toggleCollapsible('edge')">
+▶ Edge Cases & Boundary Conditions
+</div>
+<div class="collapsible-content" id="edge">
+<p><strong>Empty Array:</strong> Return false (no subarray exists).</p>
+<p><strong>Single Element Zero:</strong> Return true ([0] has sum 0).</p>
+<p><strong>All Positive/Negative:</strong> Still possible if they cancel out.</p>
+<p><strong>Entire Array Sums to Zero:</strong> Detected when prefix_sum becomes 0.</p>
+</div>
+</div>
+
+<div class="collapsible">
+<div class="collapsible-header" onclick="toggleCollapsible('caveats')">
+▶ Common Mistakes & Caveats
+</div>
+<div class="collapsible-content" id="caveats">
+<p><strong>Forgetting Initial 0:</strong> Must initialize hash table with {0: -1}.</p>
+<p><strong>Index Tracking:</strong> Store indices in hash table for subarray identification.</p>
+<p><strong>Prefix Sum Update:</strong> Update sum before checking, not after.</p>
+<p><strong>Return Value:</strong> Return boolean, not subarray indices unless asked.</p>
+</div>
+</div>
+</div>
+
+<div class="right-panel">
+<div class="visualization">
+<div class="array-display" id="arrayDisplay"></div>
+<div class="hash-table">
+<h4>Hash Table (Prefix Sum → Index)</h4>
+<div id="hashTableDisplay"></div>
+</div>
+</div>
+</div>
+
+<script>
+const arr = [4, 2, -3, 1, 6];
+let currentStep = 0;
+
+const steps = [
+{
+desc: "Initialize: Create hash table with {0: -1} to handle subarrays starting from index 0. Set prefix_sum = 0.",
+vars: {prefixSum: 0, i: -1, result: false},
+hashTable: {0: -1},
+conditions: [],
+operations: ["Initialize hash_table = {0: -1}", "Initialize prefix_sum = 0"],
+currentIndex: -1,
+visitedIndices: [],
+highlights: {}
+},
+{
+desc: "Start iteration: i = 0. Current element = 4.",
+vars: {prefixSum: 0, i: 0, result: false},
+hashTable: {0: -1},
+conditions: [],
+operations: ["Moving to index 0"],
+currentIndex: 0,
+visitedIndices: [],
+highlights: {i: 'active'}
+},
+{
+desc: "Update prefix_sum: prefix_sum = 0 + 4 = 4.",
+vars: {prefixSum: 4, i: 0, result: false},
+hashTable: {0: -1},
+conditions: [],
+operations: ["prefix_sum += arr[0]", "prefix_sum = 0 + 4 = 4"],
+currentIndex: 0,
+visitedIndices: [],
+highlights: {prefixSum: 'increment'}
+},
+{
+desc: "Check if prefix_sum (4) exists in hash table. Not found.",
+vars: {prefixSum: 4, i: 0, result: false},
+hashTable: {0: -1},
+conditions: [{text: "4 in hash_table?", result: false}],
+operations: [],
+currentIndex: 0,
+visitedIndices: [],
+highlights: {}
+},
+{
+desc: "Store prefix_sum in hash table: hash_table[4] = 0.",
+vars: {prefixSum: 4, i: 0, result: false},
+hashTable: {0: -1, 4: 0},
+conditions: [],
+operations: ["hash_table[4] = 0"],
+currentIndex: 0,
+visitedIndices: [0],
+highlights: {},
+hashHighlight: 4
+},
+{
+desc: "Move to next index: i = 1. Current element = 2.",
+vars: {prefixSum: 4, i: 1, result: false},
+hashTable: {0: -1, 4: 0},
+conditions: [],
+operations: ["i++ (0 → 1)"],
+currentIndex: 1,
+visitedIndices: [0],
+highlights: {i: 'increment'}
+},
+{
+desc: "Update prefix_sum: prefix_sum = 4 + 2 = 6.",
+vars: {prefixSum: 6, i: 1, result: false},
+hashTable: {0: -1, 4: 0},
+conditions: [],
+operations: ["prefix_sum += arr[1]", "prefix_sum = 4 + 2 = 6"],
+currentIndex: 1,
+visitedIndices: [0],
+highlights: {prefixSum: 'increment'}
+},
+{
+desc: "Check if prefix_sum (6) exists in hash table. Not found.",
+vars: {prefixSum: 6, i: 1, result: false},
+hashTable: {0: -1, 4: 0},
+conditions: [{text: "6 in hash_table?", result: false}],
+operations: [],
+currentIndex: 1,
+visitedIndices: [0],
+highlights: {}
+},
+{
+desc: "Store prefix_sum in hash table: hash_table[6] = 1.",
+vars: {prefixSum: 6, i: 1, result: false},
+hashTable: {0: -1, 4: 0, 6: 1},
+conditions: [],
+operations: ["hash_table[6] = 1"],
+currentIndex: 1,
+visitedIndices: [0, 1],
+highlights: {},
+hashHighlight: 6
+},
+{
+desc: "Move to next index: i = 2. Current element = -3.",
+vars: {prefixSum: 6, i: 2, result: false},
+hashTable: {0: -1, 4: 0, 6: 1},
+conditions: [],
+operations: ["i++ (1 → 2)"],
+currentIndex: 2,
+visitedIndices: [0, 1],
+highlights: {i: 'increment'}
+},
+{
+desc: "Update prefix_sum: prefix_sum = 6 + (-3) = 3.",
+vars: {prefixSum: 3, i: 2, result: false},
+hashTable: {0: -1, 4: 0, 6: 1},
+conditions: [],
+operations: ["prefix_sum += arr[2]", "prefix_sum = 6 + (-3) = 3"],
+currentIndex: 2,
+visitedIndices: [0, 1],
+highlights: {prefixSum: 'decrement'}
+},
+{
+desc: "Check if prefix_sum (3) exists in hash table. Not found.",
+vars: {prefixSum: 3, i: 2, result: false},
+hashTable: {0: -1, 4: 0, 6: 1},
+conditions: [{text: "3 in hash_table?", result: false}],
+operations: [],
+currentIndex: 2,
+visitedIndices: [0, 1],
+highlights: {}
+},
+{
+desc: "Store prefix_sum in hash table: hash_table[3] = 2.",
+vars: {prefixSum: 3, i: 2, result: false},
+hashTable: {0: -1, 4: 0, 6: 1, 3: 2},
+conditions: [],
+operations: ["hash_table[3] = 2"],
+currentIndex: 2,
+visitedIndices: [0, 1, 2],
+highlights: {},
+hashHighlight: 3
+},
+{
+desc: "Move to next index: i = 3. Current element = 1.",
+vars: {prefixSum: 3, i: 3, result: false},
+hashTable: {0: -1, 4: 0, 6: 1, 3: 2},
+conditions: [],
+operations: ["i++ (2 → 3)"],
+currentIndex: 3,
+visitedIndices: [0, 1, 2],
+highlights: {i: 'increment'}
+},
+{
+desc: "Update prefix_sum: prefix_sum = 3 + 1 = 4.",
+vars: {prefixSum: 4, i: 3, result: false},
+hashTable: {0: -1, 4: 0, 6: 1, 3: 2},
+conditions: [],
+operations: ["prefix_sum += arr[3]", "prefix_sum = 3 + 1 = 4"],
+currentIndex: 3,
+visitedIndices: [0, 1, 2],
+highlights: {prefixSum: 'increment'}
+},
+{
+desc: "Check if prefix_sum (4) exists in hash table. FOUND at index 0! This means subarray from index 1 to 3 has sum = 0.",
+vars: {prefixSum: 4, i: 3, result: false},
+hashTable: {0: -1, 4: 0, 6: 1, 3: 2},
+conditions: [{text: "4 in hash_table?", result: true}],
+operations: ["Found duplicate prefix sum!"],
+currentIndex: 3,
+visitedIndices: [0, 1, 2],
+highlights: {},
+hashHighlight: 4
+},
+{
+desc: "Zero-sum subarray detected! Subarray [2,-3,1] from index 1 to 3 has sum = 0. Return True.",
+vars: {prefixSum: 4, i: 3, result: true},
+hashTable: {0: -1, 4: 0, 6: 1, 3: 2},
+conditions: [],
+operations: ["Set result = True", "Zero-sum subarray found!"],
+currentIndex: 3,
+visitedIndices: [0, 1, 2, 3],
+highlights: {result: 'increment'},
+hashHighlight: 4
+}
+];
+
+function render() {
+const step = steps[currentStep];
+document.getElementById('stepCounter').textContent = currentStep;
+document.getElementById('stepDescription').textContent = step.desc;
+
+const varGrid = document.getElementById('varGrid');
+varGrid.innerHTML = '';
+for (const [key, value] of Object.entries(step.vars)) {
+const varItem = document.createElement('div');
+varItem.className = 'var-item';
+if (step.highlights[key]) {
+varItem.classList.add(step.highlights[key]);
+}
+varItem.textContent = `${key} = ${value}`;
+varGrid.appendChild(varItem);
+}
+
+const conditionsList = document.getElementById('conditionsList');
+conditionsList.innerHTML = '';
+if (step.conditions.length === 0) {
+conditionsList.innerHTML = '<p style="font-size:13px;">No conditions evaluated</p>';
+} else {
+step.conditions.forEach(cond => {
+const condItem = document.createElement('div');
+condItem.className = `condition-item ${cond.result ? 'true' : 'false'}`;
+condItem.textContent = `${cond.text} ${cond.result ? '✓' : '✗'}`;
+conditionsList.appendChild(condItem);
+});
+}
+
+const operationsList = document.getElementById('operationsList');
+operationsList.innerHTML = '';
+if (step.operations.length === 0) {
+operationsList.innerHTML = '<p style="font-size:13px;">No operations</p>';
+} else {
+step.operations.forEach(op => {
+const opItem = document.createElement('div');
+opItem.className = 'operation-item';
+if (op.includes('++') || op.includes('increment') || op.includes('True')) {
+opItem.classList.add('increment');
+} else if (op.includes('--') || op.includes('decrement')) {
+opItem.classList.add('decrement');
+} else if (op.includes('+=') || op.includes('Add') || op.includes('hash_table')) {
+opItem.classList.add('add');
+}
+opItem.textContent = op;
+operationsList.appendChild(opItem);
+});
+}
+
+const resultDisplay = document.getElementById('resultDisplay');
+resultDisplay.innerHTML = `<p style="font-size:14px;"><strong>Found Zero-Sum Subarray:</strong> ${step.vars.result}</p>`;
+
+const arrayDisplay = document.getElementById('arrayDisplay');
+arrayDisplay.innerHTML = '';
+arr.forEach((val, idx) => {
+const cell = document.createElement('div');
+cell.className = 'array-cell';
+if (idx === step.currentIndex) {
+cell.classList.add('current');
+} else if (step.visitedIndices.includes(idx)) {
+cell.classList.add('visited');
+}
+cell.textContent = val;
+
+if (idx === step.currentIndex && step.currentIndex >= 0) {
+const pointer = document.createElement('div');
+pointer.className = 'pointer pink';
+pointer.textContent = 'i';
+pointer.style.top = '-20px';
+pointer.style.left = '50%';
+pointer.style.transform = 'translateX(-50%)';
+cell.appendChild(pointer);
+}
+
+arrayDisplay.appendChild(cell);
+});
+
+const hashTableDisplay = document.getElementById('hashTableDisplay');
+hashTableDisplay.innerHTML = '';
+for (const [key, value] of Object.entries(step.hashTable)) {
+const row = document.createElement('div');
+row.className = 'hash-row';
+if (step.hashHighlight !== undefined && parseInt(key) === step.hashHighlight) {
+row.classList.add('highlight');
+}
+row.innerHTML = `<div class="hash-key">${key}</div><div style="font-size:13px;">→</div><div class="hash-value">${value}</div>`;
+hashTableDisplay.appendChild(row);
+}
+
+document.getElementById('prevBtn').disabled = currentStep === 0;
+document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+}
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+if (currentStep > 0) {
+currentStep--;
+render();
+}
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+if (currentStep < steps.length - 1) {
+currentStep++;
+render();
+}
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+currentStep = 0;
+render();
+});
+
+function toggleCollapsible(id) {
+const content = document.getElementById(id);
+const header = content.previousElementSibling;
+content.classList.toggle('open');
+header.textContent = content.classList.contains('open') 
+? header.textContent.replace('▶', '▼')
+: header.textContent.replace('▼', '▶');
+}
+
+render();
+</script>
+</body>
+</html>

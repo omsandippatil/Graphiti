@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two Sum Algorithm Visualizer</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Courier New', monospace;
+  background: white;
+  color: black;
+  padding: 20px;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+}
+
+.left-panel {
+  flex: 0 0 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section {
+  border: 2px solid black;
+  padding: 12px;
+}
+
+.section-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.problem {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  flex: 1;
+  padding: 10px;
+  background: white;
+  border: 2px solid black;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+button:hover {
+  background: black;
+  color: white;
+}
+
+button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background: white;
+  color: black;
+}
+
+.variables {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.var-item {
+  padding: 6px;
+  border: 1px solid black;
+  background: white;
+}
+
+.var-item.active {
+  background: #ffeb3b;
+}
+
+.var-item.increment {
+  background: #4caf50;
+  color: white;
+}
+
+.var-item.decrement {
+  background: #f44336;
+  color: white;
+}
+
+.var-label {
+  font-weight: bold;
+}
+
+.condition {
+  padding: 8px;
+  border: 1px solid black;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.condition.true {
+  background: #4caf50;
+  color: white;
+}
+
+.condition.false {
+  background: #f44336;
+  color: white;
+}
+
+.operation {
+  padding: 8px;
+  border: 1px solid black;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.operation.increment {
+  background: #4caf50;
+  color: white;
+}
+
+.operation.decrement {
+  background: #f44336;
+  color: white;
+}
+
+.operation.add {
+  background: #2196f3;
+  color: white;
+}
+
+.operation.check {
+  background: #ff9800;
+  color: white;
+}
+
+.step-info {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.result-display {
+  font-size: 13px;
+}
+
+.result-value {
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.collapsible {
+  margin-top: 15px;
+}
+
+.collapsible-header {
+  background: black;
+  color: white;
+  padding: 10px;
+  cursor: pointer;
+  border: 2px solid black;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.collapsible-content {
+  display: none;
+  border: 2px solid black;
+  border-top: none;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.collapsible-content.open {
+  display: block;
+}
+
+.visualization {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
+}
+
+.array-container {
+  display: flex;
+  gap: 5px;
+  position: relative;
+}
+
+.array-cell {
+  width: 80px;
+  height: 80px;
+  border: 3px solid black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  position: relative;
+}
+
+.array-cell.current {
+  border-color: #e91e63;
+  border-width: 4px;
+  background: #ffe0ec;
+}
+
+.array-cell.visited {
+  background: #f5f5f5;
+}
+
+.cell-index {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.cell-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.pointer {
+  position: absolute;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border: 2px solid black;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.pointer.i {
+  background: #e91e63;
+  color: white;
+  top: -40px;
+}
+
+.hashmap-display {
+  border: 3px solid black;
+  padding: 15px;
+  min-width: 400px;
+  background: white;
+}
+
+.hashmap-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.hashmap-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hashmap-entry {
+  padding: 8px;
+  border: 2px solid black;
+  font-size: 13px;
+  background: #f0f0f0;
+}
+
+.hashmap-entry.highlight {
+  background: #4caf50;
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="left-panel">
+    <div class="section">
+      <div class="section-title">PROBLEM</div>
+      <div class="problem">
+        Two Sum Using HashMap<br>
+        Input: [2,7,11,15], target=9<br>
+        Output: (0,1)
+      </div>
+    </div>
+
+    <div class="section controls">
+      <button id="prevBtn">Previous</button>
+      <button id="nextBtn">Next</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">STEP <span id="stepCounter">0</span></div>
+      <div class="step-info" id="stepInfo"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">VARIABLES</div>
+      <div class="variables" id="variables"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">CONDITION</div>
+      <div id="conditions"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">OPERATION</div>
+      <div id="operations"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">RESULT</div>
+      <div class="result-display">
+        <div class="result-value" id="result"></div>
+      </div>
+    </div>
+
+    <div class="collapsible">
+      <div class="collapsible-header" id="theoryHeader">▶ THEORY & EXPLANATION</div>
+      <div class="collapsible-content" id="theoryContent">
+        <strong>Algorithm:</strong> Two Sum using HashMap<br><br>
+        <strong>Approach:</strong> Use a hash map to store visited numbers and their indices. For each element, check if (target - current element) exists in the map. If yes, return the indices. If no, add current element to map.<br><br>
+        <strong>Time Complexity:</strong> O(n) - single pass through array<br>
+        <strong>Space Complexity:</strong> O(n) - hash map storage<br><br>
+        <strong>Key Insight:</strong> Instead of nested loops O(n²), use hash map for O(1) complement lookup.<br><br>
+        <strong>Edge Cases:</strong><br>
+        - Empty array<br>
+        - No solution exists<br>
+        - Multiple solutions (return first)<br>
+        - Same element used twice<br><br>
+        <strong>Boundary Conditions:</strong><br>
+        - Array with 2 elements<br>
+        - Large numbers<br>
+        - Negative numbers<br>
+        - Zero values
+      </div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="visualization">
+      <div class="array-container" id="arrayContainer"></div>
+      <div class="hashmap-display">
+        <div class="hashmap-title">HASHMAP: {value: index}</div>
+        <div class="hashmap-entries" id="hashmapEntries"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const array = [2, 7, 11, 15];
+const target = 9;
+
+const steps = [
+  {
+    step: 0,
+    info: 'Initialize: Create empty hashmap to store seen numbers',
+    vars: { i: null, current: null, complement: null, target: 9 },
+    hashmap: {},
+    current: -1,
+    condition: '',
+    operation: '',
+    result: 'null'
+  },
+  {
+    step: 1,
+    info: 'Start loop: i=0, examining first element',
+    vars: { i: 0, current: 2, complement: 7, target: 9 },
+    varStates: { i: 'active', current: 'active' },
+    hashmap: {},
+    current: 0,
+    condition: 'complement 7 in map? false',
+    conditionState: 'false',
+    operation: 'Add to map: {2: 0}',
+    operationState: 'add',
+    result: 'null'
+  },
+  {
+    step: 2,
+    info: 'i=1, current=7, calculate complement',
+    vars: { i: 1, current: 7, complement: 2, target: 9 },
+    varStates: { i: 'increment', current: 'active' },
+    hashmap: { 2: 0 },
+    current: 1,
+    condition: 'complement 2 in map? true',
+    conditionState: 'true',
+    operation: 'Found! Return [0, 1]',
+    operationState: 'check',
+    result: '[0, 1]'
+  }
+];
+
+let currentStep = 0;
+
+function render() {
+  const step = steps[currentStep];
+  
+  document.getElementById('stepCounter').textContent = step.step;
+  document.getElementById('stepInfo').textContent = step.info;
+  
+  const varsHtml = Object.entries(step.vars).map(([key, val]) => {
+    const state = step.varStates && step.varStates[key] ? step.varStates[key] : '';
+    return `<div class="var-item ${state}"><span class="var-label">${key}:</span> ${val === null ? '-' : val}</div>`;
+  }).join('');
+  document.getElementById('variables').innerHTML = varsHtml;
+  
+  if (step.condition) {
+    document.getElementById('conditions').innerHTML = 
+      `<div class="condition ${step.conditionState}">${step.condition}</div>`;
+  } else {
+    document.getElementById('conditions').innerHTML = '<div class="condition">-</div>';
+  }
+  
+  if (step.operation) {
+    document.getElementById('operations').innerHTML = 
+      `<div class="operation ${step.operationState}">${step.operation}</div>`;
+  } else {
+    document.getElementById('operations').innerHTML = '<div class="operation">-</div>';
+  }
+  
+  document.getElementById('result').textContent = step.result;
+  
+  const arrayHtml = array.map((val, idx) => {
+    const isCurrent = idx === step.current;
+    const isVisited = idx < step.current;
+    return `
+      <div class="array-cell ${isCurrent ? 'current' : ''} ${isVisited ? 'visited' : ''}">
+        <div class="cell-index">${idx}</div>
+        <div class="cell-value">${val}</div>
+        ${isCurrent ? '<div class="pointer i">i</div>' : ''}
+      </div>
+    `;
+  }).join('');
+  document.getElementById('arrayContainer').innerHTML = arrayHtml;
+  
+  const hashmapHtml = Object.entries(step.hashmap).map(([key, val]) => {
+    const isHighlight = step.operation && step.operation.includes(key);
+    return `<div class="hashmap-entry ${isHighlight ? 'highlight' : ''}">${key}: ${val}</div>`;
+  }).join('');
+  document.getElementById('hashmapEntries').innerHTML = hashmapHtml || '<div class="hashmap-entry">empty</div>';
+  
+  document.getElementById('prevBtn').disabled = currentStep === 0;
+  document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    render();
+  }
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if (currentStep > 0) {
+    currentStep--;
+    render();
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  currentStep = 0;
+  render();
+});
+
+document.getElementById('theoryHeader').addEventListener('click', () => {
+  document.getElementById('theoryContent').classList.toggle('open');
+  const header = document.getElementById('theoryHeader');
+  header.textContent = header.textContent.startsWith('▶') ? '▼ THEORY & EXPLANATION' : '▶ THEORY & EXPLANATION';
+});
+
+render();
+</script>
+
+</body>
+</html>
